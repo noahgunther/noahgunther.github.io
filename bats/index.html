@@ -5,7 +5,7 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
 	background-color: #000000;
-	font-size: 16px;
+
 }
 
 /* The side navigation menu */
@@ -20,6 +20,7 @@ body {
     overflow-x: hidden; 
 }
 
+/* The bat blocks */
 .bat_div {
 	font-size: 16px;
 	height: 60px; 
@@ -38,6 +39,7 @@ body {
 
 }
 
+/* Pop-out info blocks */
 .bat_div-content {
     display: none;
 	width: 240px;	
@@ -57,6 +59,7 @@ body {
     display: block;
 }
 
+/* Audio player buttons */
 .button {
     background-color: transparent;
     border: none;
@@ -67,6 +70,15 @@ body {
     font-size: 16px;
     margin: 0px;
     cursor: pointer;
+}
+
+.title {
+	color: #ffffff;
+	font-size: 28px;
+	position: absolute;
+	left: 16px;
+	top: 10px;
+
 }
 
 .credits {
@@ -81,13 +93,15 @@ body {
 
 </head>
 <body>
+<!--side menu-->
 <div id="left_menu" class="sidenav">
-  <a onmouseout = "bat1Dothide()" onmouseover = "bat1Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 20px;">
+  <span class = "title">Bjorklunden Bat Map</span>
+  <a onmouseout = "bat1Dothide()" onmouseover = "bat1Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 56px;">
 	<img style = "width: 50px;" src = "./media/example_bat.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Example Bat</span>
 	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
-	<audio id="player" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<button class = "button" onclick="document.getElementById('player').play()">&#9658;</button>
-			<button class = "button" onclick="document.getElementById('player').pause()">&#9612;&#9612;</button>
+	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_1').play()">&#9658;</button>
+			<button class = "button" onclick="document.getElementById('player_1').pause()">&#9612;&#9612;</button>
 	<div class="bat_div-content">
 		<p>This is where additional information about the bat should go</p>
 	</div>
@@ -97,16 +111,33 @@ body {
 <span class = "credits">Data collected By Josie Harris, Design By Noah Gunther. &copy; 2017.</span>
 </div>
 
+<!--map and radar images-->
 <img style = "width: 1000px; margin-top: 20px; margin-left: 340px; position: fixed; z-index:0;" src = "./media/map.png"/>
-<img id = "bat1Dot" style = "width: 20px; margin-top: 400px; margin-left: 600px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
+<img id = "bat1Dot1" style = "width: 20px; margin-top: 400px; margin-left: 600px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
+<img id = "bat1Dot2" style = "width: 20px; margin-top: 300px; margin-left: 690px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
+<img id = "bat1Gif1" style = "width: 44px; margin-top: 388px; margin-left: 588px; position: fixed; z-index: 1; visibility: hidden;" src = "./media/radar_dot_sound.gif"/>
+<img id = "bat1Gif2" style = "width: 44px; margin-top: 288px; margin-left: 678px; position: fixed; z-index: 1; visibility: hidden;" src = "./media/radar_dot_sound.gif"/>
 
+<!--scripts to control bat radar events-->
 <script>
 function bat1Dotshow() {
-    document.getElementById("bat1Dot").style.visibility="visible";
+    document.getElementById("bat1Dot1").style.visibility="visible"
+	document.getElementById("bat1Dot2").style.visibility="visible";
 }
 
 function bat1Dothide() {
-    document.getElementById("bat1Dot").style.visibility="hidden";
+    document.getElementById("bat1Dot1").style.visibility="hidden"
+	document.getElementById("bat1Dot2").style.visibility="hidden";
+}
+
+var playing_1 = document.getElementById("player_1");
+playing_1.onplaying = function() {
+	document.getElementById("bat1Gif1").style.visibility="visible";
+	document.getElementById("bat1Gif2").style.visibility="visible";
+}
+playing_1.onpause = function() {
+	document.getElementById("bat1Gif1").style.visibility="hidden";
+	document.getElementById("bat1Gif2").style.visibility="hidden";
 }
 </script>
 
