@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Bjork Bat Map</title>
+<title>Bj&ouml;rk Bat Map</title>
 <link rel="shortcut icon" href="./favicon.ico" />
 <style>
 body {
@@ -15,7 +15,7 @@ body {
     height: 100%; /* 100% Full-height */
     width: 300px;
     position: fixed; /* Stay in place */
-    z-index: 1; /* Stay on top */
+    z-index: 0; /* Stay on top */
     top: 0;
     left: 0;
     background-color: #666699; /* Gray*/
@@ -25,15 +25,12 @@ body {
 /* The bat blocks */
 .bat_div {
 	font-size: 16px;
-	height: 60px; 
     width: 240px;
 	border-radius: 10px;
 	margin-left: 15px;
-    position: fixed; /* Stay in place */
-    z-index: 0; /* Stay on top */
+    position: absolute; 
     top: 0;
     left: 0;
-    background-color: #ffffff; /* white*/
 	color: #000000;
     padding-top: 10px; 
 	padding-left: 20px;
@@ -46,19 +43,24 @@ body {
     display: none;
 	width: 240px;	
     position: absolute;
-    background-color: #ffffff;
-    z-index: 1;
 	border-radius: 10px;
 	margin-left: -10px;
 	padding: 10px;
 	font-size: 12px;
-    position: fixed; /* Stay in place */
 	color: #000000;
 	box-shadow: 4px 4px 3px;
+	z-index: 10;
 }
 
 .bat_div:hover .bat_div-content {
     display: block;
+
+}
+
+.bat_div:hover .bat_div {
+
+	z-index: 10;
+
 }
 
 /* Audio player buttons */
@@ -85,10 +87,9 @@ body {
 
 .credits {
 	color: #ffffff;
-	font-size: 10px;
+	font-size: 9.5px;
 	position: absolute;
 	left: 6px;
-	bottom: 10px;
 }
 
 </style>
@@ -97,25 +98,71 @@ body {
 <body>
 <!--side menu-->
 <div id="left_menu" class="sidenav">
-  <span class = "title">Bjorklunden Bat Map</span>
-  <a onmouseout = "bat1Dothide()" onmouseover = "bat1Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 56px;">
-	<img style = "width: 50px;" src = "./media/example_bat.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Example Bat</span>
+  <span class = "title">Bj&ouml;rklunden Bat Map</span>
+  <a onmouseout = "bat1Dothide()" onmouseover = "bat1Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 56px; background-color: #ffffff; height: 150px;">
+	<img style = "width: 40px;" src = "./media/myotis_lucifugus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Myotis Lucifugus</span><br/><hr width = "200px"/>
+	<img style = "width: 40px;" src = "./media/myotis_septentrionalis.gif"/><span style = "margin-top: 18px; position: absolute;">&nbsp;&nbsp;Myotis Septentrionalis</span><br/><hr width = "200px"/>
 	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
-	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
 			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
-	<div class="bat_div-content">
+	<div class="bat_div-content" style = "background-color: #ffffff;">
 		<p>This is where additional information about the bat should go</p>
 	</div>
   </div></a>
   
+  <a onmouseout = "bat2Dothide()" onmouseover = "bat2Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 225px; background-color: #fff879; height: 90px;">
+	<img style = "width: 40px;" src = "./media/lasiurus_borealis.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Lasiurus Borealis</span><br/><hr width = "200px"/>
+	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
+	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
+			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
+	<div class="bat_div-content" style = "background-color: #fff879">
+		<p>This is where additional information about the bat should go</p>
+	</div>
+  </div></a>
   
-<span class = "credits">Data collected By Josie Harris, Design By Noah Gunther. &copy; 2017.</span>
+  <a onmouseout = "bat3Dothide()" onmouseover = "bat3Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 334px; background-color: #7aff7c; height: 90px;">
+	<img style = "width: 40px;" src = "./media/perimyotis_subflavus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Perimyotis Subflavus</span><br/><hr width = "200px"/>
+	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
+	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
+			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
+	<div class="bat_div-content" style = "background-color: #7aff7c">
+		<p>This is where additional information about the bat should go</p>
+	</div>
+  </div></a>
+  
+  <a onmouseout = "bat4Dothide()" onmouseover = "bat4Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 443px; background-color: #ff7979; height: 150px;">
+	<img style = "width: 40px;" src = "./media/eptesicus_fuscus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Eptesicus Fuscus</span><br/><hr width = "200px"/>
+	<img style = "width: 40px;" src = "./media/lasionycteris_noctivagans.gif"/><span style = "margin-top: 18px; position: absolute;">&nbsp;&nbsp;Lasionycteris Noctivagans</span><br/><hr width = "200px"/>
+	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
+	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
+			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
+	<div class="bat_div-content" style = "background-color: #ff7979;">
+		<p>This is where additional information about the bat should go</p>
+	</div>
+  </div></a>
+  
+  <a onmouseout = "bat5Dothide()" onmouseover = "bat5Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 613px; background-color: #ff79f8; height: 90px;">
+	<div class="bat_div-content" style = "background-color: #ff79f8; margin-top: -80px;">
+		<p>This is where additional information about the bat should go</p>
+	</div>
+	<img style = "width: 40px;" src = "./media/lasiurus_cinereus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Lasiurus Cinereus</span><br/><hr width = "200px"/>
+	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &uarr;</span>
+	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
+			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
+  </div></a>
+  
+<span style = "bottom: 24px;" class = "credits">Bat images coutesy of WDNR Bat Program</span>  
+<span style = "bottom: 8px;" class = "credits">Data collected by Josie Harris, Design By Noah Gunther &copy; 2017</span>
 </div>
 
 <!--map and radar images-->
 <a href = "https://www.google.com/maps/place/Bjorklunden/@45.0388551,-87.1285362,15z/data=!4m5!3m4!1s0x0:0xa63cd3d04a45faaa!8m2!3d45.0388551!4d-87.1285362">
-	<img style = "width: 1000px; margin-top: 20px; margin-left: 340px; position: fixed; z-index:0;" alt = "Google Maps" src = "./media/map.png"/>
+	<img style = "width: 860px; margin-top: 30px; margin-left: 335px; position: fixed; z-index:0;" alt = "Google Maps" src = "./media/map.png"/>
 </a>
 <img id = "bat1Dot1" style = "width: 20px; margin-top: 400px; margin-left: 600px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
 <img id = "bat1Dot2" style = "width: 20px; margin-top: 300px; margin-left: 690px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
