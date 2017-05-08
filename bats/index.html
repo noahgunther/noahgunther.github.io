@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--copyright 2017-present Noah Gunther. Data property of Jocelyn Harris.-->
 <html>
 <head>
 <title>Bj&ouml;rk Bat Map</title>
@@ -13,7 +14,7 @@ body {
 /* The side navigation menu */
 .sidenav {
     height: 100%; /* 100% Full-height */
-    width: 300px;
+    width: 320px;
     position: fixed; /* Stay in place */
     z-index: 0; /* Stay on top */
     top: 0;
@@ -109,7 +110,9 @@ body {
 	<div class="bat_div-content" style = "background-color: #ffffff;">
 		<img style="display: block; margin: 0 auto;" src = "./media/myotis_lucifugus.gif"/>
 		<img style="display: block; margin: 0 auto;" src = "./media/myotis_septentrionalis.gif"/>
-		<p>This is where additional information about the bat should go</p>
+		<p><i>Myotis Lucifugus & Myotis Septentrionalis</i><br/>
+		Common names: Little Brown Bat & Northern Long-eared Bat<br/><br/>
+		These two Myotis species represent small, high frequency calling bats that hibernate in caves during the winter months before switching to tree roosting sites for the summer. They are grouped together because their vocalizations are so similar that they cannot be reliably distinguished from one another using their call designs alone. Together, they have wingspans ranging from 22-27cm, they usually weigh between 5-14g, and their echolocation frequency range is typically 40-80kHz, though they have been known to produce frequencies of over 100kHz. On the Bj&ouml;rklunden property, the Myotis species were the most active bats overall, producing more calls than any other species across the lodge, meadow, and cedar trail habitats, and more throughout all hours of the night. Like the other species, they allocated the majority of their activity around the lodge, where the open environment, vicinity to lake water, and concentration of artificial light provided the best foraging conditions for insectivorous bats. Sadly, these two prominent North American bat species are among the most at risk due to White-nose Syndrome, a fungal disease killing millions of bats in the U.S. and Canada. It is therefore even more important to acknowledge the role Bj&ouml;rklunden property plays in supporting these species.</p>
 	</div>
   </div></a>
   
@@ -121,7 +124,9 @@ body {
 			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
 	<div class="bat_div-content" style = "background-color: #fff879">
 		<img style="display: block; margin: 0 auto;" src = "./media/lasiurus_borealis.gif"/>
-		<p>This is where additional information about the bat should go</p>
+		<p><i>Lasiurus Borealis</i><br/>
+		Common name: Red Bat<br/><br/>
+		The Red Bat species is another small, high frequency calling bat. They grow to have wingspans of about 29-33cm and weigh 9.5-14g. Their echolocation frequency typically ranges from 35 to 70kHz. Red Bats were among the most active species at Bj&ouml;rklunden, second only to the two Myotis species listed above. They produced the most calls in the habitat directly around the lodge, followed by the meadow and cedar forest habitats, respectively.</p>
 	</div>
   </div></a>
   
@@ -133,44 +138,49 @@ body {
 			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
 	<div class="bat_div-content" style = "background-color: #7aff7c">
 		<img style="display: block; margin: 0 auto;" src = "./media/perimyotis_subflavus.gif"/>
-		<p>This is where additional information about the bat should go</p>
+		<p><i>Perimyotis Subflavus</i><br/>
+		Common name: Tricolored Bat<br/><br/>
+		With a typical wingspan measuring between 21-26cm and a typical weight between 14-16g, the Tricolored Bat is among the smaller bat speices at Bj&ouml;rklunden. They usually produce echolocation frequencies between 40 and 60kHz, which is considered a high frequency call. On Bj&ouml;rklunden property, Tricolored Bats were among the more active species, though they produced relatively few calls as compared to the Myotis species. They, too, had the most calls in the lodge habitat, followed by the meadow and cedar trail habitats, respectively.</p>
 	</div>
   </div></a>
   
   <a onmouseout = "bat4Dothide()" onmouseover = "bat4Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 443px; background-color: #ff7979; height: 150px;">
-	<div class="bat_div-content" style = "background-color: #ff7979; margin-top: -426px;">
-		<img style="display: block; margin: 0 auto;" src = "./media/eptesicus_fuscus.gif"/>
-		<img style="display: block; margin: 0 auto;" src = "./media/lasionycteris_noctivagans.gif"/>
-		<p>This is where additional information about the bat should go</p>
-	</div>
 	<img style = "width: 40px;" src = "./media/eptesicus_fuscus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Eptesicus Fuscus</span><br/><hr width = "200px"/>
 	<img style = "width: 40px;" src = "./media/lasionycteris_noctivagans.gif"/><span style = "margin-top: 18px; position: absolute;">&nbsp;&nbsp;Lasionycteris Noctivagans</span><br/><hr width = "200px"/>
-	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &uarr;</span>
+	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
 	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
 			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
-	
+	<div class="bat_div-content" style = "background-color: #ff7979; margin-top: 0px;">
+		<img style="display: block; margin: 0 auto;" src = "./media/eptesicus_fuscus.gif"/>
+		<img style="display: block; margin: 0 auto;" src = "./media/lasionycteris_noctivagans.gif"/>
+		<p><i>Eptesicus Fuscus & Lsionycteris Noctivagans</i><br/>
+		Common names: Big Brown Bats & Silver-haired Bat<br/><br/>
+		Unlike the species above, Big Brown and Silver-haired bats are larger, low-frequency calling bats. They are paired together because their vocalizations are too similar for them to be reliably distinguished using call design alone. Together, these bats have wingspans ranging from 27-33cm and typically weigh 8-16g. Their echolocation frequency range is 20-50kHz or lower. At Bj&ouml;rklunden, they exhibited the most activity in the lodge habitat, followed by the meadow and cedar trail habitats, respectively. Overall, they produced far fewer calls in any given habitat than the smaller species listed above.</p>
+	</div>
   </div></a>
   
   <a onmouseout = "bat5Dothide()" onmouseover = "bat5Dotshow()"><div id="bat_div" class="bat_div" style = "margin-top: 613px; background-color: #ff79f8; height: 90px;">
-	<div class="bat_div-content" style = "background-color: #ff79f8; margin-top: -256px;">
-		<img style="display: block; margin: 0 auto;" src = "./media/lasiurus_cinereus.gif"/>
-		<p>This is where additional information about the bat should go</p>
-	</div>
 	<img style = "width: 40px;" src = "./media/lasiurus_cinereus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;Lasiurus Cinereus</span><br/><hr width = "200px"/>
-	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &uarr;</span>
+	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr;</span>
 	<audio id="player_1" src="./media/example_audio.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<button class = "button" onclick="document.getElementById('player_1').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
 			<button class = "button" onclick="document.getElementById('player_1').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>
+	<div class="bat_div-content" style = "background-color: #ff79f8; margin-top: 0px;">
+		<img style="display: block; margin: 0 auto;" src = "./media/lasiurus_cinereus.gif"/>
+		<p><i>Lasiurus Cinereus</i><br/>
+		Common name: Hoary Bat<br/><br/>
+		Among the larger bat species residing on Bj&ouml;rklunden property, the Hoary Bat has a typical wingspan of about 40cm and weighs roughly 26g. Paired with their larger size, is a lower-frequency echolocation call, ranging from 15-30kHz. In contrast to other species, the only recorded activity from Hoary Bats was found in the lodge habitat, where the open space and prey-friendly characteristics provided better conditions for the larger bat to maneuver in the air and forage. Overall, Hoary Bats accounted for the fewest number of calls produced across Bj&ouml;rklunden.</p>
+	</div>
   </div></a>
   
-<span style = "bottom: 24px;" class = "credits">Bat images coutesy of WDNR Bat Program</span>  
-<span style = "bottom: 8px;" class = "credits">Data collected by Josie Harris, Design By Noah Gunther &copy; 2017</span>
+<span style = "bottom: 16px;" class = "credits">Bat images coutesy of WDNR Bat Program</span>  
+<span style = "bottom: 2px;" class = "credits">Data collected by Josie Harris, Design By Noah Gunther &copy; 2017</span>
 </div>
 
 <!--map and radar images-->
 <a href = "https://www.google.com/maps/place/Bjorklunden/@45.0388551,-87.1285362,15z/data=!4m5!3m4!1s0x0:0xa63cd3d04a45faaa!8m2!3d45.0388551!4d-87.1285362">
-	<img style = "width: 860px; margin-top: 12px; margin-left: 317px; position: fixed; z-index:0;" alt = "Google Maps" src = "./media/map.png"/>
+	<img style = "width: 860px; margin-top: 12px; margin-left: 357px; position: fixed; z-index:0;" alt = "Google Maps" src = "./media/map.png"/>
 </a>
 <img id = "bat1Dot1" style = "width: 20px; margin-top: 400px; margin-left: 600px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
 <img id = "bat1Dot2" style = "width: 20px; margin-top: 300px; margin-left: 690px; position: fixed; z-index: 1;  visibility: hidden;" src = "./media/radar_dot.gif"/>
