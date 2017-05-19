@@ -122,6 +122,10 @@ body {
 	<img style = "width: 40px;" src = "./media/myotis_lucifugus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;<i>Myotis lucifugus</i></span><br/><hr width = "200px"/>
 	<img style = "width: 40px;" src = "./media/myotis_septentrionalis.gif"/><span style = "margin-top: 18px; position: absolute;">&nbsp;&nbsp;<i>Myotis septentrionalis</i></span><br/><hr width = "200px"/>
 	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr; (Scroll)</span>
+	<audio id="player_myotis" src="./media/myotis.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_myotis').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
+			<button class = "button" onclick="document.getElementById('player_myotis').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>&nbsp;
+			<img id = "myotis_playing_gif" style = "width: 18px; position: fixed; margin-top: -1px; visibility: hidden;" src="./media/playing.gif"/>
 	<div class="bat_div-content" style = "background-color: #93bcff;">
 		<img style="display: block; margin: 0 auto;" src = "./media/myotis_lucifugus.gif"/>
 		<img style="display: block; margin: 0 auto;" src = "./media/myotis_septentrionalis.gif"/>
@@ -157,6 +161,10 @@ body {
 	<img style = "width: 40px;" src = "./media/eptesicus_fuscus.gif"/><span style = "margin-top: 6px; position: absolute;">&nbsp;&nbsp;<i>Eptesicus fuscus</i></span><br/><hr width = "200px"/>
 	<img style = "width: 40px;" src = "./media/lasionycteris_noctivagans.gif"/><span style = "margin-top: 18px; position: absolute;">&nbsp;&nbsp;<i>Lasionycteris noctivagans</i></span><br/><hr width = "200px"/>
 	<span style = "font-size: 12px;">&nbsp;&nbsp;More Info &darr; (Scroll)</span>
+	<audio id="player_epfu" src="./media/epfu.wav"></audio>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<button class = "button" onclick="document.getElementById('player_epfu').play()"><img style = "width: 16px;" src="./media/play.gif"/></button>
+			<button class = "button" onclick="document.getElementById('player_epfu').pause()"><img style = "width: 16px;" src="./media/pause.gif"/></button>&nbsp;
+			<img id = "epfu_playing_gif" style = "width: 18px; position: fixed; margin-top: -1px; visibility: hidden;" src="./media/playing.gif"/>
 	<div class="bat_div-content" style = "background-color: #ff7979; margin-top: 0px;">
 		<img style="display: block; margin: 0 auto;" src = "./media/eptesicus_fuscus.gif"/>
 		<img style="display: block; margin: 0 auto;" src = "./media/lasionycteris_noctivagans.gif"/>
@@ -226,6 +234,22 @@ function animationShow() {
 		timeline.src = timelineUrl;},
 	60000);
 
+}
+
+var playing_myotis = document.getElementById("player_myotis");
+playing_myotis.onplaying = function() {
+	document.getElementById("myotis_playing_gif").style.visibility="visible";
+}
+playing_myotis.onpause = function() {
+	document.getElementById("myotis_playing_gif").style.visibility="hidden";
+}
+	
+var playing_myotis = document.getElementById("player_epfu");
+playing_myotis.onplaying = function() {
+	document.getElementById("epfu_playing_gif").style.visibility="visible";
+}
+playing_myotis.onpause = function() {
+	document.getElementById("epfu_playing_gif").style.visibility="hidden";
 }
 
 function bat1Dotshow() {
