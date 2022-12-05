@@ -1,0 +1,21 @@
+{
+  "name": "threejs_test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^18.6.4",
+    "glslCanvas": "^0.2.6",
+    "three": "^0.146.0",
+    "three-outlinepass": "^1.2.0",
+    "three.interactive": "^1.4.0"
+  }
+}

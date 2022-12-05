@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image" href="thumbnail_ng_logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noah Gunther | Portfolio</title>
+  </head>
+  <body id="body">
+    <div id="app"></div>
+    <canvas id="bg"></canvas>
+    <script id="main" type="module" src="/main.js"></script>
+    <video id="sushi" loop autoplay muted playsinline style="display:none">
+      <source src="./meta_ar_captures/sushi.mp4"
+        type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    </video>
+    <video id="jumpwave" loop autoplay muted playsinline style="display:none">
+      <source src="./meta_ar_captures/jumpWave.mp4"
+        type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    </video>
+    <video id="costumeselector" loop autoplay muted playsinline style="display:none">
+      <source src="./meta_ar_captures/costumeSelector.mp4"
+        type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    </video>
+    <video id="groupselfie" loop autoplay muted playsinline style="display:none">
+      <source src="./meta_ar_captures/groupSelfie2.mp4"
+        type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    </video>
+    <video id="snackup" loop autoplay muted playsinline style="display:none">
+      <source src="./meta_ar_captures/snackUp.mp4"
+        type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    </video>
+    
+    <div id="loading"></div>
+
+    <div id="home" style="visibility: hidden" class="link">Home</div>
+    <div id="about" style="right: max(220px, 27vw); visibility: hidden" class="link">About</div>
+    <div id="ar" style="right: max(180px, 21vw); visibility: hidden" class="link">AR</div>
+    <div id="vr" style="right: max(140px, 15vw); visibility: hidden" class="link">VR</div>
+    <div id="houdini" style="right: max(60px, 7vw); visibility: hidden" class="link">Houdini</div>
+    <div id="other" style="right: 0vw; visibility: hidden" class="link">Other</div>
+
+    <button style="visibility: hidden;" id="button" class="ui">NEXT</button>
+
+  </body>
+</html>
