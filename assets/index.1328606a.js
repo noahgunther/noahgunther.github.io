@@ -6612,10 +6612,11 @@ void main()\r
     vec3 col = vec3(1.0, 0.13, 0.1);\r
     \r
     // Noise pattern with color\r
-    float pattern = noise(14.7 + uv * min(u_time * 50.0, 6.0) * 2.0 + vec2(0.0, u_time * 0.6 + 4.0));\r
-    pattern *= noise(uv*16.0 * min(u_time * 5.0, 0.6));\r
-    pattern = smoothstep(.4, .5, fract(pattern));\r
-    pattern *= min(0.75 + max(0.5 - u_time, -1.0), 0.75);\r
+    //float pattern = noise(14.7 + uv * min(u_time * 50.0, 6.0) * 2.0 + vec2(0.0, u_time * 0.6 + 4.0));\r
+    //pattern *= noise(uv*16.0 * min(u_time * 5.0, 0.6));\r
+    //pattern = smoothstep(.4, .5, fract(pattern));\r
+    //pattern *= min(0.75 + max(0.5 - u_time, -1.0), 0.75);\r
+    float pattern = noise(uv);\r
     col *= vec3(pattern);\r
     \r
     // Output to screen\r
