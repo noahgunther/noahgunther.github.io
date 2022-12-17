@@ -1,33 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
+
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:600"/>
     <link rel="icon" type="image" href="/assets/thumbnail_ng_logo.9ae32d65.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noah Gunther | Portfolio</title>
-    <script type="module" crossorigin src="/assets/index.7314b0f0.js"></script>
-    <link rel="stylesheet" href="/assets/index.c8094fa1.css">
+
+    <script type="module" crossorigin src="/assets/index.2f3c3a84.js"></script>
+    <link rel="stylesheet" href="/assets/index.4bb76489.css">
   </head>
+
   <body id="body">
+
     <div id="app"></div>
     <canvas id="bg"></canvas>
     
-    <video id="sushi" loop autoplay muted playsinline style="display:none">
-      <source type='video/mp4' src="/assets/sushi.53691b54.mp4">
-    </video>
-    <video id="jumpwave" loop autoplay muted playsinline style="display:none">
-      <source type='video/mp4' src="/assets/jumpWave.9e01729c.mp4">
-    </video>
-    <video id="costumeselector" loop autoplay muted playsinline style="display:none">
-      <source type='video/mp4' src="/assets/costumeSelector.b3278f41.mp4">
-    </video>
-    <video id="groupselfie" loop autoplay muted playsinline style="display:none">
-      <source type='video/mp4' src="/assets/groupSelfie2.45728bc1.mp4">
-    </video>
-    <video id="snackup" loop autoplay muted playsinline style="display:none">
-      <source type='video/mp4' src="/assets/snackUp.a773f2a4.mp4">
-    </video>
     
     <div id="loading"></div>
 
@@ -37,8 +27,28 @@
     <div id="vr" style="right: max(140px, 15vw); visibility: hidden" class="link">VR</div>
     <div id="houdini" style="right: max(60px, 7vw); visibility: hidden" class="link">Houdini</div>
     <div id="other" style="right: 0vw; visibility: hidden" class="link">Other</div>
+    
+    <div id="phonescreen" style="visibility: hidden;">
 
-    <button style="visibility: hidden;" id="button" class="ui">NEXT</button>
+      <button id="button" class="ui">NEXT</button>
+
+      <video id="sushi" loop autoplay muted playsinline preload="true">
+        <source type='video/mp4' src="/assets/sushi.53691b54.mp4">
+      </video>
+      <video id="jumpwave" loop autoplay muted playsinline style="display:none" preload="true">
+        <source type='video/mp4' src="/assets/jumpWave.9e01729c.mp4">
+      </video>
+      <video id="costumeselector" loop autoplay muted playsinline style="display:none" preload="true">
+        <source type='video/mp4' src="/assets/costumeSelector.b3278f41.mp4">
+      </video>
+      <video id="groupselfie" loop autoplay muted playsinline style="display:none" preload="true">
+        <source type='video/mp4' src="/assets/groupSelfie2.45728bc1.mp4">
+      </video>
+      <video id="snackup" loop autoplay muted playsinline style="display:none" preload="true">
+        <source type='video/mp4' src="/assets/snackUp.a773f2a4.mp4">
+      </video>
+
+    </div>
 
   </body>
 </html>
