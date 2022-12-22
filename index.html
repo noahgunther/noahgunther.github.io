@@ -5,12 +5,12 @@
 
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:600"/>
-    <link rel="icon" type="image" href="/assets/thumbnail_ng_logo.9ae32d65.png" />
+    <link rel="icon" type="image" href="thumbnail_ng_logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noah Gunther | Portfolio</title>
 
-    <script type="module" crossorigin src="/assets/index.59d9720c.js"></script>
-    <link rel="stylesheet" href="/assets/index.ae9ab3fd.css">
+    <script type="module" crossorigin src="/assets/index.c19d5f44.js"></script>
+    <link rel="stylesheet" href="/assets/index.9294fb3e.css">
   </head>
 
   <body id="body">
@@ -30,7 +30,17 @@
     <div id="houdini" style="right: max(70px, 7vw); visibility: hidden" class="link">Houdini</div>
     <div id="other" style="right: 0vw; visibility: hidden" class="link">Other</div>
 
-    <div id="aboutmepanel" style="visibility: hidden;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus sapiente officiis error reiciendis atque, recusandae saepe illum deserunt itaque incidunt eligendi, dolores sequi! Amet odit doloremque quae, tenetur debitis unde.</div>
+    <div id="aboutmepanel" style="visibility: hidden;">
+      <div id="aboutmepanelicon">
+        <img src="/assets/aboutmehand.89168bc8.png">
+      </div>
+      <div style="position: relative; top: 10%; height: 100%; overflow: hidden;">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus sapiente officiis error reiciendis atque, recusandae saepe illum deserunt itaque incidunt eligendi, dolores sequi! Amet odit doloremque quae, tenetur debitis unde.
+      </div>
+      <div id="aboutmepanelclose">
+        <img src="data:image/png;base64,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">
+      </div>
+    </div>
     
     <div id="phonescreen" style="visibility: hidden;">
 
