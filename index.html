@@ -9,14 +9,14 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
 
     <!--Logo-->
-    <link rel="icon" type="image" href="/assets/thumbnail_ng_logo.9ae32d65.png" />
+    <link id="logo" rel="icon" type="image"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--Title-->
-    <title>Noah Gunther | Portfolio</title>
+    <title id="title"></title>
 
-    <script type="module" crossorigin src="/assets/index.0abf5d5d.js"></script>
+    <script type="module" crossorigin src="/assets/index.c01ea25c.js"></script>
     <link rel="stylesheet" href="/assets/index.12cb6380.css">
   </head>
 
@@ -31,13 +31,9 @@
 
     <!--Main navigation links-->
     <div id="home" style="visibility: hidden" class="logolink">
-      <img src="/assets/thumbnail_ng_logo.9ae32d65.png" style="height: 100%; width: 100%;">
+      <img id="logolink" style="height: 100%; width: 100%;">
     </div>
-    <div id="about" style="right: max(240px, 27vw); visibility: hidden" class="link">About</div>
-    <div id="ar" style="right: max(200px, 22vw); visibility: hidden" class="link">AR</div>
-    <div id="vr" style="right: max(160px, 16vw); visibility: hidden" class="link">VR</div>
-    <div id="houdini" style="right: max(70px, 7vw); visibility: hidden" class="link">Houdini</div>
-    <div id="other" style="right: 0vw; visibility: hidden" class="link">Other</div>
+    <div id="mainnavlinks"></div>
 
     <!--About me panel-->
     <div id="aboutmepanel" style="visibility: hidden;">
@@ -93,101 +89,7 @@
         </div>
       </div>
 
-      <div id="mobilearscrollwrapper">
-        <div class="mobilearprojectsdiv">
-          <div class="mobilearprojectsdivtitle">
-            AR Games
-          </div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              UX Design
-            </div>
-          </div>
-          <div class="mobilearprojectsdivsubtitlespacer"></div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              Art Direction
-            </div>
-          </div>
-          <div class="mobilearprojectsdivsubtitlespacer"></div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              Other Thing
-            </div>
-          </div>
-          <div class="mobilearprojectsdivcontent">
-            Brief project description including role and results or whatever. Could be maybe 2 sentences, probably not much longer though.
-          </div>
-          <div id="viewargamesbutton" class="mobilearprojectsdivbuttonwrapper">
-            <div class="mobilearprojectsdivbutton" style="background-color: #ffae21;">
-              View Project
-            </div>
-          </div>
-        </div>
-        <div style="height: 2%;"></div>
-        <div class="mobilearprojectsdiv">
-          <div class="mobilearprojectsdivtitle">
-            Social AR
-          </div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              UX Design
-            </div>
-          </div>
-          <div class="mobilearprojectsdivsubtitlespacer"></div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              Art Direction
-            </div>
-          </div>
-          <div class="mobilearprojectsdivsubtitlespacer"></div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              Other Thing
-            </div>
-          </div>
-          <div class="mobilearprojectsdivcontent">
-            Brief project description including role and results or whatever. Could be maybe 2 sentences, probably not much longer though.
-          </div>
-          <div id="viewsocialarbutton" class="mobilearprojectsdivbuttonwrapper">
-            <div class="mobilearprojectsdivbutton" style="background-color: #ff21a6;">
-              View Project
-            </div>
-          </div>
-        </div>
-        <div style="height: 2%;"></div>
-        <div class="mobilearprojectsdiv">
-          <div class="mobilearprojectsdivtitle">
-            AR Games
-          </div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              UX Design
-            </div>
-          </div>
-          <div class="mobilearprojectsdivsubtitlespacer"></div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              Art Direction
-            </div>
-          </div>
-          <div class="mobilearprojectsdivsubtitlespacer"></div>
-          <div class="mobilearprojectsdivsubtitlewrapper">
-            <div class="mobilearprojectsdivsubtitle">
-              Other Thing
-            </div>
-          </div>
-          <div class="mobilearprojectsdivcontent">
-            Brief project description including role and results or whatever. Could be maybe 2 sentences, probably not much longer though.
-          </div>
-          <div id="viewareffectsbutton" class="mobilearprojectsdivbuttonwrapper">
-            <div class="mobilearprojectsdivbutton" style="background-color: #1badff;">
-              View Project
-            </div>
-          </div>
-        </div>
-        <div class="mobilearprojectsdiv" style="height: 2%; background: none;"></div>
-      </div>
+      <div id="mobilearscrollwrapper"></div>
 
       <video id="abstractlove" loop muted playsinline preload="none">
         <source type='video/mp4' src="/assets/AbstractLove.21b178bd.mp4">
