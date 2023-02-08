@@ -16,8 +16,8 @@
     <!--Title-->
     <title id="title"></title>
 
-    <script type="module" crossorigin src="/assets/index.0b97c5bb.js"></script>
-    <link rel="stylesheet" href="/assets/index.ad2f8202.css">
+    <script type="module" crossorigin src="/assets/index.80f44d78.js"></script>
+    <link rel="stylesheet" href="/assets/index.76e263f9.css">
   </head>
 
   <body id="body">
@@ -329,10 +329,16 @@
       </div>
     </div>
 
-    <!--Navigation hints-->
-    <div id="mainhint" class="hint" style="visibility: hidden;">
-      <img src="/assets/mainhint.8300a8e5.png">
+    <!--Speech Bubble-->
+    <div id="speechbubblewrapper">
+      <div id="speechbubble">
+        <div id="speechbubbletext"></div>
+        <img id="speechbubblearrowleft" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAABiCAYAAAB6bsA7AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAQSSURBVHgB7d3tVdtAEIXhaw4FkA6UCkIqQK4AUgFKBSQVhFQAqQBSAaQCQwWmA9QB7kCZRbt4kCWwjL529z7nbAzkH7xIGslIAFGDGchrRVGk8vJF1qGsxC4jl7Wyr/ey7maz2QoULonhwAQh60LWU9HOlY2JQmGDyOwPt20QdRayEpCfbBBn9gfZRRB1zkF+ML/NKoihLIuGrQgPSEdWlMcAZh3Z1zHksuZywJrrLzKOEdggjmWdYD1djO0BZSAvEw3jGIgKIpN1gGm6lji+u08YR08kBhOAOfdwinILMdUgqr5JILfmA8bRIRuECcEEYcLwJQgtl/XV7F4YxwfZINzWIUUYziWO34xjB3b0yzDuhNGnlcTxiXFsSY2cZiuRIHzzfVAjTyaMvhwzDsXjCaMPh9HvVtSEYbYQKeIOQotzWgl0wuhcNHHYCcOdsk5B7wo6jolc1PJWcHFM9KKWl7yPQ00YsY6cvfEyDjVhHIEjZ2+8iaMyYfh6Ucsrk46DI+e4JheHBGG2Cm6XkYJGM4k4Iryo5YXR4oj8opYXBouDF7X802scgbxtLlqdx8EJIxydxBHB2+aitHMcnDDC1yoOu8v4AQYRha3iUFGcgQeV0Xg3DnvG8gbcUkRn763/lDAyeVmCYUSpMY6ivLHHFShatbsVCcOco7gBRW0jDnvOwuxKeOAZubrdygUYBqEShz0APQERKrsVc/MwlBfIiNZbDns+g2HQC71bOQWRouNIQaQ8H3PYaydPIFLcloPHGrTBxcHzGrSBcVCjPRA1YBzUyMXxAKIKF0cOoornOOxjFHIQKfqY4xZEio7jH4gUXrKnRtVR9g+IrLr3kC7AK7SE+jjMbmUJit7GGVIZa80JsZ+g6NWePpdALuXlHBS1N/9WVnYxv8BIorXNH1Jn8mIiSUBR2fYWDAnKQDJQNNrevCVBGQnvBhiBnW77ZN+Q7G5Kz1AC1dUN40woGcqTZwkoCH3capKhBKLvm9S6h+S4x2CQR4a8vXWC9a0pU9DkjXJjfIbih9EfqcGH/k7XFB/Go5/9moBGM/XHeHHyGZFPDwB0z2pJwclnEL4+OjQBHz3eOy/j0Dj59Mf7ODQVituq0AcEFYfGi4MfF2wcVZx82osmDs2G4rYoCahWlHFodkR2WxWOyGur6OPQOPm8csc4GnDywSXj2IK6OOiOVWKYfFLGsYMIJp98Npt93ge1Jt+4e3kxK9RQrs0/3HJ0KJCLg7msufwC5IyjJx5fHMwkjL/mA8YxAI9G5DsJY+4+YRwDm/DbInPY3Yn7AuMY2UTeFpmjEgZNjJl8ZF3JeiyG82h3e+QLG8pF0W8oN0W5myNfmd9sWWeylkU3HovyqeMUEhtKJmtRtLcoysi22lr8B8oCOcHC+6YtAAAAAElFTkSuQmCC" style="visibility: hidden;">
+        <img id="speechbubblearrowbottom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAABiCAYAAAB6bsA7AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAQSSURBVHgB7d3tVdtAEIXhaw4FkA6UCkIqQK4AUgFKBSQVhFQAqQBSAaQCQwWmA9QB7kCZRbt4kCWwjL529z7nbAzkH7xIGslIAFGDGchrRVGk8vJF1qGsxC4jl7Wyr/ey7maz2QoULonhwAQh60LWU9HOlY2JQmGDyOwPt20QdRayEpCfbBBn9gfZRRB1zkF+ML/NKoihLIuGrQgPSEdWlMcAZh3Z1zHksuZywJrrLzKOEdggjmWdYD1djO0BZSAvEw3jGIgKIpN1gGm6lji+u08YR08kBhOAOfdwinILMdUgqr5JILfmA8bRIRuECcEEYcLwJQgtl/XV7F4YxwfZINzWIUUYziWO34xjB3b0yzDuhNGnlcTxiXFsSY2cZiuRIHzzfVAjTyaMvhwzDsXjCaMPh9HvVtSEYbYQKeIOQotzWgl0wuhcNHHYCcOdsk5B7wo6jolc1PJWcHFM9KKWl7yPQ00YsY6cvfEyDjVhHIEjZ2+8iaMyYfh6Ucsrk46DI+e4JheHBGG2Cm6XkYJGM4k4Iryo5YXR4oj8opYXBouDF7X802scgbxtLlqdx8EJIxydxBHB2+aitHMcnDDC1yoOu8v4AQYRha3iUFGcgQeV0Xg3DnvG8gbcUkRn763/lDAyeVmCYUSpMY6ivLHHFShatbsVCcOco7gBRW0jDnvOwuxKeOAZubrdygUYBqEShz0APQERKrsVc/MwlBfIiNZbDns+g2HQC71bOQWRouNIQaQ8H3PYaydPIFLcloPHGrTBxcHzGrSBcVCjPRA1YBzUyMXxAKIKF0cOoornOOxjFHIQKfqY4xZEio7jH4gUXrKnRtVR9g+IrLr3kC7AK7SE+jjMbmUJit7GGVIZa80JsZ+g6NWePpdALuXlHBS1N/9WVnYxv8BIorXNH1Jn8mIiSUBR2fYWDAnKQDJQNNrevCVBGQnvBhiBnW77ZN+Q7G5Kz1AC1dUN40woGcqTZwkoCH3capKhBKLvm9S6h+S4x2CQR4a8vXWC9a0pU9DkjXJjfIbih9EfqcGH/k7XFB/Go5/9moBGM/XHeHHyGZFPDwB0z2pJwclnEL4+OjQBHz3eOy/j0Dj59Mf7ODQVituq0AcEFYfGi4MfF2wcVZx82osmDs2G4rYoCahWlHFodkR2WxWOyGur6OPQOPm8csc4GnDywSXj2IK6OOiOVWKYfFLGsYMIJp98Npt93ge1Jt+4e3kxK9RQrs0/3HJ0KJCLg7msufwC5IyjJx5fHMwkjL/mA8YxAI9G5DsJY+4+YRwDm/DbInPY3Yn7AuMY2UTeFpmjEgZNjJl8ZF3JeiyG82h3e+QLG8pF0W8oN0W5myNfmd9sWWeylkU3HovyqeMUEhtKJmtRtLcoysi22lr8B8oCOcHC+6YtAAAAAElFTkSuQmCC" style="visibility: hidden;">
+      </div>
     </div>
+
+    <!--Navigation hints-->
     <div id="abouthint" class="hint" style="visibility: hidden;">
       <img src="/assets/abouthint.264407fa.png">
     </div>
