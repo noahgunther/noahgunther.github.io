@@ -3863,21 +3863,21 @@ void main()\r
         vec2 f = fract( x );
       
         vec4 m = vec4( 1.0, 0.0, 0.0, 0.0 );
-        for( int j=-2; j<=2; j++ ) {
-          for( int i=-2; i<=2; i++ )
+        for( int j=-1; j<=1; j++ ) {
+          for( int i=-1; i<=1; i++ )
           {
-            vec2 g = vec2( float(i),float(j) );
-            vec2 o = hash2( n + g );
+            vec2 g = vec2(i, j);
+            vec2 o = hash2(n + g);
         
             // animate
-            o = 0.5 + 0.5*sin( time*0.001 + 6.2831*o );
+            o = 0.5 + 0.5*sin(time*0.001 + 6.2831*o);
     
             // distance to cell		
             float d = length(g - f + o);
             
             // do the smooth min for colors and distances		
-            float h = smoothstep( -1.0, 1.0, (m.x-d)/w );
-            m.x = mix( m.x, d, h ) - h*(1.0-h)*w/(1.0+3.0*w); // distance
+            float h = smoothstep(-1.0, 1.0, (m.x-d)/w);
+            m.x = mix(m.x, d, h) - h*(1.0-h)*w/(1.0+3.0*w); // distance
           }
         }
         
