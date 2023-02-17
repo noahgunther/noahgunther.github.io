@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./graphics/icon.png" />
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Houdini Droplets Tool</title>
+  </head>
+  <body id="body">
+    <div id="header">
+      <div id="headertext">
+        Houdini Droplets Tool
+      </div>
+    </div>
+    <div id="content">
+      <p>This SOP-based droplet tool for Houdini, built with a lot of control over behavior, appearance, and sourcing in mind, is the result of failing to get the kind of droplet behavior I was looking for with particle fluid sim tools. While this method is not a fluid simulation, it is generally faster and offers more design input. The HDA should work with any input geometry, and it dynamically creates a wetmap texture per frame that can be fed into different values in a render engine (like the roughness value of the glass material in the Octane render below). This tool was built entirely in Houdini using mostly VEX and some python for interactively placing points.<br/><br/>Disclaimer: because this tool doesn't truly simulate anything, droplet behavior won't always be believable or look nice. This is especially true when you might expect a droplet to fall off of something - there are a couple stop parameters in this tool, but a fluid sim would work better for drops that roll down a surface and slide off into space.</p>
+      <br/>
+      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/535867559?h=8f3ebea3d7" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script><br/><br/>
+      <p><b>Download the OpenHDA for Houdini here: <a href="https://gunthern.gumroad.com/l/LaGaPi">Pay what you want on Gumroad</a></b><br/><br/>Droplets can be sourced with either a random scatter of points, or by manually clicking on the geometry where you want to add points using python states (both methods in the following two videos). The frame when the drop starts moving can also be either randomized in a range or manually specified.</p><br/><br/>
+      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/qqA8Zh6zhhA" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/CHoSRMHo_c0" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+      <br/><br/><p>This tool also offers a lot of control over drop appearance (size of drops, randomness of size, drop trail length, VDB meshing with static drops) and drop behavior (how much different conditions effect movement, when to stop). I won't go over all of these options here, but some of the preview modes for different information about drop pathing, “friction” noise, and wetmap are displayed below.</p>
+      <img src="./graphics/preview_paths.png">
+      <div class="caption"><p1>Previewing the droplet paths</p1></div><br/><br/>
+      <img src="./graphics/preview_noise.png">
+      <div class="caption"><p1>Preview of the procedural noise that acts as friction to determine drop path shape and speed. Darker areas are rougher and will repel the drops and make them move slowly. Lighter areas allow the drops to move freely. Noise size, intensity, and influence on drop behavior can all be customized.</p1></div><br/><br/>
+      <p>For the wetmap to work, the input geometry must have UVs (the wetmap preview will work either way, but the final result is passed into a COP2 net that transfers the wetness attribute to the UV space of the input geometry). Just point to the “wetmap” network within the HDA when setting up a render node and be sure to update textures every frame.</p>
+      <img src="./graphics/preview_wetmap.png">
+      <div class="caption"><p1>Previewing the dynamic wetmap texture created wherever the drops pass by</p1></div><br/><br/>
+      <img src="./graphics/headerbackground.png">
+      <div class="caption"><p1>Wetmap in action - used to determine roughness of the glass material, so streaks become see-through</p1></div><br/><br/>
+      <p>Special thanks to the Toadstorm Nerdblog for <a href="https://www.toadstorm.com/blog/?p=465">this post about xyzdist() and primuv()</a>, two of the VEX functions I used most heavily with this project. I highly recommend checking out this blog. Also thanks to Peter Quint for <a href="https://vimeo.com/285813013">this video about creating deforming wetmaps</a>.</p>
+      <br/><br/><p style="text-align: center;">© 2023 Noah Gunther</p>
+    </div>
+  </body>
+</html>

@@ -19,15 +19,27 @@ h1 {
   clear: left;
 }
 
-
 p {
   font-size: min(max(1.0vw, 100%), 200%);
 }
 
+p1 {
+  font-size: min(max(0.75vw, 75%), 150%);
+}
+
+.caption {
+  width: max(75%, 195px);
+  text-align: center;
+  transform: translate(-50%, 0%);
+  margin-left: 50%;
+}
+
 img {
-  width: max(25%, 130px);
-  float: left;
-  padding: 2%;
+  width: max(75%, 195px);
+  margin-left: 50%;
+  padding-left: 0px;
+  padding-top: 0px;
+  transform: translate(-50%, 0%);
 }
 
 video {
@@ -67,14 +79,3 @@ video {
   width: min(max(50%, 300px), 1920px);
 }
 
-#timelineimage {
-  width: 100%;
-  padding-left: 0px;
-  padding-top: 0px;
-}
-
-#smilegif {
-  float: none;
-  transform: translate(-50%, 0%);
-  margin-left: 50%;
-}
