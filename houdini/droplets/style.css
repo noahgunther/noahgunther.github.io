@@ -58,6 +58,7 @@ video {
   text-align: center;
   font-size: min(max(3vw, 160%), 600%);
   font-weight: 400;
+  text-shadow: 0px 0px 10px black;
   color: white;
   background-image: url('./graphics/headerbackground.png');
   background-position: center;
