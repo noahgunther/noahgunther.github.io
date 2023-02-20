@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-NKRE9H80JX');
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./graphics/icon.png" />
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Houdini Interactive Fireworks</title>
+  </head>
+  <body id="body">
+    <div id="header">
+      <div id="headertext">
+        Houdini Interactive Fireworks
+      </div>
+    </div>
+    <div id="content">
+      <p><i>Updated Jan. 1, 2021</i></p><br/><br/>
+      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/9RtO6c4lI08" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
+      <p>For this tool, I wanted to create something more interactive than my last few - rather than moving sliders back and forth and toggling boxes on and off, I wanted a user to be able to click on the viewport and watch something nice happen. I used python states, Houdini's flexible system for creating custom tools with viewport interactivity.</p><br/>
+      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/FmCE0s50Jto" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
+      <p><b>Download the OpenHDA for Houdini here: <a href="./fireworks_pythonstates.zip">Direct Download</a></b><br/><br/>
+      Houdini has a great library of preset python functionality, so all it took to get the basic setup working were some slight modifications to the add points python state script. The first thing I did was allow for custom geometry input to place the points where the fireworks would explode, then I added a parameter that would track the frame that the point was placed, which was important for animating the fireworks (procedurally) with consistent timing.</p><br/>
+      <img src="./graphics/screenshot.jpg">
+      <p1 class="caption">Creating the path for the fireworks to follow.</p1><br/><br/>
+      <p>Most of the rest of the work happened in VEX, where the trajectories for the fireworks and their explosions, color and emissive attributes, and procedural animations were created. As a final step, I exposed parameters like how large the arcs of the trajectories would be, how fast the fireworks would go, the size of their explosions, and more in the HDA. Feel free to download it and experiment with it as you'd like!</p><br/>
+      <br/><br/><p style="text-align: center;">© 2023 Noah Gunther</p>
+    </div>
+  </body>
+</html>
