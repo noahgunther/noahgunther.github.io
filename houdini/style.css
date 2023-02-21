@@ -48,6 +48,7 @@
     color: white;
     background-position: center;
     background-color: black;
+    background-size: cover;
   }
 
   .projecttitle {
@@ -78,8 +79,9 @@
     font-weight: 400;
     text-shadow: 0px 0px 10px black;
     color: white;
-    background-image: url('./graphics/headerbackground.png');
+    background-image: url('./pipedream/graphics/snow.png');
     background-position: center;
+    background-size: cover;
     background-color: black;
   }
   

@@ -25,7 +25,6 @@ p {
 
 p1 {
   font-size: min(max(0.75vw, 75%), 150%);
-  float: left;
 }
 
 .caption {
@@ -78,6 +77,7 @@ video {
   background-image: url('./graphics/headerbackground.png');
   background-position: center;
   background-color: black;
+  background-size: cover;
 }
 
 #headertext {

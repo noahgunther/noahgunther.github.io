@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-NKRE9H80JX');
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./graphics/icon.png" />
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Houdini Pipe Dream Redux</title>
+  </head>
+  <body id="body">
+    <div id="header">
+      <div id="headertext">
+        Houdini Pipe Dream Redux
+      </div>
+    </div>
+    <div id="content">
+      <p><i>Updated Feb. 24, 2020</i></p><br/><br/>
+      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/bzZl8qOmiIk" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
+      <p><b>Download the OpenHDA for Houdini here: <a href="./noahg_pipedream.zip">Direct Download</a></b></p><br/><br/>
+      <img src="./graphics/snow.png">
+      <div class="caption"><p1>Snow falling on the pipes.</p1></div>
+      <p>For this project, I set out to recreate the classic Windows 3D pipes screensaver that I used to watch for hours at my Grandma's house as a kid. Watching footage of the gorgeous old screensaver, I made a list of rules the pipes appear to follow, such as:<br/><br/>1. Pipes start with a single spherical joint and a small segment. Each frame, a pipe is extended by one segment.<br/><br/>2. Start points, colors, paths, and overall scene rotation are mostly random.<br/><br/>3. Pipes never intersect with themselves or other pipes.<br/><br/>4. Pipes are limited to an area (mostly) visible on-screen.<br/><br/>…and so on. In trying to figure out the best way to achieve this random pattern of movement, I started with an L-system with a simple set of turtle commands: it extended by one segment each frame and had equal probability of going straight, turning right, left, forward, or backward in space. However, this came with two limitations that I wasn't able to overcome: the line created by the system had no way of detecting if it was going to overlap itself, and it was very difficult to keep the system in a certain boundary.</p>
+      <img src="./graphics/01.png">
+      <div class="caption"><p1>A first attempt at a pipe using the Lindenmayer System. There are several intersections visible, such as near the lower right of the image.</p1></div><br/><br/>
+      <p>Ultimately, I chose to start over using a VEX based system with a point array, with simple Python variables in charge of randomizing several parameters (start points, colors, rotation, etc). The VEX system starts each pipe at a random point and then checks each possible neighboring point for itself or another pipe before moving there.</p>
+      <img src="./graphics/02.png">
+      <div class="caption"><p1>First test when each point connected to all adjacent points, rather than just one, resulted in pipes like this one.</p1></div><br/><br/>
+      <img src="./graphics/03.png">
+      <div class="caption"><p1>First pipe without self-intersection!</p1></div><br/><br/>
+      <img src="./graphics/04.png">
+      <div class="caption"><p1>First attempt at adding a second pipe caused some point conflicts.</p1></div><br/><br/>
+      <img src="./graphics/05.png">
+      <div class="caption"><p1>Success with multiple pipes!</p1></div><br/><br/>
+      <img src="./graphics/pipe_00_curves.gif">
+      <div class="caption"><p1>Points being connected, then smoothed, then fleshed out with the polywire sop. Corners where spheres should go are chosen along the way.</p1></div><br/><br/>
+      <img src="./graphics/headerbackground.gif">
+      <div class="caption"><p1>Gif of one of the randomly generated pipe patterns with 6 pipes.</p1></div><br/><br/>
+      <img src="./graphics/06.png">
+      <div class="caption"><p1>6 pipes with joint spheres assigned to random corners. The spheres mimic those in the original screensaver, but can be toggled on and off.</p1></div><br/><br/>
+      <img src="./graphics/07.png">
+      <div class="caption"><p1>Corresponding render. The number of pipes, number of frames before the pipes stop, size of boundary area, size of pipes, joint spheres, materials, animation timing, and pipe guide shapes can all be customized in the HDA.</p1></div><br/><br/>
+      <img src="./graphics/pipes_07_animation.gif">
+      <div class="caption"><p1>Pipes with colored glass material. The randomly generated point colors are passed to the transmission value of the shader in this case.</p1></div><br/><br/>
+      <img src="./graphics/pipes_08_animation.gif">
+      <div class="caption"><p1>This one uses a clear glass shader, with a single plane's worth of points for the pipes to generate on. The resample count is lowered to make them squiggly.</p1></div><br/><br/>
+      <div class="row">
+        <img src="./graphics/08.png">
+        <img src="./graphics/09.png">
+      </div>
+      <div class="caption"><p1>Trying out some of the parameters in the HDA — lowering the resample count, and changing the size of the boundary area.</p1></div><br/><br/>
+      <img src="./graphics/pipes_06_animation.gif">
+      <div class="caption"><p1>Pipes growing when the resample count is set to 1.</p1></div><br/><br/>
+      <img src="./graphics/pipes_10_animation.gif">
+      <div class="caption"><p1>An imagetexture can be set to be used instead of point colors (the pipe width can also be adjusted).</p1></div><br/><br/>
+      <p><b>February 2020:</b> When I first created the pipes system, I used a foreach loop over six VEX scripts that iterated per frame. This was very slow, and also meant that I was limiting the system to six pipes, which each had a SOP chain building them after deleting the other points. Furthermore, reducing the number of pipes only removed the others visually, instead of dynamically calculating for each pipe. This clunky system also used specific variables for each pipe's color, rather than dynamically generating random colors from one value. These were all problems I wanted to address, and in doing some research found <a href="https://entagma.com/vex-space-filling-curves-aka-that-windows-95-screensaver/">this post on the entagma.com site</a> (full of a lot of wonderful tutorials and project ideas).</p>
+      <img src="./graphics/10.png">
+      <div class="caption"><p1>February 2020 unlimited pipes update.</p1></div><br/><br/>
+      <p>I loved that they used a dynamic system to generate source points from geometry using a VDB, instead of duplicating a grid of points like I was, so I immediately updated my project to match their source system. I also noted that they were using a solver SOP, instead of a foreach loop, and were dynamically generating any number of pipes inside the solver using a for loop. Updating my project with this system, I was also able to assign an attribute (@pipe_n) to identify each pipe, and color them randomly by multiplying a single random color by n (where n is the value of the pipe). This all worked beautifully — except for one (somewhat rare) frustrating case.<br/><br/>Because in the entagma.com system the pipes were being created in a for loop inside the solver sop, two pipes would occasionally pick the same point to move to next, resulting in an intersection (this occurs because the for loop is evaluated for every pipe before the points are marked as taken — meaning multiple pipes could “take” the same point before it was set as off-limits). The solution involved a new SOP level foreach loop, inside the solver node — this time for each pipe. The iteration value of this loop is fed to the script, which means the points are updated as each pipe segment is created, not just once per frame. Hooray! Now the pipes will never move to the same point at once, and you can run as many pipes as you want at once.</p>
+      <img src="./graphics/pipes_tommy_animation.gif">
+      <div class="caption"><p1>Pipes after the Feb. 2020 update filling the Houdini “Tommy” asset.</p1></div><br/><br/>
+      <br/><br/><p style="text-align: center;">© 2023 Noah Gunther</p>
+    </div>
+  </body>
+</html>

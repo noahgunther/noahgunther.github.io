@@ -34,7 +34,7 @@
         <img src="./graphics/comp-2.gif">
         <img src="./graphics/floating_hang.gif">
       </div>
-      <p1 class="caption">Results using various parameters and target "light" configurations. Growth shape, color, and direction can all be customized.</p1><br/><br/>
+      <div class="caption"><p1>Results using various parameters and target "light" configurations. Growth shape, color, and direction can all be customized.</p1></div><br/><br/>
       <p>After working on several projects involving <a href="https://www.red3d.com/cwr/boids/">Boids using Craig Reynolds three rules of interaction</a>, I had an idea to simulate vine growth using similar principles. A big challenge here was the idea that the vines would need to “cling” to surfaces, and should not be able to fly around like boids; rather, they would need to find something to attach themselves to.</p>
       <div class="row">
         <img src="./graphics/vines_tool.octane_rop1.png">
@@ -44,19 +44,19 @@
         <img src="./graphics/vines_tool.octane_rop3.png">
         <img src="./graphics/vines_tool.octane_rop4.png">
       </div>
-      <p1 class="caption">First results, with user controls for source and target geometry, as well as things like growth randomness. However, the vines could grow in any direction arbitrarily, like trees, instead of clinging to nearby surfaces in order to climb.</p1><br/><br/><br/>
+      <div class="caption"><p1>First results, with user controls for source and target geometry, as well as things like growth randomness. However, the vines could grow in any direction arbitrarily, like trees, instead of clinging to nearby surfaces in order to climb.</p1></div><br/><br/><br/>
       <p>Like in previous projects, I used Houdini and VEX to simulate the behavior of the vines. On each frame, they choose a direction based a number of conditions, such as where their goal (the light) is, whether they are close enough, or too close, to a piece of geometry or each other, and a little sprinkling of randomness. The user has control over how strongly each of these conditions factor in. As their final step, they move forward based on the calculated direction and their movement speed (unless they have reached a stop condition).</p><br/>
       <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/FyZsNWv0KDE" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
       <img src="./graphics/settings0.png">
-      <p1 class="caption">Control over how the vines grow. Different growth settings will result in differently behaving vines!</p1><br/><br/>
+      <div class="caption"><p1>Control over how the vines grow. Different growth settings will result in differently behaving vines!</p1></div><br/><br/>
       <p>Another thing I wanted to do was add leaves that would sprout from the vines, but only when the vine was at an appropriate angle (not growing flat on the ground or hanging from something at too steep an angle). This required measuring the normal vector to the surface nearest the vine, and ruling out all the points on the vine that didn't measure up.</p><br/>
       <img src="./graphics/humanvines.png">
-      <p1 class="caption">Testing the leaf growth.</p1><br/><br/>
+      <div class="caption"><p1>Testing the leaf growth.</p1></div><br/><br/>
       <p>Finally, I also wanted the leaves to start as tiny sprouts and grow along with the vine, which also needed thicken as it grew older. To achieve these effects, I introduced a counter on the vine points that would track how old they were, allowing for dynamic scaling and coloring based on age. Of course, this is all up to the user as well. I also decided to add flowers using the same system.</p><br/>
       <img src="./graphics/settings1.png">
-      <p1 class="caption">Control over vine and leaf / flower appearance.</p1><br/><br/>
+      <div class="caption"><p1>Control over vine and leaf / flower appearance.</p1></div><br/><br/>
       <img src="./graphics/lattice_vines_2k.png">
-      <p1 class="caption">Vines climbing up a lattice.</p1><br/><br/>
+      <div class="caption"><p1>Vines climbing up a lattice.</p1></div><br/><br/>
       <br/><br/><p style="text-align: center;">© 2023 Noah Gunther</p>
     </div>
   </body>

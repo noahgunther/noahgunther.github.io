@@ -63,6 +63,7 @@ video {
   background-image: url('./graphics/headerbackground.png');
   background-position: center;
   background-color: black;
+  background-size: cover;
 }
 
 #headertext {
