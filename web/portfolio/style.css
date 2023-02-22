@@ -189,6 +189,12 @@ video {
   float: left;
 }
 
+.portraitvideo {
+  width: max(33%, 86px);
+  transform: translate(-50%, 0%);
+  margin-left: 50%;
+}
+
 #header {
   position: absolute;
   top: 0;

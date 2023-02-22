@@ -71,8 +71,24 @@
     </div>
     <div id="content">
       <p><i>Updated Feb. 28, 2023</i></p><br/><br/>
-      <p>INFORMATION ON PORTFOLIO.</p>
-      <br/><br/><p style="text-align: center;">© 2023 Noah Gunther</p>
+      <p>In November of 2022, I began working on a fully new portfolio website collaboration with an amazing Product Designer / Art Director and friend, Cody Drake. He created designs for the site and did the modeling, rigging, and animation for the characters you see on the site, while I wrote the Javascript (using <a href="https://threejs.org/">Three.js</a> for all of the WebGL components), GLSL, CSS, and HTML for the site. It was a really successful collaborative process and continues to be as we add more to the site.</p>
+      <video controls muted playsinline preload="auto">
+        <source type='video/mp4' src="./videos/main.mp4#t=0.01">
+      </video><br/><br/>
+      <p>The video above shows the site home and the various interactions there. The water, wake, ripples, splashes, and skybox are all created with custom shaders written in GLSL and applied to geometry within the 3D scene. The screen-space effects, such as the ripple wipe transition when the site loads, the sword "slash," the blood splatter, and the "speed lines" that appear when the jetski revs up are all shaders written in GLSL and displayed over the scene using <a href="https://github.com/patriciogonzalezvivo/glslCanvas">GLSLCanvas.</a><br/><br/>In order to improve performance on devices with slower GPUs, I wrote a function to set dynamic resolution based on frame rate, and included MSAA to help prevent jagged edges on geometry when the resolution is lowered.</p>
+      <video controls muted playsinline preload="auto">
+        <source type='video/mp4' src="./videos/about.mp4#t=0.01">
+      </video><br/><br/>
+      <p>Links to various parts of the site appear in the upper right of the page, but 3D objects in the scene (which are outlined in yellow when hovered over) can also be clicked on to navigate. Navigating to the about page triggers the character to jump up into space, followed by a camera and shader transition to change the color of the sky. Here, different parts of the body can be selected to view more about them.<br/><br/>While the panels displaying information are created with CSS, the selection orbs and animated lines are all created in 3D using a combination of keyframed animations and programmatic animation in Three.js. The character rig animates on a loop and slowly moves toward the mouse, so finding a way to keep the origin points for the lines consistent with the dynamic terminal points (placed at the center of each CSS panel) was key to making the effect work.</p>
+      <video controls muted playsinline preload="auto">
+        <source type='video/mp4' src="./videos/ar.mp4#t=0.01">
+      </video><br/><br/>
+      <p>For the AR page, we decided to give the phone where the AR work is displayed a little animated personality. The character is once again all rendered in the 3D space, but the phone screen where the projects are displayed is a carefully placed HTML div. This way, the phone UI can be interacted with more easily and the videos will display at full resolution.</p>
+      <video class="portraitvideo" controls muted playsinline preload="auto">
+        <source type='video/mp4' src="./videos/mobile.mp4#t=0.01">
+      </video><br/><br/>
+      <p style="clear: left;">We also designed a mobile version of the site, for which I created a separate CSS layout and additional functionality, such as a unique mobile naviagtion menu and information panel behavior for the AR work. The site should perform well on most mobile devices, but there is also a plain text version of the site available in cases where it doesn't.</p>
+      <br/><br/><p style="text-align: center; clear: left;">© 2023 Noah Gunther</p>
     </div>
   </body>
 </html>
