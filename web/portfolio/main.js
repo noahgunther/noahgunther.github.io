@@ -114,9 +114,7 @@ function showMobileNavMenu() {
 }
 
 // Links
-var currentTarget = 'web';
-webLink.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
-webLinkMobile.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
+var currentTarget = '';
 
 var homeLinkMouseDown = false;
 
