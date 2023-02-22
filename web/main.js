@@ -83,6 +83,8 @@ function showMobileNavMenu() {
 
     mobileNavMenu.style.setProperty('animation', 'mobileNavOut 0.15s forwards');
 
+    body.style.setProperty('overflow-y', 'scroll');
+
     mobileNavLinksButtonTop.style.setProperty('animation', 'mobileNavButtonTopOut 0.15s forwards');
     mobileNavLinksButtonMiddle.style.setProperty('animation', 'mobileNavButtonMiddleOut 0.15s forwards');
     mobileNavLinksButtonBottom.style.setProperty('animation', 'mobileNavButtonBottomOut 0.15s forwards');
@@ -100,6 +102,8 @@ function showMobileNavMenu() {
   else {
 
     mobileNavMenu.style.setProperty('animation', 'mobileNavIn 0.35s forwards');
+
+    body.style.setProperty('overflow-y', 'hidden');
 
     mobileNavLinksButtonTop.style.setProperty('animation', 'mobileNavButtonTopIn 0.35s forwards');
     mobileNavLinksButtonMiddle.style.setProperty('animation', 'mobileNavButtonMiddleIn 0.35s forwards');
