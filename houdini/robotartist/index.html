@@ -11,12 +11,59 @@
       gtag('config', 'G-NKRE9H80JX');
     </script>
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
     <link rel="icon" type="image/svg+xml" href="./graphics/icon.png" />
     <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Houdini Robot Artist</title>
   </head>
   <body id="body">
+    <!--Main script-->
+    <script id="main" type="module" src="./main.js"></script>
+    <!--Main navigation links and mobile nav links-->
+    <div id="home" class="logolink">
+      <img id="logolink" style="height: 100%; width: 100%;" src="./graphics/icon.png">
+    </div>
+    <div id="mainnavlinks">
+      <div id="other" class="link">Gallery</div>
+      <div id="houdini" class="link">Houdini</div>
+      <div id="web" class="link">Web</div>
+      <div id="vr" class="link">VR</div>
+      <div id="ar" class="link">AR</div>
+      <div id="about" class="link">About</div>
+    </div>
+    <div id="mobilenavlinksbutton">
+      <div id="mobilenavlinksbuttontop"></div>
+      <div id="mobilenavlinksbuttonmiddle"></div>
+      <div id="mobilenavlinksbuttonbottom"></div>
+    </div>
+    <div id="mobilenavmenu">
+      <div id="mobilenavlinks">
+        <div class="mobilemenuwrapper">
+          <div class="mobilelinkwrapper">
+            <div id="aboutmobile" class="mobilelink">About</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="armobile" class="mobilelink">AR</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="vrmobile" class="mobilelink">VR</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="webmobile" class="mobilelink">Web</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="houdinimobile" class="mobilelink">Houdini</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="othermobile" class="mobilelink">Gallery</div>
+          </div>
+        </div>
+      </div>
+      <div id="mobilenavbackgroundblur"></div>
+    </div>
+    <!--Page Content-->
     <div id="header">
       <div id="headertext">
         Houdini Robot Artist
