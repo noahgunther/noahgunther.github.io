@@ -15,6 +15,7 @@
   font-family: 'IBM Plex Mono', sans-serif;
   font-size: clamp(18px, 1.25vw, 24px);
   font-weight: 600;
+  text-shadow: 0px 0px 6px black;
   color: rgb(255, 255, 255);
   top: 0;
   margin: 50px;
