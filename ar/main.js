@@ -118,9 +118,9 @@ function showMobileNavMenu() {
 }
 
 // Links
-var currentTarget = 'vr';
-vrLink.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
-vrLinkMobile.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
+var currentTarget = 'ar';
+arLink.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
+arLinkMobile.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
 
 var homeLinkMouseDown = false;
 
