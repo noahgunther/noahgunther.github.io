@@ -198,6 +198,28 @@ video {
   padding-bottom: max(79%, 300px);
 }
 
+.lastbutton {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  margin-top: max(39.5%, 150px);
+  left: 15%;
+  width: 10%;
+  height: 0px;
+  padding-bottom: 10%;
+  background-color: blue;
+}
+
+.nextbutton {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  margin-top: max(39.5%, 150px);
+  right: 5%;
+  width: 10%;
+  height: 0px;
+  padding-bottom: 10%;
+  background-color: blue;
+}
+
 #header {
   position: absolute;
   top: 0;

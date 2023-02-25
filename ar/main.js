@@ -646,3 +646,115 @@ function otherLinkClicked() {
   location.href = "https://noahgunther.wordpress.com"
 
 }
+
+// AR content controls
+const arGamesLastButton = document.getElementById('lastbuttongames');
+const arGamesNextButton = document.getElementById('nextbuttongames');
+
+const socialArLastButton = document.getElementById('lastbuttonsocial');
+const socialArNextButton = document.getElementById('nextbuttonsocial');
+
+arGamesLastButton.onmouseover = function() {
+  body.style.setProperty('cursor', 'pointer');
+}
+
+arGamesLastButton.onmouseout = function() {
+  body.style.setProperty('cursor', 'default');
+}
+
+arGamesLastButton.onclick = function() {
+
+  arGames[arGamesIndex].style.visibility = 'hidden';
+  
+  arGamesIndex--;
+  arGamesIndex = ((arGamesIndex % arGames.length) + arGames.length) % arGames.length;
+
+  arGames[arGamesIndex].style.visibility = 'visible';
+
+}
+
+arGamesNextButton.onmouseover = function() {
+  body.style.setProperty('cursor', 'pointer');
+}
+
+arGamesNextButton.onmouseout = function() {
+  body.style.setProperty('cursor', 'default');
+}
+
+arGamesNextButton.onclick = function() {
+
+  arGames[arGamesIndex].style.visibility = 'hidden';
+  
+  arGamesIndex++;
+  arGamesIndex %= arGames.length;
+
+  arGames[arGamesIndex].style.visibility = 'visible';
+
+}
+
+socialArLastButton.onmouseover = function() {
+  body.style.setProperty('cursor', 'pointer');
+}
+
+socialArLastButton.onmouseout = function() {
+  body.style.setProperty('cursor', 'default');
+}
+
+socialArLastButton.onclick = function() {
+
+  socialAr[socialArIndex].style.visibility = 'hidden';
+  
+  socialArIndex--;
+  socialArIndex = ((socialArIndex % socialAr.length) + socialAr.length) % socialAr.length;
+
+  socialAr[socialArIndex].style.visibility = 'visible';
+
+}
+
+socialArNextButton.onmouseover = function() {
+  body.style.setProperty('cursor', 'pointer');
+}
+
+socialArNextButton.onmouseout = function() {
+  body.style.setProperty('cursor', 'default');
+}
+
+socialArNextButton.onclick = function() {
+
+  socialAr[socialArIndex].style.visibility = 'hidden';
+  
+  socialArIndex++;
+  socialArIndex %= socialAr.length;
+
+  socialAr[socialArIndex].style.visibility = 'visible';
+
+}
+
+// AR videos and descriptions
+var arGamesIndex = 0;
+var arGames = [];
+arGames.push(document.getElementById('alienattack'));
+arGames.push(document.getElementById('bumperroyale'));
+arGames.push(document.getElementById('charades'));
+arGames.push(document.getElementById('desertofdoom'));
+arGames.push(document.getElementById('dontfall'));
+arGames.push(document.getElementById('hotpotato'));
+arGames.push(document.getElementById('kawaiisushi'));
+arGames.push(document.getElementById('mazeofmystery'));
+arGames.push(document.getElementById('sk8erz'));
+arGames.push(document.getElementById('snackup'));
+arGames.push(document.getElementById('snapnsnack'));
+arGames.push(document.getElementById('speedrush'));
+arGames.push(document.getElementById('trivia'));
+
+var socialArIndex = 0;
+var socialAr = [];
+socialAr.push(document.getElementById('friendsspacewalk'));
+socialAr.push(document.getElementById('groupselfie'));
+socialAr.push(document.getElementById('costumeselector'));
+socialAr.push(document.getElementById('reshape'));
+socialAr.push(document.getElementById('wintercoaster'));
+socialAr.push(document.getElementById('abstractlove'));
+socialAr.push(document.getElementById('angelsanddemons'));
+socialAr.push(document.getElementById('poolfloaty'));
+socialAr.push(document.getElementById('candycottage'));
