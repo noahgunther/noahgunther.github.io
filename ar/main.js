@@ -664,10 +664,16 @@ arGamesLastButton.onmouseout = function() {
 
 arGamesLastButton.onclick = function() {
 
+  arGames[arGamesIndex].pause();
+  arGames[arGamesIndex].currentTime = 0;
+
   arGames[arGamesIndex].style.visibility = 'hidden';
   
   arGamesIndex--;
   arGamesIndex = ((arGamesIndex % arGames.length) + arGames.length) % arGames.length;
+  
+  arGames[arGamesIndex].currentTime = 0;
+  arGames[arGamesIndex].load();
 
   arGames[arGamesIndex].style.visibility = 'visible';
 
@@ -682,11 +688,17 @@ arGamesNextButton.onmouseout = function() {
 }
 
 arGamesNextButton.onclick = function() {
+  
+  arGames[arGamesIndex].pause();
+  arGames[arGamesIndex].currentTime = 0;
 
   arGames[arGamesIndex].style.visibility = 'hidden';
   
   arGamesIndex++;
   arGamesIndex %= arGames.length;
+  
+  arGames[arGamesIndex].currentTime = 0;
+  arGames[arGamesIndex].load();
 
   arGames[arGamesIndex].style.visibility = 'visible';
 
@@ -702,10 +714,16 @@ socialArLastButton.onmouseout = function() {
 
 socialArLastButton.onclick = function() {
 
+  socialAr[socialArIndex].pause();
+  socialAr[socialArIndex].currentTime = 0;
+
   socialAr[socialArIndex].style.visibility = 'hidden';
   
   socialArIndex--;
   socialArIndex = ((socialArIndex % socialAr.length) + socialAr.length) % socialAr.length;
+
+  socialAr[socialArIndex].currentTime = 0;
+  socialAr[socialArIndex].load();
 
   socialAr[socialArIndex].style.visibility = 'visible';
 
@@ -721,10 +739,16 @@ socialArNextButton.onmouseout = function() {
 
 socialArNextButton.onclick = function() {
 
+  socialAr[socialArIndex].pause();
+  socialAr[socialArIndex].currentTime = 0;
+
   socialAr[socialArIndex].style.visibility = 'hidden';
   
   socialArIndex++;
   socialArIndex %= socialAr.length;
+
+  socialAr[socialArIndex].currentTime = 0;
+  socialAr[socialArIndex].load();
 
   socialAr[socialArIndex].style.visibility = 'visible';
 
