@@ -250,6 +250,18 @@ video {
   width: min(max(50%, 300px), 1920px);
 }
 
+#togglepagemode {
+  position: fixed;
+  bottom: min(1vw, 12px);
+  left: min(1vw, 12px);
+  width: clamp(50px, 7vw, 130px);
+  height: clamp(50px, 7vw, 130px);
+}
+
+#togglepagemode img {
+  width: 100%;
+}
+
 /* Main nav animations */
 
 @keyframes grow {
