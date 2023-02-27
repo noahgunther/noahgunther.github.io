@@ -677,6 +677,8 @@ arGamesLastButton.onclick = function() {
 
   arGames[arGamesIndex].style.visibility = 'visible';
 
+  arGamesCaptionText.innerHTML = arGamesCaptions[arGamesIndex];
+
 }
 
 arGamesNextButton.onmouseover = function() {
@@ -701,6 +703,8 @@ arGamesNextButton.onclick = function() {
   arGames[arGamesIndex].load();
 
   arGames[arGamesIndex].style.visibility = 'visible';
+
+  arGamesCaptionText.innerHTML = arGamesCaptions[arGamesIndex];
 
 }
 
@@ -727,6 +731,8 @@ socialArLastButton.onclick = function() {
 
   socialAr[socialArIndex].style.visibility = 'visible';
 
+  socialArCaptionText.innerHTML = socialArCaptions[socialArIndex];
+
 }
 
 socialArNextButton.onmouseover = function() {
@@ -751,6 +757,8 @@ socialArNextButton.onclick = function() {
   socialAr[socialArIndex].load();
 
   socialAr[socialArIndex].style.visibility = 'visible';
+
+  socialArCaptionText.innerHTML = socialArCaptions[socialArIndex];
 
 }
 
@@ -782,3 +790,23 @@ socialAr.push(document.getElementById('abstractlove'));
 socialAr.push(document.getElementById('angelsanddemons'));
 socialAr.push(document.getElementById('poolfloaty'));
 socialAr.push(document.getElementById('candycottage'));
+
+var arGamesCaptions = [];
+arGamesCaptions.push("Alien Attack: In this AR Game, callers work together to defend their fort from aliens by firing laser beams at them. As time goes on, stronger aliens arrive, making it harder and harder to keep them at bay. Callers are composed into the area at the bottom of the screen and each given a laser cannon, controlled by tapping on the screen.");
+
+const arGamesCaptionText = document.getElementById("argamescaption");
+arGamesCaptionText.innerHTML = arGamesCaptions[0];
+
+var socialArCaptions = [];
+socialArCaptions.push("Multihead Alien: composing the faces of all the present callers into the heads of a many-headed alien enjoying a stroll on its tiny planet, this AR experience takes over the whole phone screen and is consistent for each caller, using networking technology to allow callers to see others moving their heads around in space.");
+socialArCaptions.push("Group Selfie: this AR experience is simple, but one of my favorites - callers are layered together using background segmentation into the same screen space, as if they were all in the same room. Ideal for taking virtual selfies together, callers can move to the front of the stack by shaking their phone. The possibilities for making funny scenes together are endless.");
+socialArCaptions.push("Costume Selector: all callers remain in the standard video calling grid format, taking turns choosing between two ridiculous costume options. Whichever they pick, that costume element will be applied to all callers. If the callers choose all four options in a matching set (pirate, rockstar, cyborg, or princess), a special secret costume element is revealed.");
+socialArCaptions.push("Reshape Face: no one is safe from having their face morphed into various shapes in this experience, in which callers can select shapes to morph the faces of everyone on the call.");
+socialArCaptions.push("Winter Coaster: all callers faces are composed into a winter wonderland riding a sleigh-themed roller coaster. The experience uses the full phone screen, and sends the extracted faces of the other callers over the video call using a custom shader packing and unpacking system, and the rotation of the heads is possible using networking technology to send a rotational vector between callers.");
+socialArCaptions.push("Abstract Love: callers are composed into a lovely scene full of hearts and pastel pinks. Want to capture a moment of love from far away, or create a valentines day AR photo? This is the experience for you!");
+socialArCaptions.push("Angels and Demons: the Devil on one shoulder and the Angel on the other in this AR experience will be randomly selected from the other participants in the call - be careful who you listen to! This effect uses a variety of custom screen space shader effects to give each character their unique glow.");
+socialArCaptions.push("Pool Floaty: enjoy a relaxing trip to the pool on a hot summer day with this AR experience, which composes all callers into a scene complete with floaties, headwear, and a custom water shader. Each caller is given a unique set of accessories, synchronized over the network so everyone has a consistent experience.");
+socialArCaptions.push("Candy Cottage: each caller is placed in a window of a lovely gingerbread home in this holiday themed AR experience. Tilt your phone around to see more of the scene and watch out for the gingerbread homeowner peeking out of the door.");
+
+const socialArCaptionText = document.getElementById("socialarcaption");
+socialArCaptionText.innerHTML = socialArCaptions[0];
