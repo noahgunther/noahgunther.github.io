@@ -471,7 +471,7 @@ function aboutLinkClicked() {
   aboutLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/?context=about"
+  location.href = "https://noahgunther.com/about"
 
 }
 
@@ -503,7 +503,7 @@ function arLinkClicked() {
   arLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/?context=ar"
+  location.href = "https://noahgunther.com/ar"
 
 }
 
