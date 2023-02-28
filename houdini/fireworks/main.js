@@ -1,3 +1,6 @@
+/* Search params */
+const ptParam = (new URL(window.location)).searchParams.get('pt');
+
 /* Main Navigation Links */
 const mainNavLinks = document.getElementById("mainnavlinks");
 
@@ -458,7 +461,12 @@ function homeLinkClicked() {
 
   if (mobileNavMenuVisible) showMobileNavMenu();
 
-  location.href = "https://noahgunther.com"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com";
+  }
+  else {
+    location.href = "https://noahgunther.com/about";
+  }
 
 }
 
@@ -490,7 +498,12 @@ function aboutLinkClicked() {
   aboutLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/?context=about"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/?context=about"
+  }
+  else {
+    location.href = "https://noahgunther.com/about";
+  }
 
 }
 
@@ -522,7 +535,12 @@ function arLinkClicked() {
   arLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/?context=ar"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/?context=ar"
+  }
+  else {
+    location.href = "https://noahgunther.com/ar";
+  }
 
 }
 
@@ -554,7 +572,12 @@ function vrLinkClicked() {
   vrLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/vr/vrjam"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/vr/vrjam"
+  }
+  else {
+    location.href = "https://noahgunther.com/vr/vrjam/?pt=1";
+  }
 
 }
 
@@ -582,7 +605,12 @@ function webLinkClicked() {
   webLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
   
-  location.href = "https://noahgunther.com/web"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/web"
+  }
+  else {
+    location.href = "https://noahgunther.com/web/?pt=1";
+  }
 
 }
 
@@ -610,7 +638,12 @@ function houdiniLinkClicked() {
   houdiniLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/houdini"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/houdini"
+  }
+  else {
+    location.href = "https://noahgunther.com/houdini/?pt=1";
+  }
 
 
 }

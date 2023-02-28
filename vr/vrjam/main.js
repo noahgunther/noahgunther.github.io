@@ -647,7 +647,6 @@ function houdiniLinkClicked() {
     location.href = "https://noahgunther.com/houdini/?pt=1";
   }
 
-
 }
 
 function otherLinkMouseOver() {
