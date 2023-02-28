@@ -535,7 +535,7 @@ function vrLinkClicked() {
   vrLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/vr/vrjam"
+  location.href = "https://noahgunther.com/vr/vrjam/?pt=1"
 
 }
 
@@ -563,7 +563,7 @@ function webLinkClicked() {
   webLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
   
-  location.href = "https://noahgunther.com/web"
+  location.href = "https://noahgunther.com/web/?pt=1"
 
 }
 
@@ -591,7 +591,7 @@ function houdiniLinkClicked() {
   houdiniLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/houdini"
+  location.href = "https://noahgunther.com/houdini/?pt=1"
 
 
 }
