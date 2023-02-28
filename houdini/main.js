@@ -3,13 +3,13 @@ const ptParam = (new URL(window.location)).searchParams.get('pt');
 
 // Embedded links
 if (ptParam != null) {
-  document.getElementById('dropletslink').href = './droplets/index.html/?pt=1'
-  document.getElementById('vineslink').href = './vines/index.html/?pt=1'
-  document.getElementById('robotlink').href = './robotartist/index.html/?pt=1'
-  document.getElementById('pipeslink').href = './pipedream/index.html/?pt=1'
-  document.getElementById('volcanolink').href = './volcano/index.html/?pt=1'
-  document.getElementById('stainedglasslink').href = './stainedglass/index.html/?pt=1'
-  document.getElementById('fireworkslink').href = './fireworks/index.html/?pt=1'
+  document.getElementById('dropletslink').href = './droplets/index.html?pt=1'
+  document.getElementById('vineslink').href = './vines/index.html?pt=1'
+  document.getElementById('robotlink').href = './robotartist/index.html?pt=1'
+  document.getElementById('pipeslink').href = './pipedream/index.html?pt=1'
+  document.getElementById('volcanolink').href = './volcano/index.html?pt=1'
+  document.getElementById('stainedglasslink').href = './stainedglass/index.html?pt=1'
+  document.getElementById('fireworkslink').href = './fireworks/index.html?pt=1'
 }
 
 /* Main Navigation Links */

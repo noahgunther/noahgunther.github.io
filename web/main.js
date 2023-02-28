@@ -3,7 +3,7 @@ const ptParam = (new URL(window.location)).searchParams.get('pt');
 
 // Embedded links
 if (ptParam != null) {
-  document.getElementById('portfoliolink').href = './portfolio/index.html/?pt=1'
+  document.getElementById('portfoliolink').href = './portfolio/index.html?pt=1'
 }
 
 /* Main Navigation Links */
