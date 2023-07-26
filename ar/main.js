@@ -556,7 +556,7 @@ function vrLinkClicked() {
   vrLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/vr/vrjam/?pt=1"
+  location.href = "https://noahgunther.com/vr/horizon/?pt=1"
 
 }
 

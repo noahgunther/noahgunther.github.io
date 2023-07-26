@@ -580,10 +580,10 @@ function vrLinkClicked() {
   body.style.setProperty('cursor', 'default');
 
   if (ptParam == null) {
-    location.href = "https://noahgunther.com/vr/vrjam"
+    location.href = "https://noahgunther.com/vr/horizon"
   }
   else {
-    location.href = "https://noahgunther.com/vr/vrjam/?pt=1";
+    location.href = "https://noahgunther.com/vr/horizon/?pt=1";
   }
 
 }
