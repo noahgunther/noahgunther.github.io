@@ -10,7 +10,6 @@ const arLink = document.getElementById("ar");
 const vrLink = document.getElementById("vr");
 const webLink = document.getElementById("web");
 const houdiniLink = document.getElementById("houdini");
-const otherLink = document.getElementById("other");
 
 // Mobile nav links
 const mobileNavMenu = document.getElementById("mobilenavmenu");
@@ -20,7 +19,6 @@ const arLinkMobile = document.getElementById("armobile");
 const vrLinkMobile = document.getElementById("vrmobile");
 const webLinkMobile = document.getElementById("webmobile");
 const houdiniLinkMobile = document.getElementById("houdinimobile");
-const otherLinkMobile = document.getElementById("othermobile");
 
 const mobileNavLinksButton = document.getElementById("mobilenavlinksbutton");
 const mobileNavLinksButtonTop = document.getElementById("mobilenavlinksbuttontop");
@@ -393,55 +391,6 @@ houdiniLinkMobile.onclick = function() {
   }
 }
 
-// Other
-var otherLinkMouseDown = false;
-
-otherLink.onmouseover = function() {
-  if (currentTarget != 'gallery') {
-    otherLinkMouseOver();
-  }
-}
-
-otherLink.onmouseout = function() {
-  if (currentTarget != 'gallery') {
-    otherLinkMouseOut();
-  }
-  otherLinkMouseDown = false;
-}
-
-otherLink.onmousedown = function() {
-  otherLinkMouseDown = true;
-}
-
-otherLink.onmouseup = function() {
-  if (currentTarget != 'gallery' && otherLinkMouseDown) {
-    otherLinkClicked();
-  }
-}
-
-otherLinkMobile.onmouseover = function() {
-  if (currentTarget != 'gallery') {
-    otherLinkMouseOver();
-  }
-}
-
-otherLinkMobile.onmouseout = function() {
-  if (currentTarget != 'gallery') {
-    otherLinkMouseOut();
-  }
-  otherLinkMouseDown = false;
-}
-
-otherLinkMobile.onmousedown = function() {
-  otherLinkMouseDown = true;
-}
-
-otherLinkMobile.onmouseup = function() {
-  if (currentTarget != 'gallery' && otherLinkMouseDown) {
-    otherLinkClicked();
-  }
-}
-
 // Navigation link interaction functions //
 function homeLinkMouseOver() {
 
@@ -646,35 +595,5 @@ function houdiniLinkClicked() {
   else {
     location.href = "https://noahgunther.com/houdini/?pt=1";
   }
-
-}
-
-function otherLinkMouseOver() {
-  
-  otherLink.style.setProperty('animation', 'grow 0.25s forwards');
-  otherLinkMobile.style.setProperty('animation', 'grow 0.25s forwards');
-  body.style.setProperty('cursor', 'pointer');
-
-}
-
-function otherLinkMouseOut() {
-
-  otherLink.style.setProperty('animation', 'shrink 0.25s forwards');
-  otherLinkMobile.style.setProperty('animation', 'shrink 0.25s forwards');
-  body.style.setProperty('cursor', 'default');
-
-}
-
-function otherLinkClicked() {
-
-  if (mobileNavMenuVisible) showMobileNavMenu();
-
-  otherLink.style.setProperty('animation', 'bounce 0.5s forwards');
-  otherLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
-  body.style.setProperty('cursor', 'default');
-
-  // Gallery //
-
-  location.href = "https://noahgunther.wordpress.com"
 
 }
