@@ -10,11 +10,6 @@
 // - Write script for subway cars, buses, combination scroll animation (like the tramway)
 // - Test on mobile
 // - Do a pass for various screen widths, browsers, general functionality
-// $$$:
-// - Look into new hosting for full noahgunther.com site, including this subsite (hostgator?)
-// - Alternatively, remove some of the big files from current site to make room
-
-import './style.css'
 
 window.addEventListener("load", init, false);
 
