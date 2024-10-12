@@ -2,11 +2,12 @@
 // Data:
 // - Figure out what live data is possible to access and include (Today)
 // - Review all code / math
-// - Add data disclaimer (estimated from ...) and info on updating (most recent data from mta sets fetch daily at https://gunthern.pythonanywhere.com/, most recent update xxxxxx)
+// - Add site info / data disclaimer dropdown (estimated from ...) and info on updating (most recent data from mta sets fetch daily at https://gunthern.pythonanywhere.com/, most recent update xxxxxx)
 // CSS / HTML:
 // - Create CSS for live data (old style LCD cells)
+// - Adjust font / footer / logo image size for different resolutions
 // JS functionality:
-// - Write functionality for search for subway station / bus route lists (type text, highlight matching, jump to next / previous, clear search)
+// - Fix issue with tram height on different devices, make sure it works after implementing info / data disclaimer dropdown
 // - Write script for subway cars, buses, combination scroll animation (like the tramway)
 // - Test on mobile
 // - Do a pass for various screen widths, browsers, general functionality
