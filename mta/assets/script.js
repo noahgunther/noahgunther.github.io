@@ -1,11 +1,10 @@
 // Todo:
 // Data:
 // - Figure out what live data is possible to access and include (Today)
+// -- Add live data info to dropdown
 // - Review all code / math
-// - Add site info / data disclaimer dropdown (estimated from ...) and info on updating (most recent data from mta sets fetch daily at https://gunthern.pythonanywhere.com/, most recent update xxxxxx)
 // CSS / HTML:
 // - Create CSS for live data (old style LCD cells)
-// - Increase min panel etc. width (for mobile displays and 1920p or smaller screens)
 // - Adjust font / footer / logo image size for different resolutions
 // JS functionality:
 // - Fix issue with tram / cloud height on different screen heights, make sure it works after implementing info / data disclaimer dropdown

@@ -40,7 +40,7 @@ a {
     margin-left: auto;
     margin-right: auto;
     margin-top: max(min(20%, 350px), 200px);
-    width: max(min(60%, 840px), 320px);
+    width: max(min(60%, 840px), 270px);
     position: relative;
 }
 
@@ -54,7 +54,7 @@ a {
 .headerspikerow {
     margin-left: auto;
     margin-right: auto;
-    width: max(min(60%, 840px), 320px);
+    width: max(min(60%, 840px), 270px);
     height: 0%;
     position: relative;
 }
@@ -70,8 +70,8 @@ a {
     margin-right: auto;
     margin-bottom: max(min(5%, 100px), 50px);
     margin-top: 0px;
-    width: max(min(62%, 920px), 335px);
-    padding: max(min(2%, 36px), 22px);
+    width: max(min(62%, 920px), 285px);
+    padding: max(min(2%, 36px), 14px);
     box-shadow: 5px 10px 10px rgb(73, 73, 73);
     background-image: url(./greenMetal.png);
     border-radius: 3px;
@@ -102,13 +102,6 @@ a {
     margin-right: 0px;
 }
 
-.arrow {
-    height: auto;
-    width: 3%;
-    max-width: 40px;
-    min-width: 15px;
-}
-
 .tiledivborder {
     height: max(min(2vw, 32px), 16px);
     width: 100%;
@@ -131,7 +124,7 @@ a {
     margin-top: max(min(5%, 100px), 50px);
     margin-bottom: max(min(5%, 100px), 50px);
     padding: 0px;
-    width: max(min(60%, 900px), 320px);
+    width: max(min(60%, 900px), 270px);
     color: white;
     background-color: rgb(22, 22, 22);
     overflow: hidden;
@@ -170,7 +163,7 @@ a {
 .panelsmalltext {
     margin-top: 0px;
     margin-left: max(min(1vw, 8px), 4px);
-    margin-left: max(min(1.1vw, 10px), 8px);
+    margin-left: max(min(1vw, 8px), 4px);
     margin-bottom: max(min(2.5vw, 40px), 20px);
     font-size: max(min(1vw, 1em), 0.75em);
 }
@@ -319,7 +312,7 @@ a {
 .footerright {
     width: 60%;
     top: 0px;
-    padding-bottom: 10px;
+    padding-right: 1%;
 }
 
 .footerexit {
@@ -328,7 +321,7 @@ a {
     margin-top: 0px;
     margin-bottom: 0px;
     padding-bottom: 35px;
-    font-size: max(min(6.5vw, 6.5em), 3em);
+    font-size: max(min(6.5vw, 6.5em), 2.5em);
     line-height: 0.77em;
 }
 
