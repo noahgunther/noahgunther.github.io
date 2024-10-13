@@ -1,5 +1,5 @@
 // Todo:
-// - Add dropdown
+// - Fix mobile
 // - Fix tram / cloud positioning
 // Data:
 // - Figure out what live data is possible to access and include (Today)
@@ -23,6 +23,9 @@ function init() {
     const xhttp = new XMLHttpRequest();
     xhttp.onload = function () {
         const response = JSON.parse(this.responseText);
+        document.getElementById('datacachedatestamp').innerHTML = response.last_cached.substring(0, 10);
+        document.getElementById('datacachetimestamp').innerHTML = response.last_cached.substring(11, 19);
+
         const dateMostRecent = response.dateMostRecent;
         const dateWeekStart = response.dateWeekStart;
         const dateYearStart = response.dateYearStart;
@@ -46,7 +49,7 @@ function init() {
 
         document.getElementById('tramweeklyridership').innerHTML = response.tramWeeklyRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('trammaxdailyridership').innerHTML = response.tramMaxDailyRidershipWeekly.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        document.getElementById('trammaxdailydate').innerHTML = response.tramMaxDailyDateWeekly.slice(0, -6);;
+        document.getElementById('trammaxdailydate').innerHTML = response.tramMaxDailyDateWeekly.slice(0, -6);
 
         document.getElementById('subwayweeklyridership').innerHTML = response.subwayWeeklyRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('subwaymaxdailyridership0').innerHTML = response.subwayMaxDailyRidershipWeekly.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -331,6 +334,25 @@ function init() {
         
         // Update html
         document.getElementById(element).innerHTML = htmlString;
+    }
+
+    // More info dropdown
+    const infoDropdownToggle = document.getElementById('infodropdownlink');
+    const infoDropdownText = document.getElementById('infodropdowntext');
+    const infoDropdownArrow = document.getElementById('infodropdownarrow');
+    const infoDropdown = document.getElementById('infodropdown');
+    infoDropdownToggle.onclick = function() {
+        if (infoDropdown.hidden) {
+            infoDropdown.hidden = false;
+            infoDropdownText.innerHTML = "Hide info on site and data:";
+            infoDropdownArrow.style.transform = 'rotate(0deg)';
+        }
+        else {
+            infoDropdown.hidden = true;
+            infoDropdownText.innerHTML = "Show info on site and data:";
+            infoDropdownArrow.style.transform = 'rotate(180deg)';
+        }
+        updateScrollValues();
     }
 
     // Scrolling effects

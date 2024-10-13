@@ -16,6 +16,10 @@ body {
     margin: 0px;
 }
 
+a {
+    color: white;
+}
+
 .start {
     top: 0px;
     height: 128px;
@@ -36,7 +40,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     margin-top: max(min(20%, 350px), 200px);
-    width: max(min(50%, 840px), 480px);
+    width: max(min(60%, 840px), 320px);
     position: relative;
 }
 
@@ -50,7 +54,7 @@ body {
 .headerspikerow {
     margin-left: auto;
     margin-right: auto;
-    width: max(min(50%, 840px), 480px);
+    width: max(min(60%, 840px), 320px);
     height: 0%;
     position: relative;
 }
@@ -64,9 +68,9 @@ body {
 .headerborder1 {
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: max(10%, 100px);
+    margin-bottom: max(min(5%, 100px), 50px);
     margin-top: 0px;
-    width: max(min(52%, 920px), 500px);
+    width: max(min(62%, 920px), 335px);
     padding: max(min(2%, 36px), 22px);
     box-shadow: 5px 10px 10px rgb(73, 73, 73);
     background-image: url(./greenMetal.png);
@@ -127,7 +131,7 @@ body {
     margin-top: max(min(5%, 100px), 50px);
     margin-bottom: max(min(5%, 100px), 50px);
     padding: 0px;
-    width: max(min(50%, 900px), 480px);
+    width: max(min(60%, 900px), 320px);
     color: white;
     background-color: rgb(22, 22, 22);
     overflow: hidden;
@@ -225,6 +229,14 @@ body {
 .chart {
     margin-left: 1%;
     width: 98%;
+}
+
+#infodropdownlink {
+    cursor: pointer;
+}
+
+#infodropdown {
+
 }
 
 #sky {

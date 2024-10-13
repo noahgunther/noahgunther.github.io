@@ -45,15 +45,29 @@
                     <p class="paneltext">Every day in New York City, people ride public transit millions of times.</p>
                     <p class="paneltext">This website presents data collected and distributed by the MTA. More info and extensive data collections are available at <a class="panellink" style="text-decoration: underline;" href="https://data.ny.gov" target="_blank">ny.data.gov</a>.</p>
                     
-                    <a class="panellink" href="https://data.ny.gov" target="_blank">
-                        <img class="logo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left"/>
-                        <p class="panellinktext">Data from data.ny.gov</p>
-                    </a>
+                    <div id="infodropdownlink">
+                        <p class="panellinktext" id="infodropdowntext">Show info on site and data:</p>
+                        <img id="infodropdownarrow" class="logo" src="./assets/arrowUp.png" alt="Arrow pointing down" style="float: left; transform: rotate(180deg);"/>
+                    </div>
                     <a class="panellink" href="https://noahgunther.com" target="_blank">
                         <img class="logo" src="./assets/subwayG.png" alt="" style="float: right; margin: 10px; margin-left: 0px; margin-bottom: 0px;"/>
                         <img class="logo" src="./assets/subwayN.png" alt="" style="float: right; margin: 10px; margin-right: 5px; margin-bottom: 0px;"/>
                         <p class="panellinktext" style="float: right;">Created by Noah Gunther, 2024</p>
                     </a>
+                    <div id="infodropdown" hidden>
+                        <div class="panelline" style="margin-top: 10%; margin-bottom: 2%;"></div>
+                        <p class="paneltext">Data displayed on this site (including text and graphs) are cached daily from the most recent available transportation data on <a href="https://data.ny.gov" target="_blank"> data.ny.gov</a>.</p>
+                        <p class="paneltext">Data was most recently cached on <text id="datacachedatestamp"></text> at <text id="datacachetimestamp"></text> GMT. <a href="https://gunthern.pythonanywhere.com/" target="_blank">View raw data cache</a></p>
+                        <p class="paneltext">This site uses data from the following datasets:
+                            <br/>
+                            - <a href="https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-Beginning-2020/vxuj-8kew/about_data" target="_blank">MTA Daily Ridership Data: Beginning 2020</a>
+                            <br/>
+                            - <a href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s/about_data" target="_blank">MTA Subway Hourly Ridership: Beginning February 2022</a>
+                            <br/>
+                            - <a href="https://data.ny.gov/Transportation/MTA-Bus-Hourly-Ridership-Beginning-February-2022/kv7t-n8in/about_data" target="_blank">MTA Bus Hourly Ridership: Beginning February 2022</a>
+                        </p>
+                        <p class="paneltext">Source code for this site and the auto data cache / processing script are <a href="https://github.com/noahgunther/MTADataChallenge" target="_blank">available on Github</a>.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -446,7 +460,7 @@
                     <div class="footerexit">Top</div>
                 </div>
                 <div class="footerright">
-                    <p class="paneltitle" style="font-size: 50px;">Lately on the MTA</p>
+                    <p class="paneltitle">Lately on the MTA</p>
                     <a class="panellink" href="https://noahgunther.com" target="_blank">
                         <a class="panellink" href="https://noahgunther.com" target="_blank">
                             <img class="logo" src="./assets/subwayN.png" alt="Subway N line logo" style="float: left; margin-bottom: 0px; margin-right: 0px; margin-left: 10px; min-width: 25px;"/>
