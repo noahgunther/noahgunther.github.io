@@ -84,8 +84,8 @@
         <div class="tiledivborder"></div>
 
         <!--Roosevelt island tram-->
-        <div class="sky" id="tramanimstart">
-            <div class="skycontent">
+        <div id="sky">
+            <div id="skyart">
                 <img class="cloud" style="margin-top: -200px; margin-left: 50%; width: 12%; min-width: 240px; max-width: 360px;" src="./assets/cloud0.png" alt=""/>
                 <img class="cloud" style="margin-top: 50px; margin-left: 15%; width: 10%; min-width: 200px; max-width: 300px;" src="./assets/cloud0.png" alt=""/>
                 <img class="cloud" style="margin-top: 100px; margin-left: 30%; width: 20%; min-width: 400px; max-width: 600px;" src="./assets/cloud1.png" alt=""/>
@@ -106,28 +106,34 @@
                 </div>
             </div>
 
-            <div style="height: 200px;"></div>
-            <div class="panel" style="margin-top: 0; box-shadow: none;">
-                <div class="panelline"></div>
-                <p class="paneltitle">A Week on the Roosevelt Island Tramway</p>
-                <p class="panelsmalltext">Week of <text id="weekdaterangetram0"></text></p>
-                <p class="paneltext">People rode the Roosevelt Island Tramway <text id="tramweeklyridership"></text> times during this week! The most popular day was <text id="trammaxdailydate"></text>, with a total ridership of <text id="trammaxdailyridership"></text>.</p>
-                <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s/about_data" target="_blank">
-                    <img class="sublogo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left">
-                    <p class="panelsmalltext" style="float: left; margin-top: 22px; text-decoration: underline;">MTA Subway (and Tram) Hourly Ridership Data</p>
-                </a>
-            </div>
+            <div id="skycontent">
+                <div style="height: 100px;"></div>
 
-            <div style="height: 1900px;"></div>
-            <div class="panel" style="margin-top: 0; box-shadow: none;">
-                <div class="panelline"></div>
-                <p class="paneltitle">Tram Ridership by Hour</p>
-                <p class="panelsmalltext" style="margin-bottom: 10px;">Week of <text id="weekdaterangetram1"></text></p>
-                <img class="chart" id="tramweeklyridershiphourly" alt="Chart displaying ridership by hour for one week of tram service"/>
-                <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s/about_data" target="_blank">
-                    <img class="sublogo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left">
-                    <p class="panelsmalltext" style="float: left; margin-top: 22px; text-decoration: underline;">MTA Subway (and Tram) Hourly Ridership Data</p>
-                </a>
+                <div class="panel">
+                    <div class="panelline"></div>
+                    <p class="paneltitle">A Week on the Roosevelt Island Tramway</p>
+                    <p class="panelsmalltext">Week of <text id="weekdaterangetram0"></text></p>
+                    <p class="paneltext">People rode the Roosevelt Island Tramway <text id="tramweeklyridership"></text> times during this week! The most popular day was <text id="trammaxdailydate"></text>, with a total ridership of <text id="trammaxdailyridership"></text>.</p>
+                    <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s/about_data" target="_blank">
+                        <img class="sublogo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left">
+                        <p class="panelsmalltext" style="float: left; margin-top: 22px; text-decoration: underline;">MTA Subway (and Tram) Hourly Ridership Data</p>
+                    </a>
+                </div>
+
+                <div style="height: 1700px;"></div>
+
+                <div class="panel" style="margin-bottom: 0px;">
+                    <div class="panelline"></div>
+                    <p class="paneltitle">Tram Ridership by Hour</p>
+                    <p class="panelsmalltext" style="margin-bottom: 10px;">Week of <text id="weekdaterangetram1"></text></p>
+                    <img class="chart" id="tramweeklyridershiphourly" alt="Chart displaying ridership by hour for one week of tram service"/>
+                    <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s/about_data" target="_blank">
+                        <img class="sublogo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left">
+                        <p class="panelsmalltext" style="float: left; margin-top: 22px; text-decoration: underline;">MTA Subway (and Tram) Hourly Ridership Data</p>
+                    </a>
+                </div>
+
+                <div style="height: 100px;"></div>
             </div>
         </div>
 

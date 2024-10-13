@@ -343,7 +343,7 @@ function init() {
     let tramStart;
     function updateScrollValues() {
         lastKnownScrollPosition = window.scrollY;
-        tramStart = document.getElementById('tramanimstart').getBoundingClientRect().top + window.scrollY;
+        tramStart = sky.getBoundingClientRect().top + window.scrollY;
     }
     updateScrollValues();
 
@@ -390,25 +390,9 @@ function init() {
     tramPositioner(lastKnownScrollPosition);
 
     // Autoscroll
-    function scrollTo(destination, duration) {
-        if (duration <= 0) {
-            return;
-        }
-        const difference = destination.scrollTop - window.scrollY;
-        const perTick = (difference / duration) * 10;
-    
-        setTimeout(() => {
-            window.scrollTo(0, window.scrollY + perTick);
-            if (window.scrollY === destination.scrollTop) {
-                return;
-            }
-            scrollTo(destination, duration - 10);
-        }, 10);
-    }
     const footermiddle = document.getElementById('footermiddle');
     const footerleft = document.getElementById('footerleft');
-    footermiddle.addEventListener('click', function() { scrollTo(document.getElementById('top'), 1000); });
-    footerleft.addEventListener('click', function() { scrollTo(document.getElementById('top'), 1000); });
-
-    updateScrollValues();
+    const pageTop = document.getElementById('top');
+    footermiddle.addEventListener('click', function() { window.scrollTo({ top: pageTop.scrollTop, behavior: 'smooth'}) });
+    footerleft.addEventListener('click', function() { window.scrollTo({ top: pageTop.scrollTop, behavior: 'smooth'}) });
 }

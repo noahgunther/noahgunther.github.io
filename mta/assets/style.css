@@ -18,32 +18,31 @@ body {
 
 .start {
     top: 0px;
-    height: max(min(10%, 128px), 64px);
+    height: 128px;
     width: 100%;
     background-image: url(./warningStrip.png);
-    background-size: max(min(3.8%, 128px), 64px);
+    background-size: 98px;
     border-bottom: solid rgb(182, 151, 28) 2px;
 }
 
 .warningstrip {
     top: 0px;
-    height: max(min(2.33%, 40px), 20px);
+    height: 30px;
     background-image: url(./warningStripEdge.png);
-    background-size: max(min(3.8%, 128px), 64px);
     box-shadow: 0px 10px 10px rgb(73, 73, 73);
 }
 
 .lamps {
     margin-left: auto;
     margin-right: auto;
-    margin-top: max(15%, 150px);
-    width: max(min(42%, 840px), 470px);
+    margin-top: max(16%, 200px);
+    width: max(min(60%, 840px), 560px);
     position: relative;
 }
 
 .lamp {
     margin-left: max(min(-8%, -30px), -80px);
-    width: max(min(26%, 300px), 90px);
+    width: max(min(28%, 300px), 110px);
     bottom: 0;
     position: absolute;
 }
@@ -51,7 +50,7 @@ body {
 .headerspikerow {
     margin-left: auto;
     margin-right: auto;
-    width: max(min(42%, 840px), 480px);
+    width: max(min(60%, 840px), 560px);
     height: 0%;
     position: relative;
 }
@@ -67,7 +66,7 @@ body {
     margin-right: auto;
     margin-bottom: max(10%, 100px);
     margin-top: 0px;
-    width: max(min(42%, 920px), 500px);
+    width: max(min(62%, 920px), 600px);
     padding: max(min(2%, 36px), 22px);
     box-shadow: 5px 10px 10px rgb(73, 73, 73);
     background-image: url(./greenMetal.png);
@@ -98,7 +97,7 @@ body {
 }
 
 .tiledivborder {
-    height: max(min(3%, 32px), 16px);
+    height: 32px;
     width: 100%;
     background-image: url(./tileBorder.png);
     background-size: 32px;
@@ -106,10 +105,10 @@ body {
 }
 
 .tilediv {
-    height: max(min(15%, 150px), 15px);
+    height: 125px;
     width: 100%;
     background-image: url(./tileGray.png);
-    background-size: max(min(5%, 50px), 38px);
+    background-size: 50px;
     border: solid rgb(78, 78, 78) 1px;
 }
 
@@ -119,7 +118,7 @@ body {
     margin-top: 100px;
     margin-bottom: 100px;
     padding: 0px;
-    width: max(min(40%, 900px), 480px);
+    width: max(min(60%, 900px), 580px);
     color: white;
     background-color: rgb(22, 22, 22);
     overflow: hidden;
@@ -138,21 +137,21 @@ body {
     margin-top: 0px;
     margin-bottom: 0px;
     margin-left: 8px;
-    font-size: 52px;
+    font-size: 3.25em;
 }
 
 .panelsmalltitle {
     margin-top: 0px;
     margin-bottom: 0px;
     margin-left: 8px;
-    font-size: 48px;
+    font-size: 2.85em;
 }
 
 .paneltext {
     margin-top: 0px;
     margin-left: 8px;
     margin-right: 10px;
-    font-size: 22px;
+    font-size: 1.375em;
 }
 
 .panelsmalltext {
@@ -160,11 +159,7 @@ body {
     margin-left: 8px;
     margin-right: 10px;
     margin-bottom: 40px;
-    font-size: 16px;
-}
-
-.panelsublogo {
-    width: 40px;
+    font-size: 1em;
 }
 
 .panellink {
@@ -187,7 +182,7 @@ body {
 
 .paneltable {
     width: 100%;
-    font-size: 16px;
+    font-size: 1em;
 }
 
 .paneltable th {
@@ -206,19 +201,25 @@ body {
     width: 98%;
 }
 
-.sky {
+#sky {
+    position: relative;
     width: 100%;
-    height: 3700px;
 }
 
-.skycontent {
-    width: 100%;
-    height: 3700px;
+#skyart {
     position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: -1;
     background-color: rgb(87, 152, 216);
     background: linear-gradient(180deg, rgb(164, 211, 255) 0%, rgb(71, 136, 200) 100%);
     overflow: hidden;
+}
+
+#skycontent {
+    position: relative;
 }
 
 .cloud {
@@ -247,6 +248,7 @@ body {
     max-width: 400px;
     z-index: 0;
     transform: translate(-50%);
+    will-change: transform;
 }
 
 .tramcable {
@@ -257,6 +259,7 @@ body {
     background-color: rgb(46, 46, 46);
     background: linear-gradient(180deg, rgb(90, 90, 90) 0%, rgba(0,0,0,1) 100%);
     z-index: 1;
+    will-change: transform;
 }
 
 .footer {
@@ -273,7 +276,7 @@ body {
 
 .footermiddle {
     width: 30%;
-    min-width: 180px;
+    min-width: 200px;
     background-color: rgb(235, 0, 8);
     top: 0px;
     cursor: pointer;
@@ -291,8 +294,8 @@ body {
     margin-top: 0px;
     margin-bottom: 0px;
     padding-bottom: 35px;
-    font-size: 100px;
-    line-height: 80px;
+    font-size: 6.5em;
+    line-height: 0.77em;
 }
 
 .footerarrow {
