@@ -235,10 +235,6 @@ a {
     cursor: pointer;
 }
 
-#infodropdown {
-
-}
-
 #sky {
     position: relative;
     width: 100%;
@@ -307,14 +303,14 @@ a {
 }
 
 .footerleft {
-    width: auto;
+    width: 16%;
+    max-width: 100px;
     top: 0px;
     cursor: pointer;
 }
 
 .footermiddle {
     width: 30%;
-    min-width: 200px;
     background-color: rgb(235, 0, 8);
     top: 0px;
     cursor: pointer;
@@ -332,13 +328,13 @@ a {
     margin-top: 0px;
     margin-bottom: 0px;
     padding-bottom: 35px;
-    font-size: max(min(6.5vw, 6.5em), 5.65em);
+    font-size: max(min(6.5vw, 6.5em), 3em);
     line-height: 0.77em;
 }
 
 .footerarrow {
-    padding: 5px;
-    height: 95px;
+    margin: 5%;
+    width: 90%;
 }
 
 .end {

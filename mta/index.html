@@ -5,7 +5,7 @@
         <meta charset="UTF-8" />
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
         <script type="module" src="./assets/script.js"></script>
         <link rel="stylesheet" href="./assets/style.css"/>
         <title>Lately on the MTA</title>
@@ -46,19 +46,13 @@
                     <p class="paneltext">This website presents data collected and distributed by the MTA. More info and extensive data collections are available at <a class="panellink" style="text-decoration: underline;" href="https://data.ny.gov" target="_blank">ny.data.gov</a>.</p>
                     
                     <div id="infodropdownlink">
-                        <p class="panellinktext" id="infodropdowntext">Show info on site and data:</p>
-                        <img id="infodropdownarrow" class="logo" src="./assets/arrowUp.png" alt="Arrow pointing down" style="float: left; transform: rotate(180deg);"/>
+                        <p class="panellinktext" id="infodropdowntext">Show info on site and data</p>
                     </div>
-                    <a class="panellink" href="https://noahgunther.com" target="_blank">
-                        <img class="logo" src="./assets/subwayG.png" alt="" style="float: right; margin: 10px; margin-left: 0px; margin-bottom: 0px;"/>
-                        <img class="logo" src="./assets/subwayN.png" alt="" style="float: right; margin: 10px; margin-right: 5px; margin-bottom: 0px;"/>
-                        <p class="panellinktext" style="float: right;">Created by Noah Gunther, 2024</p>
-                    </a>
                     <div id="infodropdown" hidden>
-                        <div class="panelline" style="margin-top: 10%; margin-bottom: 2%;"></div>
-                        <p class="paneltext">Data displayed on this site (including text and graphs) are cached daily from the most recent available transportation data on <a href="https://data.ny.gov" target="_blank"> data.ny.gov</a>.</p>
-                        <p class="paneltext">Data was most recently cached on <text id="datacachedatestamp"></text> at <text id="datacachetimestamp"></text> GMT. <a href="https://gunthern.pythonanywhere.com/" target="_blank">View raw data cache</a></p>
-                        <p class="paneltext">This site uses data from the following datasets:
+                        <div class="panelline" style="margin-top: max(10%, 60px); margin-bottom: 2%;"></div>
+                        <p class="panelsmalltext">Data displayed on this site (including text and graphs) are cached daily from the most recent available transportation data on <a href="https://data.ny.gov" target="_blank"> data.ny.gov</a>.</p>
+                        <p class="panelsmalltext">Data was most recently cached on <text id="datacachedatestamp"></text> at <text id="datacachetimestamp"></text> GMT. <a href="https://gunthern.pythonanywhere.com/" target="_blank">View raw data cache</a></p>
+                        <p class="panelsmalltext">This site uses data from the following datasets:
                             <br/>
                             - <a href="https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-Beginning-2020/vxuj-8kew/about_data" target="_blank">MTA Daily Ridership Data: Beginning 2020</a>
                             <br/>
@@ -66,7 +60,7 @@
                             <br/>
                             - <a href="https://data.ny.gov/Transportation/MTA-Bus-Hourly-Ridership-Beginning-February-2022/kv7t-n8in/about_data" target="_blank">MTA Bus Hourly Ridership: Beginning February 2022</a>
                         </p>
-                        <p class="paneltext">Source code for this site and the auto data cache / processing script are <a href="https://github.com/noahgunther/MTADataChallenge" target="_blank">available on Github</a>.</p>
+                        <p class="panelsmalltext">Source code for this site and the auto data cache / processing script are <a href="https://github.com/noahgunther/MTADataChallenge" target="_blank">available on Github</a>.</p>
                     </div>
                 </div>
             </div>
@@ -179,10 +173,6 @@
                 <img class="logo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left"/>
                 <p class="panellinktext">MTA Subway Hourly Ridership Data</p>
             </a>
-            <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-Beginning-2020/vxuj-8kew/about_data" target="_blank">
-                <img class="logo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left"/>
-                <p class="panellinktext">MTA Daily Ridership Data</p>
-            </a>
         </div>
 
         <div class="panel">
@@ -292,10 +282,6 @@
             <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Bus-Hourly-Ridership-Beginning-February-2022/kv7t-n8in/about_data" target="_blank">
                 <img class="logo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left"/>
                 <p class="panellinktext">MTA Bus Hourly Ridership Data</p>
-            </a>
-            <a class="panellink" href="https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-Beginning-2020/vxuj-8kew/about_data" target="_blank">
-                <img class="logo" src="./assets/mtaLogo.png" alt="MTA logo" style="float: left"/>
-                <p class="panellinktext">MTA Daily Ridership Data</p>
             </a>
         </div>
 
