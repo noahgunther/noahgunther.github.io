@@ -1,4 +1,8 @@
 // Todo:
+// - CSS width for mobile etc
+// - Text wrong size mobile?
+// - Add dropdown
+// - Fix tram / cloud positioning
 // Data:
 // - Figure out what live data is possible to access and include (Today)
 // - Review all code / math
