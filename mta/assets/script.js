@@ -1,6 +1,4 @@
 // Todo:
-// - CSS width for mobile etc
-// - Text wrong size mobile?
 // - Add dropdown
 // - Fix tram / cloud positioning
 // Data:
@@ -250,7 +248,7 @@ function init() {
             document.getElementById('busstatenweekmaxroute1').innerHTML = response.busRouteMaxRidershipWeeklyRoute[statenMaxRouteIndex];
             document.getElementById('busstatenweekmaxcount').innerHTML = response.busRouteMaxRidershipWeeklyCount[statenMaxRouteIndex].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
-        let busWeeklyTableHtmlString = "<thead class='paneltablehead'><tr><th><text>Rank</text></th><th><text>Bus Route</text></th><th><text>Service</text></th><th><text>Ridership (week)</text></th></tr></thead><tbody class='paneltablebody'>";
+        let busWeeklyTableHtmlString = "<thead class='paneltablehead'><tr><th><text>Rank</text></th><th><text>Bus Route</text></th><th><text>Primary Service</text></th><th><text>Ridership (week)</text></th></tr></thead><tbody class='paneltablebody'>";
         for (let i=0; i<response.busRouteMaxRidershipWeeklyRoute.length; i++) {
             const nameIds = idsNameSplit(response.busRouteMaxRidershipWeeklyRoute[i].toString());
             let tableString = "<tr><th><text>" + (i+1) + "</text></th><th><text>" + nameIds[1] + "</text></th>";
@@ -325,9 +323,8 @@ function init() {
 
         // Create html string
         let htmlString = '';
-        let logoScale = ['sublogo'];
         for (let i=0; i<id.length; i++) {
-            htmlString += '<img class="' + logoScale[scale] + '" ';
+            htmlString += '<img class="logo" ';
             if (i==0) htmlString += 'style="margin-left: 10px;" ';
             htmlString += 'src = "./assets/subway' + id[i].toString() + '.png" alt="Subway ' + id[i].toString() + ' line logo"/>';
         }

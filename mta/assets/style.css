@@ -35,8 +35,8 @@ body {
 .lamps {
     margin-left: auto;
     margin-right: auto;
-    margin-top: max(16%, 200px);
-    width: max(min(60%, 840px), 560px);
+    margin-top: max(min(20%, 350px), 200px);
+    width: max(min(50%, 840px), 480px);
     position: relative;
 }
 
@@ -50,7 +50,7 @@ body {
 .headerspikerow {
     margin-left: auto;
     margin-right: auto;
-    width: max(min(60%, 840px), 560px);
+    width: max(min(50%, 840px), 480px);
     height: 0%;
     position: relative;
 }
@@ -66,7 +66,7 @@ body {
     margin-right: auto;
     margin-bottom: max(10%, 100px);
     margin-top: 0px;
-    width: max(min(62%, 920px), 600px);
+    width: max(min(52%, 920px), 500px);
     padding: max(min(2%, 36px), 22px);
     box-shadow: 5px 10px 10px rgb(73, 73, 73);
     background-image: url(./greenMetal.png);
@@ -88,16 +88,25 @@ body {
     border-radius: 2px;
 }
 
-.sublogo {
-    width: 40px;
-    height: 40px;
+.logo {
+    height: auto;
+    width: 6%;
+    max-width: 40px;
+    min-width: 20px;
     margin: 10px;
     margin-left: 5px;
     margin-right: 0px;
 }
 
+.arrow {
+    height: auto;
+    width: 3%;
+    max-width: 40px;
+    min-width: 15px;
+}
+
 .tiledivborder {
-    height: 32px;
+    height: max(min(2vw, 32px), 16px);
     width: 100%;
     background-image: url(./tileBorder.png);
     background-size: 32px;
@@ -105,7 +114,7 @@ body {
 }
 
 .tilediv {
-    height: 125px;
+    height: max(min(5vw, 125px), 75px);
     width: 100%;
     background-image: url(./tileGray.png);
     background-size: 50px;
@@ -115,10 +124,10 @@ body {
 .panel {
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
-    margin-bottom: 100px;
+    margin-top: max(min(5%, 100px), 50px);
+    margin-bottom: max(min(5%, 100px), 50px);
     padding: 0px;
-    width: max(min(60%, 900px), 580px);
+    width: max(min(50%, 900px), 480px);
     color: white;
     background-color: rgb(22, 22, 22);
     overflow: hidden;
@@ -127,39 +136,43 @@ body {
 
 .panelline {
     margin-left: 0px;
-    margin-top: 20px;
+    margin-top: max(min(2.5%, 20px), 5px);
     width: 200%;
-    height: 3px;
+    height: max(min(0.25vw, 3px), 1px);
     background-color: white;
 }
 
 .paneltitle {
     margin-top: 0px;
     margin-bottom: 0px;
-    margin-left: 8px;
-    font-size: 3.25em;
+    margin-left: max(min(1vw, 8px), 4px);
+    font-size: max(min(3.25vw, 3.25em), 2em);
 }
 
 .panelsmalltitle {
     margin-top: 0px;
     margin-bottom: 0px;
-    margin-left: 8px;
-    font-size: 2.85em;
+    margin-left: max(min(1vw, 8px), 4px);
+    font-size: max(min(2.85vw, 2.85em), 1.65em);
 }
 
 .paneltext {
     margin-top: 0px;
-    margin-left: 8px;
-    margin-right: 10px;
-    font-size: 1.375em;
+    margin-left: max(min(1vw, 8px), 4px);
+    margin-right: max(min(1.1vw, 10px), 5px);
+    font-size: max(min(1.375vw, 1.375em), 0.9em);
 }
 
 .panelsmalltext {
     margin-top: 0px;
-    margin-left: 8px;
-    margin-right: 10px;
-    margin-bottom: 40px;
-    font-size: 1em;
+    margin-left: max(min(1vw, 8px), 4px);
+    margin-left: max(min(1.1vw, 10px), 8px);
+    margin-bottom: max(min(2.5vw, 40px), 20px);
+    font-size: max(min(1vw, 1em), 0.75em);
+}
+
+.textbreak {
+    margin-bottom: max(min(2.5vw, 40px), 20px);
 }
 
 .panellink {
@@ -167,9 +180,20 @@ body {
     text-decoration: none;
 }
 
+.panellinktext {
+    font-size: max(min(1vw, 1em), 0.75em);
+    float: left; 
+    margin-left: 1%;
+    margin-top: max(min(1.5vw, 22px), 18px);
+    margin-bottom: max(min(1.25vw, 20px), 10px);
+    text-decoration: underline;
+}
+
 .paneltablewrapper {
     width: 100%;
-    height: 500px;
+    height: 30vw;
+    min-height: 300px;
+    max-height: 550px;
     overflow-y: scroll;
 }
 
@@ -182,7 +206,7 @@ body {
 
 .paneltable {
     width: 100%;
-    font-size: 1em;
+    font-size: max(min(1vw, 1em), 0.65em);
 }
 
 .paneltable th {
@@ -190,8 +214,10 @@ body {
 }
 
 .paneltable img {
-    width: 20px;
-    margin: 3px;
+    width: 5%;
+    min-width: 10px;
+    max-width: 20px;
+    margin: max(min(0.25vw, 3px), 1px);
     margin-left: 1px;
     margin-right: 1px;
 }
@@ -294,17 +320,13 @@ body {
     margin-top: 0px;
     margin-bottom: 0px;
     padding-bottom: 35px;
-    font-size: 6.5em;
+    font-size: max(min(6.5vw, 6.5em), 5.65em);
     line-height: 0.77em;
 }
 
 .footerarrow {
     padding: 5px;
     height: 95px;
-}
-
-.footerlogos {
-    margin: 10px;
 }
 
 .end {
