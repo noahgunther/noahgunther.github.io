@@ -5,9 +5,10 @@
 // - Add site info / data disclaimer dropdown (estimated from ...) and info on updating (most recent data from mta sets fetch daily at https://gunthern.pythonanywhere.com/, most recent update xxxxxx)
 // CSS / HTML:
 // - Create CSS for live data (old style LCD cells)
+// - Increase min panel etc. width (for mobile displays and 1920p or smaller screens)
 // - Adjust font / footer / logo image size for different resolutions
 // JS functionality:
-// - Fix issue with tram height on different devices, make sure it works after implementing info / data disclaimer dropdown
+// - Fix issue with tram / cloud height on different screen heights, make sure it works after implementing info / data disclaimer dropdown
 // - Write script for subway cars, buses, combination scroll animation (like the tramway)
 // - Test on mobile
 // - Do a pass for various screen widths, browsers, general functionality
@@ -146,7 +147,7 @@ function init() {
             const nameIds = idsNameSplit(response.subwayStationMaxRidershipWeeklyStation[i].toString());
             let idsImgString = '<br/>';
             for (let j=0; j<nameIds[0].length; j++) {
-                idsImgString += '<img src="./media/subway' + nameIds[0][j] + '.png" alt="Subway ' + nameIds[0][j] + ' line logo"/>';
+                idsImgString += '<img src="./assets/subway' + nameIds[0][j] + '.png" alt="Subway ' + nameIds[0][j] + ' line logo"/>';
             }
             let tableString = "<tr><th><text>" + (i+1) + "</text></th><th><text>" + nameIds[1] + "</text>" + idsImgString + "</th>";
             tableString += "<th><text>" + response.subwayStationMaxRidershipWeeklyBorough[i] + "</text></th>";
@@ -324,7 +325,7 @@ function init() {
         for (let i=0; i<id.length; i++) {
             htmlString += '<img class="' + logoScale[scale] + '" ';
             if (i==0) htmlString += 'style="margin-left: 10px;" ';
-            htmlString += 'src = "./media/subway' + id[i].toString() + '.png" alt="Subway ' + id[i].toString() + ' line logo"/>';
+            htmlString += 'src = "./assets/subway' + id[i].toString() + '.png" alt="Subway ' + id[i].toString() + ' line logo"/>';
         }
         
         // Update html
@@ -332,10 +333,16 @@ function init() {
     }
 
     // Scrolling effects
-    let offset;
+    let lastKnownScrollPosition = 0;
+    window.addEventListener("scroll", function() {
+        lastKnownScrollPosition = window.scrollY;
+        cloudPositioner(lastKnownScrollPosition);
+        tramPositioner(lastKnownScrollPosition);
+    });
+    
     let tramStart;
     function updateScrollValues() {
-        offset = window.scrollY;
+        lastKnownScrollPosition = window.scrollY;
         tramStart = document.getElementById('tramanimstart').getBoundingClientRect().top + window.scrollY;
     }
     updateScrollValues();
@@ -348,45 +355,39 @@ function init() {
     }
     const cloudScrollYSpeed = 0.5;
 
-    function cloudPositioner() {
+    function cloudPositioner(offset) {
         for (let i=0; i<clouds.length; i++) {
             const pos = cloudPosY[i] - tramStart + 1500 + offset * cloudScrollYSpeed;
-            clouds[i].style.marginTop = pos + 'px';
+            clouds[i].style.transform = 'translateY(' + pos + 'px)';
         }
     }
-    cloudPositioner();
+    cloudPositioner(lastKnownScrollPosition);
 
     // Scroll animation for tram
-    const tram = document.getElementById('tram');
-    const tramRig = document.getElementById('tramrig');
+    const tramRigX = document.getElementById('tramrigx');
+    const tramRigY = document.getElementById('tramrigy');
     const tramPosY = 600;
     const tramScrollLock = tramStart;
     const tramScrollUnlock = tramScrollLock + 2000;
     const tramScrollXSpeed = 0.7;
     const tramScrollYSpeed = 0.9;
-    function tramPositioner() {
+    function tramPositioner(offset) {
         const pos = offset * tramScrollXSpeed;
         const offsetX = (tramStart / 100) * 2.75;
-        tram.style.marginLeft = (pos/20 - offsetX) + '%';
+        tramRigX.style.transform = 'translateX(' + (pos/20 - offsetX) + '%)';
         if (offset > tramScrollLock) {
             if (offset < tramScrollUnlock) {
-                tramRig.style.marginTop = (tramPosY + (offset - tramScrollLock) * tramScrollYSpeed) + 'px';
+                tramRigY.style.transform = 'translateY(' + (tramPosY + (offset - tramScrollLock) * tramScrollYSpeed) + 'px)';
             }
             else {
-                tramRig.style.marginTop = (tramPosY + (tramScrollUnlock - tramScrollLock) * tramScrollYSpeed) + 'px';
+                tramRigY.style.transform = 'translateY(' + (tramPosY + (tramScrollUnlock - tramScrollLock) * tramScrollYSpeed) + 'px)';
             }
         }
         else {
-            tramRig.style.marginTop = tramPosY + 'px';
+            tramRigY.style.transform = 'translateY(' + tramPosY + 'px)';
         }
     }
-    tramPositioner();
-
-    window.addEventListener("scroll", function() {
-        offset = window.scrollY;
-        cloudPositioner();
-        tramPositioner();
-    });
+    tramPositioner(lastKnownScrollPosition);
 
     // Autoscroll
     function scrollTo(destination, duration) {

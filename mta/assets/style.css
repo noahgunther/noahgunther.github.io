@@ -225,11 +225,19 @@ body {
     position: absolute;
     z-index: -2;
     transform: translate(-50%);
+    will-change: transform;
 }
 
-#tramrig {
+#tramrigy {
     position: absolute;
     width: 100%;
+    will-change: transform;
+}
+
+#tramrigx {
+    position: absolute;
+    width: 100%;
+    will-change: transform;
 }
 
 #tram {
