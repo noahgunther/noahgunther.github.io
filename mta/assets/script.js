@@ -1,6 +1,4 @@
 // Todo:
-// - Fix mobile
-// - Fix tram / cloud positioning
 // Data:
 // - Figure out what live data is possible to access and include (Today)
 // - Review all code / math
@@ -339,18 +337,15 @@ function init() {
     // More info dropdown
     const infoDropdownToggle = document.getElementById('infodropdownlink');
     const infoDropdownText = document.getElementById('infodropdowntext');
-    const infoDropdownArrow = document.getElementById('infodropdownarrow');
     const infoDropdown = document.getElementById('infodropdown');
     infoDropdownToggle.onclick = function() {
         if (infoDropdown.hidden) {
             infoDropdown.hidden = false;
             infoDropdownText.innerHTML = "Hide info on site and data:";
-            infoDropdownArrow.style.transform = 'rotate(0deg)';
         }
         else {
             infoDropdown.hidden = true;
             infoDropdownText.innerHTML = "Show info on site and data:";
-            infoDropdownArrow.style.transform = 'rotate(180deg)';
         }
         updateScrollValues();
     }
