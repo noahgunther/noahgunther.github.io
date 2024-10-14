@@ -5,9 +5,8 @@
 // - Review all code / math
 // CSS / HTML:
 // - Create CSS for live data (old style LCD cells)
-// - Adjust font / footer / logo image size for different resolutions
 // JS functionality:
-// - Fix issue with tram / cloud height on different screen heights, make sure it works after implementing info / data disclaimer dropdown
+// - Change tramway clouds / tram to static vertical position, animate over time, add multiple trams
 // - Write script for subway cars, buses, combination scroll animation (like the tramway)
 // - Test on mobile
 // - Do a pass for various screen widths, browsers, general functionality
