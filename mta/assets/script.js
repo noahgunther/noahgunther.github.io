@@ -6,7 +6,7 @@
 // CSS / HTML:
 // - Create CSS for live data (old style LCD cells)
 // JS functionality:
-// - Change tramway clouds / tram to static vertical position, animate over time, add multiple trams
+// - Change tramway clouds / tram to static vertical position, animate over time, add multiple trams, add different 'people'?
 // - Write script for subway cars, buses, combination scroll animation (like the tramway)
 // - Test on mobile
 // - Do a pass for various screen widths, browsers, general functionality
@@ -258,9 +258,9 @@ function init() {
         document.getElementById('busweeklytable').innerHTML = busWeeklyTableHtmlString + '</tbody>';
 
         document.getElementById('subwaymaxannualdate').innerHTML = response.subwayMaxAnnualDate;
-        document.getElementById('subwaymaxannualdateridership').innerHTML = response.subwayMaxAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+        document.getElementById('subwaymaxannualdateridership').innerHTML = response.subwayMaxAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('subwayminannualdate').innerHTML = response.subwayMinAnnualDate;
-        document.getElementById('subwayminannualdateridership').innerHTML = response.subwayMinAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+        document.getElementById('subwayminannualdateridership').innerHTML = response.subwayMinAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('subwaymaxannualday').innerHTML = response.subwayMaxAnnualDay;
         document.getElementById('subwaymaxannualdaymean').innerHTML = response.subwayMaxMeanDayRidership.toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('subwayminannualday').innerHTML = response.subwayMinAnnualDay;
@@ -269,9 +269,9 @@ function init() {
         document.getElementById('subwaydailyridershipavg').innerHTML = (response.subwayYearlyRidership / 365.0).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         
         document.getElementById('busmaxannualdate').innerHTML = response.busMaxAnnualDate;
-        document.getElementById('busmaxannualdateridership').innerHTML = response.busMaxAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+        document.getElementById('busmaxannualdateridership').innerHTML = response.busMaxAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('busminannualdate').innerHTML = response.busMinAnnualDate;
-        document.getElementById('busminannualdateridership').innerHTML = response.busMinAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+        document.getElementById('busminannualdateridership').innerHTML = response.busMinAnnualDateRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('busmaxannualday').innerHTML = response.busMaxAnnualDay;
         document.getElementById('busmaxannualdaymean').innerHTML = response.busMaxMeanDayRidership.toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('busminannualday').innerHTML = response.busMinAnnualDay;
@@ -279,16 +279,14 @@ function init() {
         document.getElementById('busyearlyridership').innerHTML = response.busYearlyRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('busdailyridershipavg').innerHTML = (response.busYearlyRidership / 365.0).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         
-        document.getElementById('tramweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklytramridership?dummy' + Date.now())
-        document.getElementById('subwayweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklysubwayridership?dummy' + Date.now())
-        document.getElementById('subwayweeklystationcomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklystationcomparison?dummy' + Date.now())
-        document.getElementById('busweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklybusridership?dummy' + Date.now())
-        document.getElementById('busweeklyroutecomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklyroutecomparison?dummy' + Date.now())
-        document.getElementById('meandayofweekcomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/meandayofweekcomparison?dummy' + Date.now())
-        document.getElementById('subwayyearlyridershipdaily').setAttribute('src', 'https://gunthern.pythonanywhere.com/yearlysubwayridership?dummy' + Date.now())
-        document.getElementById('busyearlyridershipdaily').setAttribute('src', 'https://gunthern.pythonanywhere.com/yearlybusridership?dummy' + Date.now())
-
-        updateScrollValues();
+        document.getElementById('tramweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklytramridership?dummy' + Date.now());
+        document.getElementById('subwayweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklysubwayridership?dummy' + Date.now());
+        document.getElementById('subwayweeklystationcomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklystationcomparison?dummy' + Date.now());
+        document.getElementById('busweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklybusridership?dummy' + Date.now());
+        document.getElementById('busweeklyroutecomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklyroutecomparison?dummy' + Date.now());
+        document.getElementById('meandayofweekcomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/meandayofweekcomparison?dummy' + Date.now());
+        document.getElementById('subwayyearlyridershipdaily').setAttribute('src', 'https://gunthern.pythonanywhere.com/yearlysubwayridership?dummy' + Date.now());
+        document.getElementById('busyearlyridershipdaily').setAttribute('src', 'https://gunthern.pythonanywhere.com/yearlybusridership?dummy' + Date.now());
     }
     xhttp.open("GET", "https://gunthern.pythonanywhere.com/");
     xhttp.send();
@@ -345,65 +343,7 @@ function init() {
             infoDropdown.hidden = true;
             infoDropdownText.innerHTML = "Show info on site and data:";
         }
-        updateScrollValues();
     }
-
-    // Scrolling effects
-    let lastKnownScrollPosition = 0;
-    window.addEventListener("scroll", function() {
-        lastKnownScrollPosition = window.scrollY;
-        cloudPositioner(lastKnownScrollPosition);
-        tramPositioner(lastKnownScrollPosition);
-    });
-    
-    let tramStart;
-    function updateScrollValues() {
-        lastKnownScrollPosition = window.scrollY;
-        tramStart = sky.getBoundingClientRect().top + window.scrollY;
-    }
-    updateScrollValues();
-
-    // Parallax scroll for clouds
-    const clouds = document.getElementsByClassName('cloud');
-    let cloudPosY = [];
-    for (let i=0; i<clouds.length; i++) {
-        cloudPosY.push(parseFloat(clouds[i].style.marginTop.slice(0, -1)));
-    }
-    const cloudScrollYSpeed = 0.5;
-
-    function cloudPositioner(offset) {
-        for (let i=0; i<clouds.length; i++) {
-            const pos = cloudPosY[i] - tramStart + 1500 + offset * cloudScrollYSpeed;
-            clouds[i].style.transform = 'translateY(' + pos + 'px)';
-        }
-    }
-    cloudPositioner(lastKnownScrollPosition);
-
-    // Scroll animation for tram
-    const tramRigX = document.getElementById('tramrigx');
-    const tramRigY = document.getElementById('tramrigy');
-    const tramPosY = 600;
-    const tramScrollLock = tramStart;
-    const tramScrollUnlock = tramScrollLock + 2000;
-    const tramScrollXSpeed = 0.7;
-    const tramScrollYSpeed = 0.9;
-    function tramPositioner(offset) {
-        const pos = offset * tramScrollXSpeed;
-        const offsetX = (tramStart / 100) * 2.75;
-        tramRigX.style.transform = 'translateX(' + (pos/20 - offsetX) + '%)';
-        if (offset > tramScrollLock) {
-            if (offset < tramScrollUnlock) {
-                tramRigY.style.transform = 'translateY(' + (tramPosY + (offset - tramScrollLock) * tramScrollYSpeed) + 'px)';
-            }
-            else {
-                tramRigY.style.transform = 'translateY(' + (tramPosY + (tramScrollUnlock - tramScrollLock) * tramScrollYSpeed) + 'px)';
-            }
-        }
-        else {
-            tramRigY.style.transform = 'translateY(' + tramPosY + 'px)';
-        }
-    }
-    tramPositioner(lastKnownScrollPosition);
 
     // Autoscroll
     const footermiddle = document.getElementById('footermiddle');

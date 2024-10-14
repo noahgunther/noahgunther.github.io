@@ -253,25 +253,23 @@ a {
     position: absolute;
     z-index: -2;
     transform: translate(-50%);
-    will-change: transform;
 }
 
-#tramrigy {
+.tramrigy {
     position: absolute;
     width: 100%;
-    will-change: transform;
+    height: max(min(20vw, 400px), 200px);
 }
 
-#tramrigx {
+.tramrigx {
     position: absolute;
     width: 100%;
-    will-change: transform;
 }
 
-#tram {
+.tram {
     position: absolute;
-    width: 15%;
-    min-width: 300px;
+    width: 20%;
+    min-width: 200px;
     max-width: 400px;
     z-index: 0;
     transform: translate(-50%);
@@ -282,11 +280,45 @@ a {
     position: absolute;
     margin-left: 0px;
     width: 100%;
-    height: 4px;
+    height: max(min(0.27vw, 4px), 2px);
     background-color: rgb(46, 46, 46);
     background: linear-gradient(180deg, rgb(90, 90, 90) 0%, rgba(0,0,0,1) 100%);
     z-index: 1;
     will-change: transform;
+}
+
+#try0 {
+    top: 30%;
+}
+
+#trx0 {
+    animation: tramanimationLR;
+    animation-duration: 40s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+#trx1 {
+    animation: tramanimationRL;
+    animation-duration: 40s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-delay: 5s;
+    z-index: -1;
+    top: 9%;
+    left: 120%;
+}
+
+@keyframes tramanimationLR {
+    0% { left: -20%; }
+    50% { left: 120%; }
+    100% { left: -20%; }
+}
+
+@keyframes tramanimationRL {
+    0% { left: 120%; }
+    50% { left: -20%; }
+    100% { left: 120%; }
 }
 
 .footer {
