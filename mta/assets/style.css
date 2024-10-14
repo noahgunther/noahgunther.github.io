@@ -102,6 +102,11 @@ a {
     margin-right: 0px;
 }
 
+.subwaystationserviceicons {
+    width: 99%;
+    margin-left: 0.5%;
+}
+
 .tiledivborder {
     height: max(min(2vw, 32px), 16px);
     width: 100%;
@@ -288,7 +293,7 @@ a {
 }
 
 #try0 {
-    top: 30%;
+    top: 35%;
 }
 
 #trx0 {
@@ -296,6 +301,7 @@ a {
     animation-duration: 40s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+    left: min(max(-50%, -400px), -200px);
 }
 
 #trx1 {
@@ -307,18 +313,19 @@ a {
     z-index: -1;
     top: 9%;
     left: 120%;
+    left: max(min(150%, calc(100% + 400px)), calc(100% + 200px));
 }
 
 @keyframes tramanimationLR {
-    0% { left: -20%; }
-    50% { left: 120%; }
-    100% { left: -20%; }
+    0% { left: min(max(-50%, -400px), -200px); }
+    50% { left: max(min(150%, calc(100% + 400px)), calc(100% + 200px)); }
+    100% { left: min(max(-50%, -400px), 200px); }
 }
 
 @keyframes tramanimationRL {
-    0% { left: 120%; }
-    50% { left: -20%; }
-    100% { left: 120%; }
+    0% { left: max(min(150%, calc(100% + 400px)), calc(100% + 200px)); }
+    50% { left: min(max(-50%, -400px), 200px); }
+    100% { left: max(min(150%, calc(100% + 400px)), calc(100% + 200px)); }
 }
 
 .footer {

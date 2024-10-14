@@ -321,9 +321,7 @@ function init() {
         // Create html string
         let htmlString = '';
         for (let i=0; i<id.length; i++) {
-            htmlString += '<img class="logo" ';
-            if (i==0) htmlString += 'style="margin-left: 10px;" ';
-            htmlString += 'src = "./assets/subway' + id[i].toString() + '.png" alt="Subway ' + id[i].toString() + ' line logo"/>';
+            htmlString += '<img class="logo" src = "./assets/subway' + id[i].toString() + '.png" alt="Subway ' + id[i].toString() + ' line logo"/>';
         }
         
         // Update html
