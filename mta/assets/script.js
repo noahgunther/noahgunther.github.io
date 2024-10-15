@@ -1,14 +1,8 @@
 // Todo:
 // Data:
-// - Figure out what live data is possible to access and include (Today)
-// -- Add live data info to dropdown
 // - Review all code / math
-// CSS / HTML:
-// - Create CSS for live data (old style LCD cells)
 // JS functionality:
-// - Change tramway clouds / tram to static vertical position, animate over time, add multiple trams, add different 'people'?
-// - Write script for subway cars, buses, combination scroll animation (like the tramway)
-// - Test on mobile
+// - Write script for subway cars, buses, combination animations (like the tramway)
 // - Do a pass for various screen widths, browsers, general functionality
 
 window.addEventListener("load", init, false);
