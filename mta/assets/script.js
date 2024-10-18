@@ -1,4 +1,15 @@
 // Todo:
+// Art:
+// - Subway:
+// -- Add lights glowing here and there in darkness (signals, misc), yellow cable lights (on pillars?)
+// -- Add more trains
+// -- Pizza rat easter egg?
+// - Bus:
+// -- Buses on bridges, one on ground at bottom
+// - All together:
+// -- Tram in far background w/ clouds, tall buildings
+// -- Elevated subway in midground with 6 story buildings, tall trees
+// -- Buses in foreground with short trees, bus station, sidewalk, people
 // Data:
 // - Review all code / math
 // JS functionality:

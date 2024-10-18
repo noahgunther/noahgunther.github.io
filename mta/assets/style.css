@@ -33,7 +33,7 @@ a {
     top: 0px;
     height: 30px;
     background-image: url(./warningStripEdge.png);
-    box-shadow: 0px 10px 10px rgb(73, 73, 73);
+    box-shadow: 0px 10px 10px rgb(35, 35, 35);
 }
 
 .lamps {
@@ -72,7 +72,7 @@ a {
     margin-top: 0px;
     width: max(min(62%, 920px), 285px);
     padding: max(min(2%, 36px), 14px);
-    box-shadow: 5px 10px 10px rgb(73, 73, 73);
+    box-shadow: 5px 10px 10px rgb(35, 35, 35);
     background-image: url(./greenMetal.png);
     border-radius: 3px;
 }
@@ -133,7 +133,7 @@ a {
     color: white;
     background-color: rgb(22, 22, 22);
     overflow: hidden;
-    box-shadow: 5px 10px 10px rgb(73, 73, 73);
+    box-shadow: 5px 10px 10px rgb(35, 35, 35);
 }
 
 .panelline {
@@ -289,7 +289,6 @@ a {
     background-color: rgb(46, 46, 46);
     background: linear-gradient(180deg, rgb(90, 90, 90) 0%, rgba(0,0,0,1) 100%);
     z-index: 1;
-    will-change: transform;
 }
 
 #try0 {
@@ -326,6 +325,333 @@ a {
     0% { left: max(min(150%, calc(100% + 400px)), calc(100% + 200px)); }
     50% { left: min(max(-50%, -400px), 200px); }
     100% { left: max(min(150%, calc(100% + 400px)), calc(100% + 200px)); }
+}
+
+#underground {
+    position: relative;
+    width: 100%;
+}
+
+#undergroundart {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    background-color: rgb(0, 0, 0);
+    overflow: hidden;
+}
+
+#undergroundcontent {
+    position: relative;
+}
+
+#grate {
+    position: absolute;
+    left: 50%;
+    z-index: -2;
+    transform: translate(-50%);
+    top: 1%; 
+    width: 25%; 
+    min-width: 250px; 
+    max-width: 500px;
+}
+
+#subwaystation {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 15%;
+    height: max(min(30vw, 750px), 350px);
+    z-index: -10;
+}
+
+#stationlightabove {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    height: 5%;
+    background-color: rgb(0, 0, 0);
+    background: linear-gradient(0deg, rgb(150, 150, 150) 0%, rgb(0, 0, 0) 100%);
+}
+
+#stationlight {
+    position: absolute;
+    width: 100%;
+    top: 5%;
+    height: 1%;
+    background-color: white;
+}
+
+#stationlightbelow {
+    position: absolute;
+    width: 100%;
+    top: 6%;
+    height: 5%;
+    z-index: 10;
+    background-color: rgb(0, 0, 0);
+    background: linear-gradient(180deg, rgb(203, 203, 203) 0%, rgb(0, 0, 0, 0) 100%);
+}
+
+#stationtile {
+    position: absolute;
+    width: 100%;
+    height: 30%;
+    top: 6%;
+    background-image: url(./tileGray.png);
+    background-size: 1.5%;
+    z-index: -10;
+}
+
+#stationtileshadow {
+    position: absolute;
+    width: 100%;
+    top: 22%;
+    height: 15%;
+    z-index: 10;
+    background-color: rgb(0, 0, 0);
+    background: linear-gradient(0deg, rgb(51, 48, 38, 0.75) 0%, rgb(51, 48, 38, 0) 100%);
+}
+
+#stationpillars {
+    position: absolute;
+    width: 100%;
+    height: 40.5%;
+    top: 0;
+    z-index: 13;
+}
+
+.pillar {
+    position: absolute;
+    bottom: 0;
+    width: max(min(1.6%, 42px), 19px);
+}
+
+.stationpassengers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 12;
+}
+
+.stationpassenger {
+    position: absolute;
+    top: 18%;
+    width: 7%;
+}
+
+#stationpassengers00 {
+    animation: stationpassengers00;
+    animation-duration: 12s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers00 {
+    0% { left: -10%; }
+    50% { left: 25%; }
+    100% { left: -10%; }
+}
+
+#stationpassengers01 {
+    animation: stationpassengers01;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers01 {
+    0% { left: 20%; }
+    50% { left: -10%; }
+    100% { left: 20%; }
+}
+
+#stationpassengers02 {
+    animation: stationpassengers02;
+    animation-duration: 16s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers02 {
+    0% { left: 40%; }
+    50% { left: -10%; }
+    100% { left: 40%; }
+}
+
+#stationpassengers03 {
+    animation: stationpassengers03;
+    animation-duration: 25s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers03 {
+    0% { left: 60%; }
+    50% { left: -10%; }
+    100% { left: 60%; }
+}
+
+#stationpassengers04 {
+    animation: stationpassengers04;
+    animation-duration: 20s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers04 {
+    0% { left: 110%; }
+    50% { left: 45%; }
+    100% { left: 100%; }
+}
+
+#stationpassengers05 {
+    animation: stationpassengers05;
+    animation-duration: 25s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers05 {
+    0% { left: 31%; }
+    50% { left: 110%; }
+    100% { left: 31%; }
+}
+
+#stationpassengers06 {
+    animation: stationpassengers06;
+    animation-duration: 30s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers06 {
+    0% { left: 10%; }
+    50% { left: 110%; }
+    100% { left: 10%; }
+}
+
+#stationpassengers07 {
+    animation: stationpassengers07;
+    animation-duration: 25s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers07 {
+    0% { left: 40%; }
+    50% { left: 110%; }
+    100% { left: 40%; }
+}
+ 
+#stationfloor {
+    position: absolute;
+    top: 36%;
+    width: 100%;
+    height: 5%;
+    z-index: 11;
+    background-color: rgb(100, 91, 57);
+    background: linear-gradient(0deg, rgb(51, 48, 38) 0%, rgb(100, 91, 57) 50%, rgb(51, 48, 38) 100%);
+}
+
+#stationwarnstrip {
+    position: absolute;
+    width: 100%;
+    top: 41%;
+    height: 2%;
+    background-color: rgb(168, 155, 22);
+}
+
+#stationdrop {
+    position: absolute;
+    width: 100%;
+    top: 43%;
+    height: 6%;
+    background-color: rgb(51, 48, 38);
+    background: linear-gradient(180deg, rgb(51, 48, 38) 0%, rgb(0, 0, 0) 100%);
+}
+
+.subwayrigy {
+    position: absolute;
+    width: 100%;
+    height: max(min(19.5vw, 500px), 200px);
+}
+
+.subwayrigx {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.subwaytrack {
+    position: absolute;
+    margin-left: 0px;
+    width: 100%;
+    height: max(min(0.8vw, 28px), 10px);
+    background-color: rgb(0, 0, 0);
+    background: linear-gradient(180deg, rgb(12, 10, 8) 0%, rgb(5, 5, 5) 100%);
+    will-change: transform;
+}
+
+.subwaytrain {
+    position: absolute;
+    z-index: -2;
+    transform: translate(-50%);
+    width: 65%; 
+    min-width: 660px;
+    max-width: 1700px;
+}
+
+.subwaypassengers {
+    position: absolute;
+    z-index: -3;
+    transform: translate(-50%);
+    width: 65%; 
+    min-width: 660px;
+    max-width: 1700px;
+}
+
+#subwayengine01 {
+    position: absolute;
+    animation: subwayanimationRL00;
+    animation-duration: 20s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes subwayanimationRL00 {
+    0% { left: max(min(800%, calc(400% + 3200px)), calc(400% + 1600px)); }
+    100% { left: min(max(-800%, calc(-400% - 3200px)), calc(-400% - 1600px)); }
+}
+
+#subwayengine02 {
+    position: absolute;
+    animation: subwayanimationLR00;
+    animation-duration: 12s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes subwayanimationLR00 {
+    0% { left: min(max(-300%, calc(-200% - 3200px)), calc(-200% - 1600px)); }
+    100% { left: max(min(300%, calc(200% + 3200px)), calc(200% + 1600px)); }
+}
+
+#subwayengine03 {
+    position: absolute;
+    animation: subwayanimationRL01;
+    animation-duration: 16s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+@keyframes subwayanimationRL01 {
+    0% { left: max(min(400%, calc(200% + 3200px)), calc(200% + 1600px)); }
+    52% { left: 46%; }
+    46% { left: 49%; }
+    100% { left: min(max(-400%, calc(-200% - 3200px)), calc(-200% - 1600px)); }
 }
 
 .footer {
