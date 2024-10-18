@@ -358,6 +358,12 @@ a {
     max-width: 500px;
 }
 
+.subwaylight {
+    position: absolute;
+    z-index: 20;
+    transform: translate(-50%);
+}
+
 #subwaystation {
     position: absolute;
     width: 100%;
@@ -417,15 +423,22 @@ a {
 #stationpillars {
     position: absolute;
     width: 100%;
-    height: 40.5%;
+    height: 40.75%;
     top: 0;
     z-index: 13;
 }
 
+.tunnelpillars {
+    position: absolute;
+    width: 100%;
+    height: max(min(16vw, 400px), 170px);
+}
+
 .pillar {
     position: absolute;
-    bottom: 0;
-    width: max(min(1.6%, 42px), 19px);
+    top: 0;
+    height: 100%;
+    transform: translate(-50%);
 }
 
 .stationpassengers {
@@ -437,112 +450,112 @@ a {
 
 .stationpassenger {
     position: absolute;
-    top: 18%;
-    width: 7%;
+    top: 16%;
+    height: 25%;
 }
 
 #stationpassengers00 {
     animation: stationpassengers00;
-    animation-duration: 12s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-
-@keyframes stationpassengers00 {
-    0% { left: -10%; }
-    50% { left: 25%; }
-    100% { left: -10%; }
-}
-
-#stationpassengers01 {
-    animation: stationpassengers01;
-    animation-duration: 10s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-
-@keyframes stationpassengers01 {
-    0% { left: 20%; }
-    50% { left: -10%; }
-    100% { left: 20%; }
-}
-
-#stationpassengers02 {
-    animation: stationpassengers02;
-    animation-duration: 16s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-
-@keyframes stationpassengers02 {
-    0% { left: 40%; }
-    50% { left: -10%; }
-    100% { left: 40%; }
-}
-
-#stationpassengers03 {
-    animation: stationpassengers03;
-    animation-duration: 25s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-
-@keyframes stationpassengers03 {
-    0% { left: 60%; }
-    50% { left: -10%; }
-    100% { left: 60%; }
-}
-
-#stationpassengers04 {
-    animation: stationpassengers04;
     animation-duration: 20s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
-@keyframes stationpassengers04 {
-    0% { left: 110%; }
-    50% { left: 45%; }
-    100% { left: 100%; }
+@keyframes stationpassengers00 {
+    0% { left: -20%; }
+    50% { left: 113%; }
+    100% { left: -20%; }
 }
 
-#stationpassengers05 {
-    animation: stationpassengers05;
-    animation-duration: 25s;
+#stationpassengers01 {
+    animation: stationpassengers01;
+    animation-duration: 23s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
-@keyframes stationpassengers05 {
-    0% { left: 31%; }
-    50% { left: 110%; }
-    100% { left: 31%; }
+@keyframes stationpassengers01 {
+    0% { left: 106%; }
+    50% { left: -16%; }
+    100% { left: 106%; }
 }
 
-#stationpassengers06 {
-    animation: stationpassengers06;
+#stationpassengers02 {
+    animation: stationpassengers02;
+    animation-duration: 26s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers02 {
+    0% { left: 140%; }
+    50% { left: -20%; }
+    100% { left: 140%; }
+}
+
+#stationpassengers03 {
+    animation: stationpassengers03;
+    animation-duration: 35s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers03 {
+    0% { left: 110%; }
+    50% { left: -10%; }
+    100% { left: 110%; }
+}
+
+#stationpassengers04 {
+    animation: stationpassengers04;
     animation-duration: 30s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
+@keyframes stationpassengers04 {
+    0% { left: 120%; }
+    50% { left: -35%; }
+    100% { left: 120%; }
+}
+
+#stationpassengers05 {
+    animation: stationpassengers05;
+    animation-duration: 40s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes stationpassengers05 {
+    0% { left: -31%; }
+    50% { left: 107%; }
+    100% { left: -31%; }
+}
+
+#stationpassengers06 {
+    animation: stationpassengers06;
+    animation-duration: 47s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
 @keyframes stationpassengers06 {
-    0% { left: 10%; }
-    50% { left: 110%; }
-    100% { left: 10%; }
+    0% { left: 130%; }
+    50% { left: -20%; }
+    100% { left: 130%; }
 }
 
 #stationpassengers07 {
     animation: stationpassengers07;
-    animation-duration: 25s;
+    animation-duration: 38s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
 @keyframes stationpassengers07 {
-    0% { left: 40%; }
-    50% { left: 110%; }
-    100% { left: 40%; }
+    0% { left: 140%; }
+    50% { left: -40%; }
+    100% { left: 140%; }
 }
  
 #stationfloor {
@@ -590,8 +603,8 @@ a {
     margin-left: 0px;
     width: 100%;
     height: max(min(0.8vw, 28px), 10px);
-    background-color: rgb(0, 0, 0);
-    background: linear-gradient(180deg, rgb(12, 10, 8) 0%, rgb(5, 5, 5) 100%);
+    background-color: rgb(23, 21, 16);
+    background: linear-gradient(180deg, rgb(23, 21, 16) 0%, rgb(13, 12, 10) 100%);
     will-change: transform;
 }
 
@@ -632,6 +645,7 @@ a {
     animation-duration: 12s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+    transform: scale(-1, 1);
 }
 
 @keyframes subwayanimationLR00 {
@@ -652,6 +666,23 @@ a {
     52% { left: 46%; }
     46% { left: 49%; }
     100% { left: min(max(-400%, calc(-200% - 3200px)), calc(-200% - 1600px)); }
+}
+
+#subwayengine04 {
+    position: absolute;
+    animation: subwayanimationRL00;
+    animation-duration: 12s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+#subwayengine05 {
+    position: absolute;
+    animation: subwayanimationLR00;
+    animation-duration: 9s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    transform: scale(-1, 1);
 }
 
 .footer {
