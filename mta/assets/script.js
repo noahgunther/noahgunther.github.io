@@ -1,10 +1,3 @@
-// Todo:
-// Art:
-// - All together:
-// -- Tram in far background w/ clouds, tall buildings, sun
-// -- Elevated subway in midground with 6 story buildings, tall trees
-// -- Buses in foreground with short trees, sidewalk, people
-
 window.addEventListener("load", init, false);
 
 function init() {

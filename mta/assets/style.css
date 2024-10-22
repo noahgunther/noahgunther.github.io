@@ -278,7 +278,6 @@ a {
     max-width: 400px;
     z-index: 0;
     transform: translate(-50%);
-    will-change: transform;
 }
 
 .tramcable {
@@ -311,7 +310,6 @@ a {
     animation-delay: 5s;
     z-index: -1;
     top: 9%;
-    left: 120%;
     left: max(min(150%, calc(100% + 400px)), calc(100% + 200px));
 }
 
@@ -891,8 +889,182 @@ a {
     right: 0;
     z-index: -1;
     background-color: rgb(164, 211, 255);
-    background: linear-gradient(180deg, rgb(164, 211, 255) 0%, rgb(255, 157, 108) 50%, rgb(255, 164, 202) 100%);
+    background: linear-gradient(180deg, rgb(164, 211, 255) 0%, rgb(255, 180, 143) 50%, rgb(255, 177, 210) 100%);
     overflow: hidden;
+}
+
+.building {
+    position: absolute;
+    bottom: 7%;
+    background-color: rgb(166, 166, 166);
+}
+
+#buildingleft00 {
+    left: 3%;
+    width: 7%;
+    top: 10%;
+}
+
+#buildingleft01 {
+    left: 5%;
+    width: 10%;
+    top: 12%;
+}
+
+#buildingleft02 {
+    left: 0%;
+    width: 8%;
+    top: 16%;
+}
+
+#buildingright00 {
+    right: 2%;
+    width: 8%;
+    top: 25%;
+}
+
+#buildingright01 {
+    right: 5%;
+    width: 10%;
+    top: 30%;
+}
+
+#buildingright02 {
+    right: 0%;
+    width: 8%;
+    top: 36%;
+}
+
+#ground {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    bottom: 7%;
+    background-color: rgb(166, 166, 166);
+}
+
+#groundunder {
+    position: absolute;
+    width: 100%;
+    top: 96%;
+    bottom: 0;
+    background-color: rgb(166, 166, 166);
+}
+
+.tramsmall {
+    position: absolute;
+    width: 10%;
+    min-width: 100px;
+    max-width: 200px;
+    z-index: 0;
+    transform: translate(-50%);
+}
+
+.tramcablesmall {
+    position: absolute;
+    margin-left: 0px;
+    width: 100%;
+    height: max(min(0.1vw, 2px), 1px);
+    background-color: rgb(166, 166, 166);
+    z-index: 1;
+}
+
+#try1 {
+    top: 17%;
+    z-index: -1;
+}
+
+#trx2 {
+    animation: tramanimationLR;
+    animation-duration: 40s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    left: min(max(-50%, -400px), -200px);
+}
+
+#trx3 {
+    animation: tramanimationRL;
+    animation-duration: 40s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    z-index: -1;
+    top: 9%;
+    left: max(min(150%, calc(100% + 400px)), calc(100% + 200px));
+}
+
+.bussmall {
+    position: absolute;
+    bottom: 0;
+    transform: translate(-50%);
+    width: 25%;
+    min-width: 250px;
+    max-width: 500px;
+}
+
+#bus07 {
+    position: absolute;
+    animation: busanimationLR02;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    z-index: -10;
+}
+
+#bus08 {
+    position: absolute;
+    transform: scale(-1, 1);
+    animation: busanimationRL01;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    z-index: -10;
+}
+
+@keyframes busanimationRL01 {
+    0% { left: 20%; }
+    100% { left: -120%; }
+}
+
+@keyframes busanimationLR02 {
+    0% { left: -20%; }
+    100% { left: 120%; }
+}
+
+.subwaytrainsmall {
+    position: absolute;
+    bottom: 0;
+    z-index: -1;
+    transform: translate(-50%);
+    width: 30%; 
+    min-width: 300px;
+    max-width: 600px;
+}
+
+#subwayengine06 {
+    position: absolute;
+    animation: subwayanimationRL02;
+    animation-duration: 12s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+#subwayengine07 {
+    position: absolute;
+    animation: subwayanimationLR01;
+    animation-duration: 9s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    transform: scale(-1, 1);
+}
+
+@keyframes subwayanimationRL02 {
+    0% { left: 180%; }
+    100% { left: -280%; }
+}
+
+@keyframes subwayanimationLR01 {
+    0% { left: -180%; }
+    100% { left: 280%; }
 }
 
 .footer {
