@@ -266,16 +266,16 @@ function init() {
         document.getElementById('busyearlyridership').innerHTML = response.busYearlyRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('busdailyridershipavg').innerHTML = (response.busYearlyRidership / 365.0).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         
-        document.getElementById('tramweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklytramridership?dummy' + Date.now());
-        document.getElementById('subwayweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklysubwayridership?dummy' + Date.now());
-        document.getElementById('subwayweeklystationcomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklystationcomparison?dummy' + Date.now());
-        document.getElementById('busweeklyridershiphourly').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklybusridership?dummy' + Date.now());
-        document.getElementById('busweeklyroutecomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/weeklyroutecomparison?dummy' + Date.now());
-        document.getElementById('meandayofweekcomparison').setAttribute('src', 'https://gunthern.pythonanywhere.com/meandayofweekcomparison?dummy' + Date.now());
-        document.getElementById('subwayyearlyridershipdaily').setAttribute('src', 'https://gunthern.pythonanywhere.com/yearlysubwayridership?dummy' + Date.now());
-        document.getElementById('busyearlyridershipdaily').setAttribute('src', 'https://gunthern.pythonanywhere.com/yearlybusridership?dummy' + Date.now());
+        document.getElementById('tramweeklyridershiphourly').setAttribute('src', './media/weeklytramridership.png?dummy' + Date.now());
+        document.getElementById('subwayweeklyridershiphourly').setAttribute('src', './media/weeklysubwayridership.png?dummy' + Date.now());
+        document.getElementById('subwayweeklystationcomparison').setAttribute('src', './media/weeklystationcomparison.png?dummy' + Date.now());
+        document.getElementById('busweeklyridershiphourly').setAttribute('src', './media/weeklybusridership.png?dummy' + Date.now());
+        document.getElementById('busweeklyroutecomparison').setAttribute('src', './media/weeklyroutecomparison.png?dummy' + Date.now());
+        document.getElementById('meandayofweekcomparison').setAttribute('src', './media/meandayofweekcomparison.png?dummy' + Date.now());
+        document.getElementById('subwayyearlyridershipdaily').setAttribute('src', './media/yearlysubwayridership.png?dummy' + Date.now());
+        document.getElementById('busyearlyridershipdaily').setAttribute('src', './media/yearlybusridership.png?dummy' + Date.now());
     }
-    xhttp.open("GET", "https://gunthern.pythonanywhere.com/");
+    xhttp.open("GET", "./data.json");
     xhttp.send();
 
     // Extract subway line identifiers from station name
