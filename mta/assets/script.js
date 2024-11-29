@@ -266,16 +266,16 @@ function init() {
         document.getElementById('busyearlyridership').innerHTML = response.busYearlyRidership.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById('busdailyridershipavg').innerHTML = (response.busYearlyRidership / 365.0).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         
-        document.getElementById('tramweeklyridershiphourly').setAttribute('src', './media/weeklytramridership.png?dummy' + Date.now());
-        document.getElementById('subwayweeklyridershiphourly').setAttribute('src', './media/weeklysubwayridership.png?dummy' + Date.now());
-        document.getElementById('subwayweeklystationcomparison').setAttribute('src', './media/weeklystationcomparison.png?dummy' + Date.now());
-        document.getElementById('busweeklyridershiphourly').setAttribute('src', './media/weeklybusridership.png?dummy' + Date.now());
-        document.getElementById('busweeklyroutecomparison').setAttribute('src', './media/weeklyroutecomparison.png?dummy' + Date.now());
-        document.getElementById('meandayofweekcomparison').setAttribute('src', './media/meandayofweekcomparison.png?dummy' + Date.now());
-        document.getElementById('subwayyearlyridershipdaily').setAttribute('src', './media/yearlysubwayridership.png?dummy' + Date.now());
-        document.getElementById('busyearlyridershipdaily').setAttribute('src', './media/yearlybusridership.png?dummy' + Date.now());
+        document.getElementById('tramweeklyridershiphourly').setAttribute('src', './assets/media/weeklytramridership.png?dummy' + Date.now());
+        document.getElementById('subwayweeklyridershiphourly').setAttribute('src', './assets/media/weeklysubwayridership.png?dummy' + Date.now());
+        document.getElementById('subwayweeklystationcomparison').setAttribute('src', './assets/media/weeklystationcomparison.png?dummy' + Date.now());
+        document.getElementById('busweeklyridershiphourly').setAttribute('src', './assets/media/weeklybusridership.png?dummy' + Date.now());
+        document.getElementById('busweeklyroutecomparison').setAttribute('src', './assets/media/weeklyroutecomparison.png?dummy' + Date.now());
+        document.getElementById('meandayofweekcomparison').setAttribute('src', './assets/media/meandayofweekcomparison.png?dummy' + Date.now());
+        document.getElementById('subwayyearlyridershipdaily').setAttribute('src', './assets/media/yearlysubwayridership.png?dummy' + Date.now());
+        document.getElementById('busyearlyridershipdaily').setAttribute('src', './assets/media/yearlybusridership.png?dummy' + Date.now());
     }
-    xhttp.open("GET", "./data.json");
+    xhttp.open("GET", "./assets/data.json");
     xhttp.send();
 
     // Extract subway line identifiers from station name
