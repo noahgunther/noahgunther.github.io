@@ -129,6 +129,26 @@
       <img src="./graphics/3D/3D_process/3D_12.png"/>
       <p>My next task was adding doors and windows to the buildings. This was achieved using the 2D domain repetition technique on the building surfaces, and modifying the size of the windows based on the building sub-ID, also used to determine building material. The windows are heavily aliased here, since no smooth stepping has been implemented yet.</p><br/>
       <img src="./graphics/3D/3D_process/3D_14.png"/>
+      <p>I started adding a day / night cycle, and, critically, some of the windows needed to be illuminated. I used some randomness to determine which windows lit up, as well as slightly randomly offsetting the emissive colors.</p><br/>
+      <img src="./graphics/3D/3D_process/3D_17.png"/>
+      <img src="./graphics/3D/3D_process/3D_15.png"/>
+      <img src="./graphics/3D/3D_process/3D_16.png"/>
+      <p>As time cycled, I altered the color values from the light source and the sky to emulate a hazy yellow sunrise and a pink-orange sunset. At night, I added a touch of blue.</p><br/>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity3D_sunrise.mp4#t=0.01">
+      </video><br/><br/>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity3D_sunset.mp4#t=0.01">
+      </video><br/><br/>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity3D_moonrise.mp4#t=0.01">
+      </video><br/><br/>
+      <p>In addition to the color changes, I added a sun, moon, and stars. The sun and moon are 2D SDFs, rotating through the sky, but the stars presented a new challenge. A 2D noise texture didn't look right projected in the 3D space, so I eventually used a 3D noise volume and sampled it to draw the stars. I also used a slice of this volume to give the parks and building roofs some slight color variation. Above are the sunrise, sunset, and moonrise in the final version of the shader.</p><br/>
+      <img src="./graphics/3D/3D_aa/mipmaps_combined.png"/>
+      <p>A common problem in any 3D scene is aliasing, and there are a wide array of techniques commonly used to anti-alias a rendered image. Some of these target the aliasing of 2D textures applied to 3D surfaces, such as the aliasing of the road markings visible in the far distance of the top left image. As the road stretches away, the road markings, smooth stepped 2D SDFs, become smaller and smaller, eventually only taking up a sparse handful of pixels, which appear quite jagged and are very noticeable when the scene is in motion. A common solution to this are <a href="https://en.wikipedia.org/wiki/Mipmap">mipmaps</a>, smaller resolution iterations of a texture that are applied to a surface as distance or viewing angle is increased.</p>
+      <p>The middle image above shows the same road with mipmaps applied at intervals of distance, reducing the road texture aliasing, and on the right are the raw mipmaps for the road markings.</p><br/>
+      <img src="./graphics/3D/3D_aa/smooth_windows_combined.png"/>
+      <p>The aliasing on the windows is an example of the same kind of 2D aliasing we saw in the 2D version of this shader. We can smoothstep over the previously aliased SDFs (above left) to give them a soft, anti-aliased edge (above right). Like with mipmaps, we can increase this softening with distance and viewing angle.</p><br/>
       <br/><br/><p style="text-align: center; clear: left;">© 2025 Noah Gunther</p>
     </div>
   </body>

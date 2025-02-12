@@ -2,12 +2,9 @@ Grid City:
 -Blog post
 
 --3D:
-----Geometry bounding optimization
-----Sky / time of day
-----AO / Soft shadows
 ----AA (2D sdfs, FXAA, near miss technique (not implemented))
-----Color curving / gamma
-----More final images
+----AO / Soft shadows
+----Final images
 ----Path tracing bonus
 
 --Editing pass
