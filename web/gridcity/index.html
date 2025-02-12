@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-NKRE9H80JX');
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
+    <link rel="icon" type="image/svg+xml" href="./graphics/icon.png" />
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grid City</title>
+  </head>
+  <body id="body">
+    <!--Main script-->
+    <script id="main" type="module" src="./main.js"></script>
+    <!--Main navigation links and mobile nav links-->
+    <div id="home" class="logolink">
+      <img id="logolink" style="height: 100%; width: 100%;" src="./graphics/icon.png">
+    </div>
+    <div id="mainnavlinks">
+      <div id="other" class="link">Gallery</div>
+      <div id="houdini" class="link">Houdini</div>
+      <div id="web" class="link">Web</div>
+      <div id="vr" class="link">VR</div>
+      <div id="ar" class="link">AR</div>
+      <div id="about" class="link">About</div>
+    </div>
+    <div id="mobilenavlinksbutton">
+      <div id="mobilenavlinksbuttontop"></div>
+      <div id="mobilenavlinksbuttonmiddle"></div>
+      <div id="mobilenavlinksbuttonbottom"></div>
+    </div>
+    <div id="mobilenavmenu" style="visibility: hidden;">
+      <div id="mobilenavlinks">
+        <div class="mobilemenuwrapper">
+          <div class="mobilelinkwrapper">
+            <div id="aboutmobile" class="mobilelink">About</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="armobile" class="mobilelink">AR</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="vrmobile" class="mobilelink">VR</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="webmobile" class="mobilelink">Web</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="houdinimobile" class="mobilelink">Houdini</div>
+          </div>
+          <div class="mobilelinkwrapper">
+            <div id="othermobile" class="mobilelink">Gallery</div>
+          </div>
+        </div>
+      </div>
+      <div id="mobilenavbackgroundblur"></div>
+    </div>
+    <!--Page Content-->
+    <div id="header">
+      <div id="headertext">
+        Grid City Shader
+      </div>
+    </div>
+    <div id="content">
+      <p><i>Feb. 11, 2024</i></p><br/><br/>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity3D_cycle.mp4#t=0.01">
+      </video><br/><br/>
+      <p><a href="https://www.shadertoy.com/view/lXcyDl">Grid City</a>, a math and code based infinite 3D city, is an attempt at creating a fragment shader (graphics code informing the color of each pixel) that renders a cityscape in real time using a 3D rendering technique known as raymarching. I wrote this shader on <a href="https://shadertoy.com">Shadertoy.com</a>, a site for creating and sharing this kind of shader.</p>
+      <p>Creating a world like this using only a fragment shader often involves using signed distance functions, or SDFs, to define geometry, as opposed to the traditional polygonal meshes used in 3D graphics. In this shader, everything you see is defined by an SDF - 3D SDFs define the buildings, cars, trees, while 2D SDFs are used for the windows, street markings, and car lights, to name a few examples.</p><br/>
+      <hr/><br/>
+      <p>When I started this project, I knew I wanted to create a 3D city, inspired by New York City, but as is often the case with building in 3D, it was easier to start with two dimensions. The below video is from <a href="https://www.shadertoy.com/view/43ccW2">Grid City 2D</a>, the shader I wrote as a preliminary sketch for the 3D version.</p>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity2D.mp4#t=0.01">
+      </video><br/><br/>
+      <p>One amazing aspect of art created with graphics code is the infinite repeatability of space. If you play video games, you've probably noticed places where textures are repeated across surfaces - the image being tiled indefinitely. This is achieved by sampling the texture repeatedly, starting over each time we reach the end. We can use the same logic to repeat space in a shader like this, creating an infinite grid of 'cells' or 'tiles.' This technique is known as <a href="https://iquilezles.org/articles/sdfrepetition/">Domain Repetition</a>, and can be applied to any number of dimensions.</p>
+      <p>In the linked article, Inigo Quilez says it best: it's a "mind blowing moment ... when one learns that with Domain Repetition a simple line of code can replicate an object infinite many times without requiring writing hundreds of lines of instancing infrastructure." What's particularly fascinating about Domain Repetition is not only that we can infinitely repeat a tile, we can also use the unique coordinates of each tile to change what appears in that tile.</p><br/>
+      <img src="./graphics/2D/2D_02.png"/>
+      <p>Using 2D domain repetition to divide up the space and <a href="https://iquilezles.org/articles/distfunctions2d/">2D SDFs (catalogued by Inigo Quilez)</a> to draw shapes, Grid City 2D started to take shape. Each tile represents a block, with a variety of configurations of buildings, vehicles, and trees. Parks and lakes, which need to span multiple tiles, are shaped according to a function that checks the eight neighbors in a square around each tile, and creates geometry accordingly.</p><br/>
+      <img src="./graphics/2D/2D_01.png"/>
+      <p>I also added elevated trains, which use domain repetition in only one dimension, and a helicopter (or UFO) that flies above the city once in a while. Everything else exists within the bounds of the 2D city grid.</p><br/>
+      <img src="./graphics/2D/2D_03.png"/>
+      <p>Block, park, and lake states are all determined using a noise function, so they aren't purely random and instead form 'blobs' or clusters of like tiles. If you zoom out a little bit, you can see the clusters more clearly.</p><br/>
+      <img src="./graphics/2D/2D.gif"/>
+      <p>A particularly challenging feature I wanted to include was this wave animation - the waves fade in and move outward, while the tide rolls in and out. Because the lake tiles are formed by combining multiple sphere and rounded box SDF shapes, the waves had to be carefully programmed to follow the shape of the shoreline and line up perfectly where the shapes are combined.</p><br/>
+      <img src="./graphics/2D/aa.png"/>
+      <p>Before moving on to the 3D Grid City shader, I want to touch on <a href="https://en.wikipedia.org/wiki/Aliasing">AA - anti-aliasing</a> - in the 2D version. When I first published this shader, it was heavily aliased, because I was stepping from SDF to SDF without any smoothness, creating hard lines and jagged pixel edges. Based on advice in the comments of the shader, I updated all the SDFs to use the smoothstep function to transition gradually between definitions - in the above image, the original aliased version is represented on the left, and the updated anti-aliased version is on the right.</p><br/>
+      <hr/><br/>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity3D_cycle_topdown.mp4#t=0.01">
+      </video><br/><br/>
+      <p>Like the 2D version of Grid City, the 3D version uses SDFs to define geometry; this time, <a href="https://iquilezles.org/articles/distfunctions/">3D signed distance functions</a>. I used a plane for the ground, rounded boxes for the buildings and cars, round cones for the trees, and extruded 2D SDFs for sidewalks and parks.</p>
+      <p>2D SDFs play a big role here, too. In addition to being extruded for some 3D geometry, they also define the road markings, car lights and windows, and building windows - the sides of the buildings are actually divided up using the same 2D domain repetition technique described above, to infinitely repeat the window rectangle on the building surfaces.</p><br/>
+      <img src="./graphics/3D/3D_process/3D_00.png"/>
+      <p>Domain repetition works in 3D largely the same way it works in 2D, just with a third dimension. Above is my first pass at bringing the logic that determines building height with a noise function into a 3D raymarched space. <a href="https://iquilezles.org/articles/raymarchingdf/">Inigo Quilez has a great page on raymarching</a> - essentially, each pixel 'marches' a ray through space away from the camera until it gets close enough to call something a surface, or it reaches a maximum distance.</p>
+      <p>In addition to rendering geometry based on a camera (ray origin), raymarching can also be used to do things like calculate shadows - raymarch from the camera to a surface, then raymarch from the surface to the position of a light. If some geometry is encountered before the light position is reached, that surface point would be in shadow. The shadows of the blocks above are rendered using this technique.</p><br/>
+      <img src="./graphics/3D/3D_process/3D_01.png"/>
+      <p>After I had some basic blocks / buildings in place, I started bringing other geometry over from the 2D shader. I ported the road markings, which work well on a 2D plane without much adjustment, and added simple trees, sidewalks, and parks using all the same logic. Things were looking pretty good! However, this shader was running extremely slowly on my NVIDIA GTX 1080 Ti (a great GPU released in 2017), and I had barely gotten started.</p>
+      <p>There are a few issues here, but one of the biggest are the noise functions that determine building height and where parks appear, and the function that computes how a park tile should configure based on its neighbors. In the 2D version of the shader, these functions were being called once per pixel, which is fine, but in this version, because of the raymarching loop, they were being called hundreds of times per pixel - once each time the ray marched forward.</p>
+      <img src="./graphics/3D/3D_data_buffer.gif" style="width:25%; outline: 3px solid black; outline-offset: -3px;"/>
+      <p>The solution I found was to use a data buffer - on Shadertoy, this exists as a secondary pixel shader that can be accessed from the main image. Because Grid City is all based on a 2D grid, each block being one tile, we can write the data for each tile to one individual pixel of this data buffer. The result is this bitmap, accessed each time the main shader would previously calculate these values at a significantly reduced computational cost. The lower square contains the data for building height (in the red channel) as well as park locations (green) and park tile configuration (blue).</p>
+      <p>The top square contains random values in each channel - useful for performance so we can avoid calling a random number function every time we need some randomness. The maps are limited to 128x128 pixels, more than enough since the maximum render distance is 50 blocks in any direction. The buffer is moving at the same rate as the camera moves over the city, keeping the data consistent with the tiles we can see.</p><br/>
+      <img src="./graphics/3D/3D_process/3D_03.png"/>
+      <p>On a walk one day, I noticed how buildings far away tend to appear lower down on the horizon and I wanted to replicate this effect in the shader. I warped the space down as the distance from the camera grows, which created the effect of a curved horizon and the planet rolling by under the camera. I also added cars at this point.</p><br/>
+      <img src="./graphics/3D/3D_process/3D_04.png"/>
+      <p>If you increase the displacement of the space considerably further, you can completely wrap it into a ball - this was a really fun surprise and reminds me a lot of sphere based games like Super Mario Galaxy or Katamari Damacy. This game me some style inspiration as I moved forward.</p><br/>
+      <img src="./graphics/3D/3D_process/3D_05.png"/>
+      <p>Next, I added individual buildings, with different configurations for each block, like in the 2D shader. Once again, though, I was running into significant performance issues. This time, I couldn't move costly functions into a data buffer, but there was one other major issue in my raymarching setup - material assignment.</p>
+      <img src="./graphics/3D/3D_process/3D_06.png"/>
+      <p>Stepping back for a moment: in raymarching a 3D scene, the primary goal is to get the distance from the camera (ray origin) to the nearest geometry surface. Represented visually, that distance looks something like the above, where the darker values correspond to shorter distances.</p>
+      <img src="./graphics/3D/3D_process/3D_08.png"/>
+      <p>Using that distance value with the scene geometry, you can find the normal vector of the surface at each pixel and calculate lighting for the scene, as seen above. You can also fade geometry out based on distance, shown here, as if it's occluded by the atmosphere.</p>
+      <br/><br/><p style="text-align: center; clear: left;">© 2025 Noah Gunther</p>
+    </div>
+  </body>
+</html>

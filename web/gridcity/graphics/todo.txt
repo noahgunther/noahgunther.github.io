@@ -1,0 +1,16 @@
+Grid City:
+-Blog post
+
+--3D:
+----Building noise & parks from 2D bitmap in data buffer
+----Texture / color buffer
+----Space curving
+----Material setup fix
+----Sky / time of day
+----AO / Soft shadows
+----AA (2D sdfs, FXAA, near miss technique (not implemented))
+----Color curving / gamma
+----More final images
+----Path tracing bonus
+
+-SPELL CHECK!
