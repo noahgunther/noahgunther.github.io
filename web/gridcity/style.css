@@ -161,7 +161,7 @@ h1 {
 }
 
 h2 {
-  font-size: min(max(1.5vw, 90%), 300%);
+  font-size: min(max(1.5vw, 110%), 300%);
   font-weight: 400;
   color: rgb(63, 63, 63);
   clear: left;
