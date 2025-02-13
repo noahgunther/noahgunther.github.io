@@ -85,7 +85,7 @@
       </video><br/><br/>
       <hr/><br/>
       <h2>Domain Repetition</h2>
-      <p>One amazing aspect of art created with graphics code is the infinite repeatability of space. If you play video games, you've probably noticed places where textures are repeated across surfaces - the image being tiled indefinitely. This is achieved by sampling the texture repeatedly, starting over each time we reach the end. We can use the same logic to repeat space in a shader like this, creating an infinite grid of 'cells' or 'tiles.' This technique is known as <a href="https://iquilezles.org/articles/sdfrepetition/">Domain Repetition</a>, and can be applied to any number of dimensions.</p>
+      <p>One amazing aspect of art created with graphics code is the infinite repeatability of space. If you play video games, you've probably noticed repeated textures tiled across surfaces. This is achieved by sampling the texture repeatedly, starting over each time we reach the end. We can use the same logic to repeat space in a shader like this, creating an infinite grid of 'cells' or 'tiles.' This technique is known as <a href="https://iquilezles.org/articles/sdfrepetition/">Domain Repetition</a>, and can be applied to any number of dimensions.</p>
       <p>In the linked article, Inigo Quilez says it best: it's a "mind blowing moment ... when one learns that with Domain Repetition a simple line of code can replicate an object infinite many times without requiring writing hundreds of lines of instancing infrastructure." What's particularly fascinating about Domain Repetition is not only that we can infinitely repeat a tile, we can also use the unique coordinates of each tile to change what appears in that tile.</p><br/>
       <img src="./graphics/2D/2D_02.png"/>
       <p>Using 2D domain repetition to divide up the space and <a href="https://iquilezles.org/articles/distfunctions2d/">2D SDFs (catalogued by Inigo Quilez)</a> to draw shapes, Grid City 2D started to take shape. Each tile represents a block, with a variety of configurations of buildings, vehicles, and trees. Parks and lakes, which need to span multiple tiles, are shaped according to a function that checks the eight neighbors in a square around each tile, and creates geometry accordingly.</p><br/>
@@ -96,7 +96,7 @@
       <hr/><br/>
       <img src="./graphics/2D/2D.gif"/>
       <h2>Wave Animation</h2>
-      <p>A particularly challenging feature I wanted to include was the above wave animation - the waves fade in and move outward, while the tide rolls in and out. Because the lake tiles are formed by combining multiple sphere and rounded box SDF shapes, the waves had to be carefully programmed to follow the shape of the shoreline and line up perfectly where the shapes are combined.</p><br/>
+      <p>A particularly challenging feature was the above wave animation - fading in and moving toward shore, while the tide rolls in and out. Because the lake tiles are formed by combining multiple sphere and rounded box SDF shapes, the waves had to be carefully programmed to follow the shape of the shoreline and line up perfectly where the shapes are combined.</p><br/>
       <hr/><br/>
       <img src="./graphics/2D/aa.png"/>
       <h2>Anti-Aliasing</h2>
