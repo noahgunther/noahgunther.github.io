@@ -106,6 +106,9 @@
       <video controls muted playsinline preload="auto" autoplay loop>
         <source type='video/mp4' src="./videos/gridCity3D_cycle_topdown.mp4#t=0.01">
       </video><br/><br/>
+      <video controls muted playsinline preload="auto" autoplay loop>
+        <source type='video/mp4' src="./videos/gridCity3D_sphere.mp4#t=0.01">
+      </video><br/><br/>
       <h2>3D SDFs</h2>
       <p>Like the 2D version of Grid City, the 3D version uses SDFs to define geometry; this time, <a href="https://iquilezles.org/articles/distfunctions/">3D signed distance functions</a>. I used a plane for the ground, rounded boxes for the buildings and cars, round cones for the trees, and extruded 2D SDFs for sidewalks and parks.</p>
       <p>2D SDFs play a big role here, too. In addition to being extruded for some 3D geometry, they also define the road markings, car lights and windows, and building windows - the sides of the buildings are actually divided up using the same 2D domain repetition technique described above, to infinitely repeat the window rectangle on the building surfaces.</p><br/>
