@@ -1,9 +1,0 @@
-Grid City:
--Blog post
-
---3D:
-----Final images
-----Path tracing bonus
-
---Editing pass
---Post (linkedin, IG)

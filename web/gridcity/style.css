@@ -160,6 +160,13 @@ h1 {
   clear: left;
 }
 
+h2 {
+  font-size: min(max(1.5vw, 90%), 300%);
+  font-weight: 400;
+  color: rgb(63, 63, 63);
+  clear: left;
+}
+
 p {
   font-size: min(max(1.0vw, 100%), 200%);
 }
