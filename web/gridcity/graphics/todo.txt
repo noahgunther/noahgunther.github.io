@@ -2,8 +2,6 @@ Grid City:
 -Blog post
 
 --3D:
-----AA (2D sdfs, FXAA, near miss technique (not implemented))
-----AO / Soft shadows
 ----Final images
 ----Path tracing bonus
 
