@@ -188,6 +188,7 @@ img {
   padding-left: 0px;
   padding-top: 0px;
   transform: translate(-50%, 0%);
+  overflow: hidden;
 }
 
 video {
@@ -195,6 +196,7 @@ video {
   padding-top: 2%;
   padding-bottom: 2%;
   float: left;
+  overflow: hidden;
 }
 
 .portraitvideo {
