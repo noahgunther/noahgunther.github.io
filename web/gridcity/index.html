@@ -70,7 +70,7 @@
       </div>
     </div>
     <div id="content">
-      <h1>Breakdown and Process</h1>
+      <p>Breakdown and Process</p>
       <p><i>Feb. 11, 2024</i></p><br/><br/>
       <video controls muted playsinline preload="auto" autoplay loop>
         <source type='video/mp4' src="./videos/gridCity3D_cycle.mp4#t=0.01">
@@ -78,13 +78,13 @@
       <p><a href="https://www.shadertoy.com/view/lXcyDl">Grid City</a>, a math and code based infinite 3D city, is an attempt at creating a fragment shader (graphics code informing the color of each pixel) that renders a cityscape in real time using a 3D rendering technique known as raymarching. I wrote this shader on <a href="https://shadertoy.com">Shadertoy.com</a>, a site for creating and sharing this kind of code.</p>
       <p>Creating a world like this using only a fragment shader often involves using signed distance functions, or SDFs, to define geometry, as opposed to the traditional polygonal meshes used in 3D graphics. In this shader, everything you see is defined by an SDF - 3D SDFs define the buildings, cars, trees, while 2D SDFs are used for the windows, street markings, and car lights, to name a few examples.</p><br/>
       <hr/><br/>
-      <h1>Grid City 2D</h1>
+      <p>Grid City 2D</p>
       <p>When I started this project, I knew I wanted to create a 3D city inspired by New York, but as is often the case with building in 3D, it was easier to start with two dimensions. The below video is from <a href="https://www.shadertoy.com/view/43ccW2">Grid City 2D</a>, the shader I wrote as a preliminary sketch for the 3D version.</p>
       <video controls muted playsinline preload="auto" autoplay loop>
         <source type='video/mp4' src="./videos/gridCity2D.mp4#t=0.01">
       </video><br/><br/>
       <hr/><br/>
-      <h2>Domain Repetition</h2>
+      <p><b>Domain Repetition</b></p>
       <p>One amazing aspect of art created with graphics code is the infinite repeatability of space. If you play video games, you've probably noticed repeated textures tiled across surfaces. This is achieved by sampling the texture repeatedly, starting over each time we reach the end. We can use the same logic to repeat space in a shader like this, creating an infinite grid of 'cells' or 'tiles.' This technique is known as <a href="https://iquilezles.org/articles/sdfrepetition/">Domain Repetition</a>, and can be applied to any number of dimensions.</p>
       <p>In the linked article, Inigo Quilez says it best: it's a "mind blowing moment ... when one learns that with Domain Repetition a simple line of code can replicate an object infinite many times without requiring writing hundreds of lines of instancing infrastructure." What's particularly fascinating about Domain Repetition is not only that we can infinitely repeat a tile, we can also use the unique coordinates of each tile to change what appears in that tile.</p><br/>
       <img src="./graphics/2D/2D_02.png"/>
@@ -95,32 +95,32 @@
       <p>Block, park, and lake states are all determined using a noise function, so they aren't purely random and instead form 'blobs' or clusters of like tiles. If you zoom out a little bit, you can see the clusters more clearly.</p><br/>
       <hr/><br/>
       <img src="./graphics/2D/2D.gif"/>
-      <h2>Wave Animation</h2>
+      <p><b>Wave Animation</b></p>
       <p>A particularly challenging feature was the above wave animation - fading in and moving toward shore, while the tide rolls in and out. Because the lake tiles are formed by combining multiple sphere and rounded box SDF shapes, the waves had to be carefully programmed to follow the shape of the shoreline and line up perfectly where the shapes are combined.</p><br/>
       <hr/><br/>
       <img src="./graphics/2D/aa.png"/>
-      <h2>Anti-Aliasing</h2>
+      <p><b>Anti-Aliasing</b></p>
       <p>Before moving on to the 3D Grid City shader, I want to touch on <a href="https://en.wikipedia.org/wiki/Aliasing">AA - anti-aliasing</a> - in the 2D version. When I first published this shader, it was heavily aliased, because I was stepping from SDF to SDF without any smoothness, creating hard lines and jagged pixel edges. Based on advice in the comments of the shader, I updated all the SDFs to use the smoothstep function to transition gradually between definitions - in the above image, the original aliased version is represented on the left, and the updated anti-aliased version is on the right.</p><br/>
       <hr/><br/>
-      <h1>Grid City 3D</h1>
+      <p>Grid City 3D</p>
       <video controls muted playsinline preload="auto" autoplay loop>
         <source type='video/mp4' src="./videos/gridCity3D_cycle_topdown.mp4#t=0.01">
       </video><br/><br/>
       <video controls muted playsinline preload="auto" autoplay loop>
         <source type='video/mp4' src="./videos/gridCity3D_sphere.mp4#t=0.01">
       </video><br/><br/>
-      <h2>3D SDFs</h2>
+      <p><b>3D SDFs</b></p>
       <p>Like the 2D version of Grid City, the 3D version uses SDFs to define geometry; this time, <a href="https://iquilezles.org/articles/distfunctions/">3D signed distance functions</a>. I used a plane for the ground, rounded boxes for the buildings and cars, round cones for the trees, and extruded 2D SDFs for sidewalks and parks.</p>
       <p>2D SDFs play a big role here, too. In addition to being extruded for some 3D geometry, they also define the road markings, car lights and windows, and building windows - the sides of the buildings are actually divided up using the same 2D domain repetition technique described above, to infinitely repeat the window rectangle on the building surfaces.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_process/3D_00.png"/>
-      <h2>3D Domain Repetition and Raymarching</h2>
+      <p><b>3D Domain Repetition and Raymarching</b></p>
       <p>Domain repetition works in 3D largely the same way it works in 2D, just with a third dimension. In this case, we don't actually need that third dimension, since we're only repeating across a plane, and can clamp the Y axis to a single iteration.</p>
       <p>Above is my first pass at bringing the logic that determines building height with a noise function into a 3D raymarched space. <a href="https://iquilezles.org/articles/raymarchingdf/">Inigo Quilez has a great page on raymarching</a> - essentially, each pixel 'marches' a ray through space away from the camera until it gets close enough to call something a surface, or it reaches a maximum distance.</p>
       <p>In addition to rendering geometry based on a camera (ray origin), raymarching can also be used to do things like calculate shadows - raymarch from the camera to a surface, then raymarch from the surface to the position of a light. If some geometry is encountered before the light position is reached, that surface point would be in shadow. The shadows of the blocks above are rendered using this technique.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_process/3D_01.png"/>
-      <h2>Optimizing Tile Logic</h2>
+      <p><b>Optimizing Tile Logic</b></p>
       <p>After I had some basic building blocks in place, I started bringing other geometry over from the 2D shader. I ported the road markings, which work well on a 2D plane without much adjustment, and added simple trees, sidewalks, and parks using all the same logic. However, this shader was running extremely slowly on my NVIDIA GTX 1080 Ti (a great GPU released in 2017), and I had barely gotten started.</p>
       <p>There are a few issues here, but one of the biggest are the noise functions that determine building height and where parks appear, and the function that computes how a park tile should configure based on its neighbors. In the 2D version of the shader, these functions were being called once per pixel, which is fine, but in this version, because of the raymarching loop, they were being called hundreds of times per pixel - once each time the ray marched forward.</p>
       <img src="./graphics/3D/3D_data_buffer.gif" style="width:25%; outline: 3px solid black; outline-offset: -3px;"/>
@@ -129,13 +129,13 @@
       <p>I also created a second buffer to store the color texture for the street markings, and other constant color values I'd need (such as building colors). The advantage of doing this is that the 2D SDFs that make up the street markings only needs to be calculated on the first frame, and can be stored for continued use.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_process/3D_03.png"/>
-      <h2>Warping Space</h2>
+      <p><b>Warping Space</b></p>
       <p>On a walk one day, I noticed how buildings far away tend to appear lower down on the horizon and I wanted to replicate this effect in the shader. I warped the space down as the distance from the camera increases, creating the effect of a curved horizon seen above; in motion, the planet slowly rolls by under the camera.</p><br/>
       <img src="./graphics/3D/3D_process/3D_04.png"/>
       <p>If you increase the displacement of the space considerably further, you can completely wrap it into a ball - this was a really fun surprise and reminded me of sphere-centric games like Super Mario Galaxy or Katamari Damacy. This association gave me some style inspiration as I went on.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_process/3D_05.png"/>
-      <h2>Material Assignment</h2>
+      <p><b>Material Assignment</b></p>
       <p>Next, I added individual buildings, with different configurations for each block, like in the 2D shader. Once again, though, I was running into significant performance issues. This time, I didn't have costly per-tile functions that I could move into a data buffer, but there was still one major issue in my raymarching setup - material assignment.</p>
       <img src="./graphics/3D/3D_process/3D_06.png"/>
       <p>Stepping back for a moment: in raymarching a 3D scene, the primary goal is to get the distance from the camera (ray origin) to the nearest geometric surface. Represented visually, that distance looks something like the above, where the darker values correspond to shorter distances. You can fade geometry out based on distance, shown below, as if it's occluded by the atmosphere.</p>
@@ -150,7 +150,7 @@
       <p>Also, while on the topic of optimization, Shadertoy user <a href="https://www.shadertoy.com/user/kastorp">kastorp</a> suggested exiting the geometry function early after building calculation (skipping trees and vehicles) if a certain height is exceeded, since nothing else is as tall as a building. This had an incredible impact on performance and freed resources for later additions like soft shadows and ambient occlusion.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_process/3D_12.png"/>
-      <h2>Doors and Windows</h2>
+      <p><b>Doors and Windows</b></p>
       <p>My next task was adding doors and windows to the buildings. This was achieved using the 2D domain repetition technique on the building surfaces, and modifying the size of the windows based on the building sub-ID used to determine building material. The windows are heavily aliased here, since no smooth stepping has been implemented yet.</p><br/>
       <img src="./graphics/3D/3D_process/3D_14.png"/>
       <p>I started adding a day / night cycle, and, critically, some of the windows needed to be illuminated. I used some randomness to determine which windows lit up, as well as slightly randomly offsetting the emissive colors.</p><br/>
@@ -158,7 +158,7 @@
       <img src="./graphics/3D/3D_process/3D_17.png"/>
       <img src="./graphics/3D/3D_process/3D_15.png"/>
       <img src="./graphics/3D/3D_process/3D_16.png"/>
-      <h2>Color and Time</h2>
+      <p><b>Color and Time</b></p>
       <p>As time cycled, I altered the color values from the light source and the sky to emulate a hazy yellow sunrise and a pink-orange sunset. At night, I added a touch of blue.</p><br/>
       <video controls muted playsinline preload="auto" autoplay loop>
         <source type='video/mp4' src="./videos/gridCity3D_sunrise.mp4#t=0.01">
@@ -172,7 +172,7 @@
       <p>In addition to the color changes, I added a sun, moon, and stars. The sun and moon are 2D SDFs, rotating through the sky, but the stars presented a new challenge. A 2D noise texture didn't look right projected in the 3D space, so I eventually used a 3D noise volume and sampled it to draw the stars. I also used a slice of this volume to give the parks and building roofs some slight color variation. Above are the sunrise, sunset, and moonrise in the final version of the shader.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_aa/mipmaps_combined.png"/>
-      <h2>Anti-Aliasing in 3D</h2>
+      <p><b>Anti-Aliasing in 3D</b></p>
       <p>A common problem in any 3D rendered scene is aliasing, and there are a wide array of techniques commonly used to anti-alias a rendered image. Some of these target the aliasing of 2D textures applied to 3D surfaces, such as the aliasing of the road markings visible in the far distance of the top left image. As the road stretches away, the road markings, smooth stepped 2D SDFs, become smaller and smaller, eventually only taking up a sparse handful of pixels, which appear quite jagged and are very noticeable when the scene is in motion. A common solution to this are <a href="https://en.wikipedia.org/wiki/Mipmap">mipmaps</a>, smaller resolution iterations of a texture that are applied to a surface as distance or viewing angle is increased.</p>
       <p>The middle image above shows the same road with mipmaps applied at intervals of distance, reducing the road texture aliasing, and on the right are the raw mipmaps for the road markings.</p><br/>
       <img src="./graphics/3D/3D_aa/smooth_windows_combined.png"/>
@@ -182,14 +182,14 @@
       <p>Note: another 3D AA technique specific to raymarching was suggested by Shadertoy user spalmer, <a href="https://www.shadertoy.com/view/ctVBRG">which finds the edges of geometry during raymarching and blends them to antialias the scene</a>. I wasn't able to successfully implement this method but when I have a chance I'd like to revisit it and try again.</p><br/>
       <hr/><br/>
       <img src="./graphics/3D/3D_passes/shadows_combined.png"/>
-      <h2>Light and Shadow</h2>
+      <p><b>Light and Shadow</b></p>
       <p>Shadows are also an interesting challenge. In the above image, lighting is calculated using the classic normal-dot-light formula, which determines which pixels of a surface should be illuminated. If we stop there, we get the image on the left, with lighting but no shadows. However, if we then raymarch from the surface point to the light source, we can determine whether the point is in shadow, creating the hard shadows shown in the middle.</p>
       <p>To get the soft shadows on the right, we can modify the shadow raymarching loop to decrease an illumination value gradually based on the proximity of the ray to the geometry surface as it marches. The more the ray is occluded as it steps, the more we reduce the illumination value, meaning areas where the marching ray will step past the geometry are darkened less than the fully occluded areas. Grid City has a toggle in the common tab where shadows can be disabled, set to hard, or (by default) set to soft.</p><br/>
       <img src="./graphics/3D/3D_passes/ao.png"/>
       <p>AO (ambient occlusion), shown above, is calculated very similarly to shadows, and adds a nice shading effect based on geometric proximity. To get AO values for a surface, we raymarch at the surface point not toward a light source, but simply in the direction of the surface normal vector. We then return the distance to the next surface hit, if any - if a surface is very close to another, it will be shaded darker.</p>
       <p>This same technique (raymarching again from the geometry point visible to the camera) can be used to calculate other things, like geometric reflections. To save on resources, though, I opted to instead use a cubemap for reflections; instead of raymarching again, we just sample a texture based on the reflected vector.</p><br/>
       <hr/><br/>
-      <h2>Material Combine</h2>
+      <p><b>Material Combine</b></p>
       <p>All these distance, normal, and lighting calculations combine to create a final image, composed of different material attributes - lighting, color, specularity, reflection, emission, and AO. Below are the various data and material values visualized independently.</p><br/>
       <img src="./graphics/3D/3D_passes/passes_combined.png"/>
       <p>Above, left to right from top to bottom: distance, normals (world space), diffuse lighting (soft shadows), AO, reflection, specular, color, and emissive values. Below: final images created from those values.</p>
@@ -199,7 +199,7 @@
       <img src="./graphics/3D/3D_final/3D_final_night.png"/>
       <img src="./graphics/3D/3D_final/3D_final_planet.png"/>
       <hr/><br/>
-      <h2>Bonus: Path Tracing</h2>
+      <p><b>Bonus: Path Tracing</b></p>
       <p>Shadertoy user <a href="https://www.shadertoy.com/user/FifthStateOfMatter">FifthStateOfMatter</a> created a <a href="https://en.wikipedia.org/wiki/Path_tracing">path traced</a> version of this shader; some captures shown below.</p><br/>
       <img src="./graphics/3D/pathtracing/PT_00.png"/>
       <img src="./graphics/3D/pathtracing/PT_01.png"/>
