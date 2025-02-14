@@ -183,12 +183,9 @@ p1 {
 }
 
 img {
+  display: block;
   width: max(75%, 195px);
-  max-width: 100%;
-  margin-left: 50%;
-  padding-left: 0px;
-  padding-top: 0px;
-  transform: translate(-50%, 0%);
+  margin: auto;
 }
 
 video {
