@@ -1,3 +1,6 @@
+/* Search params */
+const ptParam = (new URL(window.location)).searchParams.get('pt');
+
 /* Main Navigation Links */
 const mainNavLinks = document.getElementById("mainnavlinks");
 
@@ -116,9 +119,30 @@ function showMobileNavMenu() {
 }
 
 // Links
-var currentTarget = 'about';
-aboutLink.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
-aboutLinkMobile.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
+var currentTarget = 'games';
+gamesLink.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
+gamesLinkMobile.style.setProperty('border-color', 'rgb(255, 227, 100, 1.0)');
+
+var homeLinkMouseDown = false;
+
+homeLink.onmouseover = function() {
+  homeLinkMouseOver();
+}
+
+homeLink.onmouseout = function() {
+  homeLinkMouseDown = false;
+  homeLinkMouseOut();
+}
+
+homeLink.onmousedown = function() {
+  homeLinkMouseDown = true;
+}
+
+homeLink.onmouseup = function() {
+  if (homeLinkMouseDown) {
+    homeLinkClicked();
+  }
+}
 
 // About
 var aboutLinkMouseDown = false;
@@ -387,8 +411,13 @@ function homeLinkClicked() {
   homeLink.style.setProperty('animation', 'bounce 0.5s forwards');
 
   if (mobileNavMenuVisible) showMobileNavMenu();
-
-  location.href = "https://noahgunther.com"
+  
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com";
+  }
+  else {
+    location.href = "https://noahgunther.com/about";
+  }
 
 }
 
@@ -420,7 +449,12 @@ function aboutLinkClicked() {
   aboutLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/about"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/?context=about"
+  }
+  else {
+    location.href = "https://noahgunther.com/about";
+  }
 
 }
 
@@ -451,8 +485,13 @@ function arLinkClicked() {
   arLink.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   arLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
-
-  location.href = "https://noahgunther.com/ar"
+  
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/?context=ar"
+  }
+  else {
+    location.href = "https://noahgunther.com/ar";
+  }
 
 }
 
@@ -484,7 +523,12 @@ function gamesLinkClicked() {
   gamesLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/games/?pt=1"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/games"
+  }
+  else {
+    location.href = "https://noahgunther.com/games/?pt=1";
+  }
 
 }
 
@@ -512,7 +556,12 @@ function webLinkClicked() {
   webLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
   
-  location.href = "https://noahgunther.com/web/?pt=1"
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/web"
+  }
+  else {
+    location.href = "https://noahgunther.com/web/?pt=1";
+  }
 
 }
 
@@ -540,7 +589,11 @@ function houdiniLinkClicked() {
   houdiniLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
-  location.href = "https://noahgunther.com/houdini/?pt=1"
-
+  if (ptParam == null) {
+    location.href = "https://noahgunther.com/houdini"
+  }
+  else {
+    location.href = "https://noahgunther.com/houdini/?pt=1";
+  }
 
 }

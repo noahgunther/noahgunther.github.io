@@ -7,7 +7,7 @@ const mainNavLinks = document.getElementById("mainnavlinks");
 const homeLink = document.getElementById("home");
 const aboutLink = document.getElementById("about");
 const arLink = document.getElementById("ar");
-const vrLink = document.getElementById("vr");
+const gamesLink = document.getElementById("games");
 const webLink = document.getElementById("web");
 const houdiniLink = document.getElementById("houdini");
 
@@ -16,7 +16,7 @@ const mobileNavMenu = document.getElementById("mobilenavmenu");
 
 const aboutLinkMobile = document.getElementById("aboutmobile");
 const arLinkMobile = document.getElementById("armobile");
-const vrLinkMobile = document.getElementById("vrmobile");
+const gamesLinkMobile = document.getElementById("gamesmobile");
 const webLinkMobile = document.getElementById("webmobile");
 const houdiniLinkMobile = document.getElementById("houdinimobile");
 
@@ -240,52 +240,52 @@ arLinkMobile.onmouseup = function() {
   }
 }
 
-// VR
-var vrLinkMouseDown = false;
+// Games
+var gamesLinkMouseDown = false;
 
-vrLink.onmouseover = function() {
-  if (currentTarget != 'vr') {
-    vrLinkMouseOver();
+gamesLink.onmouseover = function() {
+  if (currentTarget != 'games') {
+    gamesLinkMouseOver();
   }
 }
 
-vrLink.onmouseout = function() {
-  if (currentTarget != 'vr') {
-    vrLinkMouseOut();
+gamesLink.onmouseout = function() {
+  if (currentTarget != 'games') {
+    gamesLinkMouseOut();
   }
-  vrLinkMouseDown = false;
+  gamesLinkMouseDown = false;
 }
 
-vrLink.onmousedown = function() {
-  vrLinkMouseDown = true;
+gamesLink.onmousedown = function() {
+  gamesLinkMouseDown = true;
 }
 
-vrLink.onmouseup = function() {
-  if (vrLinkMouseDown && currentTarget != 'vr') {
-    vrLinkClicked();
-  }
-}
-
-vrLinkMobile.onmouseover = function() {
-  if (currentTarget != 'vr') {
-    vrLinkMouseOver();
+gamesLink.onmouseup = function() {
+  if (gamesLinkMouseDown && currentTarget != 'games') {
+    gamesLinkClicked();
   }
 }
 
-vrLinkMobile.onmouseout = function() {
-  if (currentTarget != 'vr') {
-    vrLinkMouseOut();
+gamesLinkMobile.onmouseover = function() {
+  if (currentTarget != 'games') {
+    gamesLinkMouseOver();
   }
-  vrLinkMouseDown = false;
 }
 
-vrLinkMobile.onmousedown = function() {
-  vrLinkMouseDown = true;
+gamesLinkMobile.onmouseout = function() {
+  if (currentTarget != 'games') {
+    gamesLinkMouseOut();
+  }
+  gamesLinkMouseDown = false;
 }
 
-vrLinkMobile.onmouseup = function() {
-  if (vrLinkMouseDown && currentTarget != 'vr') {
-    vrLinkClicked();
+gamesLinkMobile.onmousedown = function() {
+  gamesLinkMouseDown = true;
+}
+
+gamesLinkMobile.onmouseup = function() {
+  if (gamesLinkMouseDown && currentTarget != 'games') {
+    gamesLinkClicked();
   }
 }
 
@@ -409,7 +409,7 @@ function homeLinkClicked() {
   homeLink.style.setProperty('animation', 'bounce 0.5s forwards');
 
   if (mobileNavMenuVisible) showMobileNavMenu();
-
+  
   if (ptParam == null) {
     location.href = "https://noahgunther.com";
   }
@@ -483,7 +483,7 @@ function arLinkClicked() {
   arLink.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   arLinkMobile.style.setProperty('animation', 'bounceChangeBorder 0.5s forwards');
   body.style.setProperty('cursor', 'default');
-
+  
   if (ptParam == null) {
     location.href = "https://noahgunther.com/?context=ar"
   }
@@ -493,39 +493,39 @@ function arLinkClicked() {
 
 }
 
-function vrLinkMouseOver() {
+function gamesLinkMouseOver() {
 
-  if (currentTarget != "vr") {
+  if (currentTarget != "games") {
 
-    vrLink.style.setProperty('animation', 'grow 0.25s forwards');
-    vrLinkMobile.style.setProperty('animation', 'grow 0.25s forwards');
+    gamesLink.style.setProperty('animation', 'grow 0.25s forwards');
+    gamesLinkMobile.style.setProperty('animation', 'grow 0.25s forwards');
     body.style.setProperty('cursor', 'pointer');
 
   }
 
 }
 
-function vrLinkMouseOut() {
+function gamesLinkMouseOut() {
 
-  vrLink.style.setProperty('animation', 'shrink 0.25s forwards');
-  vrLinkMobile.style.setProperty('animation', 'shrink 0.25s forwards');
+  gamesLink.style.setProperty('animation', 'shrink 0.25s forwards');
+  gamesLinkMobile.style.setProperty('animation', 'shrink 0.25s forwards');
   body.style.setProperty('cursor', 'default');
 
 }
 
-function vrLinkClicked() {
+function gamesLinkClicked() {
 
   if (mobileNavMenuVisible) showMobileNavMenu();
 
-  vrLink.style.setProperty('animation', 'bounce 0.5s forwards');
-  vrLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
+  gamesLink.style.setProperty('animation', 'bounce 0.5s forwards');
+  gamesLinkMobile.style.setProperty('animation', 'bounce 0.5s forwards');
   body.style.setProperty('cursor', 'default');
 
   if (ptParam == null) {
-    location.href = "https://noahgunther.com/vr/horizon"
+    location.href = "https://noahgunther.com/games"
   }
   else {
-    location.href = "https://noahgunther.com/vr/horizon/?pt=1";
+    location.href = "https://noahgunther.com/games/?pt=1";
   }
 
 }
