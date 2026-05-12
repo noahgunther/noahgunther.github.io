@@ -67,23 +67,35 @@
     </div>
     <div id="content">
       <p><i>Updated May 10, 2026</i></p><br/><br/>
+      <video id="dronedelivery" controls muted playsinline preload="auto">
+        <source type='video/mp4' src="./videos/delivery.mp4#t=0.1">
+      </video>
+      <p>This is a slice of a game centered around delivering packages to hard-to-reach places by drone - in this level, you fly against the wind to deliver a box to a family in the mountains.</p>
+      <img src="./graphics/pickup.gif">
+      <p>The controller for the drone and its grabber chain use physics bodies to simulate forces like gravity and directional input, allowing the weight of the attached box bouncing in space to pull the drone around. The chain animates procedurally when activated, enabling physics per link once they animate into place at the top of the chain. When it's recalled up again, the procedural animation happens in reverse.</p>
+      <br/>
+      <img src="./graphics/delivery.gif">
+      <p>In this level, wind increases as you climb higher, requiring flight to be handled precisely. If you break a fragile package (or knock over something in the yard), the recipient might be unhappy. In addition to the physics-based controller, I added a few animations to the drone, like the wobble when colliding with some impassable geometry.</p>
+      <br/>
       <img src="./graphics/chimney.gif">
+      <p>The chimney is animated using a vertex shader to drive deformation, timed to match the smoke, which is displaced and faded out using its own shader. The smoke uses a Fresnel alpha blend to fade out at the edges. I used custom shaders throughout the environment, particularly around the house and characters.</p>
+      <img src="./graphics/chimney_vertex_color.png" style="width: 26%;">
+      <p>The chimney shader uses vertex color to control where the pipe bulges with smoke (red) and where the upper portion lifts (green).</p>
       <br/>
       <img src="./graphics/tree.gif">
+      <p>Like the chimney, the trees are animated using a vertex shader that distinguishes between trunk and foliage, displacing the foliage more in the wind.</p>
+      <br/>
+      <img src="./graphics/bears.png">
+      <p>A custom surface shader with Fresnel and a noisy normal map is used to give the bears a warm, fuzzy appearance.</p>
       <br/>
       <img src="./graphics/water00.gif">
       <br/>
       <img src="./graphics/water01.gif">
+      <p>The water shader in this level uses a variety of techniques, including parallax to fake depth, displaced surface (skybox) reflections, depth-based opacity, surface animated noise, and Voronoi caustics (you can see a <a href="https://www.shadertoy.com/view/wXVSzt">real-time water shader with similar techniques at my shadertoy</a>). The ripples around the shorelines are a second shader rendered on a separate piece of geometry, with UV-based animation.</p>
       <br/>
       <img src="./graphics/terrain.png">
+      <p>In addition to the other environmental details I created for this project, I wrote a custom shader for the terrain that would blend different surfaces together based on various paramters, such as normal direction, height, and procedural noise.</p>
       <br/>
-      <img src="./graphics/pickup.gif">
-      <br/>
-      <img src="./graphics/delivery.gif">
-      <br/>
-      <video id="dronedelivery" controls muted playsinline preload="auto">
-        <source type='video/mp4' src="./videos/delivery.mp4#t=0.1">
-      </video>
       <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
     </div>
   </body>
