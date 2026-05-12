@@ -16,7 +16,7 @@
     <link rel="icon" type="image/svg+xml" href="../../icon.png" />
     <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Horizon Worlds</title>
+    <title>Meta Reality Labs | Horizon</title>
   </head>
   <body id="body">
     <!--Main script-->
@@ -62,15 +62,29 @@
     <!--Page Content-->
     <div id="header">
       <div id="headertext">
-        Horizon Worlds
+        Meta Reality Labs | Horizon
       </div>
     </div>
     <div id="content">
-      <p><i>Updated July 25, 2023</i></p><br/><br/>
-      <p>Since March of 2023, I've been working at Meta on <a href="https://www.meta.com/horizon-worlds/">Horizon Worlds</a>, their first-party "Metaverse" experience. Much of my work on Horizon isn't publicly available yet, but I'm excited for it to be shared with the world - stay tuned!</p>
+      <p><i>Updated May 12, 2026</i></p><br/><br/>
+      <img src="./graphics/central00.jpg" style="width: max(100%, 260px)">
+      <p>Since March 2023, I've been working at Meta Reality Labs on 3D graphics, gameplay, characters, and AI. The image above shows Horizon Central V2, a hub world that was released in 2025 - I worked with a large team of artists and engineers to bring graphics and gameplay elements to life.</p>
       <br/>
-      <img src="./graphics/horizon.jpg">
-      <p>Before joining the Horizon team, I worked at Meta on AR experiences for Instagram and Messenger. See the AR section of my website to learn more.</p>
+      <img src="./graphics/central01.jpg">
+      <p>Central V2 hosted larger groups of people on one server than previously possible - one feature I worked on were distance crowds, using particle systems to stand in for the usual complex avatars. I helped create the render pipeline, shader, and behavior code for these distant avatar systems.</p>
+      <p>In the left of the above image, you can also see portals that I worked on; writing and optimizing the parallax / skybox shaders that created the depth illusion, and writing the Typescript that drove a networked countdown, transition animation, and content refresh sequence.</p>
+      <br/>
+      <img src="./graphics/hopper_arrows.gif">
+      <p>I also built a wide variety of shader and rendering systems for Central V2, including this scrolling arrow effect, which only uses a single texture sample - you can see <a href="https://www.shadertoy.com/view/W33XW2">a shader that uses similar sampling to create a repeated effect on my shadertoy profile here</a>.</p>
+      <img src="./graphics/avatars.png">
+      <p>Meta went through a somewhat infamous transition to avatars with legs in 2023 (see above), during which I worked on the asset pipeline for avatars, used to process all the variations of hair, clothes, and more to ensure they worked for all shapes and sizes. Specifically, I built out parts of the pipeline used for testing to ensure that all LODs looked accurate, and that none of the assets were unexpectedly clipping through parts of the avatar that should be covered.</p>
+      <p>During this time, I also worked on the first prototype of a version of Horizon in which players could create avatars with much heavier customization, similar to VRChat. Eventually, some avatars in this style made it into the game, such as the two on the far ends of the above image.</p>
+      <img src="./graphics/gsplats.jpg">
+      <p>I also worked on several experimental projects involving AI and cutting edge graphics techniques. One specific area I worked in was <a href="https://en.wikipedia.org/wiki/Gaussian_splatting">GSplats, or Gaussian Splats</a>, a novel method for rendering 3D geometry in real time. This technique is often used to represent geomtry captured with physical cameras in real life, but in our case, we were using it to capture high quality renders of digital 3D assets that are difficult to render in real time, such as clouds, and create beautiful and optimized versions with splats.</p>
+      <img src="./graphics/gsops02.png">
+      <p><a href="https://www.cgnomads.com/">GSOPS, CGNomads GSplat toolkit for Houdini</a>, was primarily where I worked to render hundreds of images of an asset (in a setup similar to the above image), which I would then use a COLMAP fitting system to render out into a relatively low density splat asset.</p>
+      <p>Other experimental projects I worked on included many AI powered gameplay or game creation tools, such as a game where players generate AI entities that they then battle like Pokemon, script generation tools that create functional game code from text input, and systems that generate full gameplay loops with assets based on text input, similar to Claude + Threejs workflows.</p>
+      <p>Before joining the Horizon team, I worked at Meta on <a href="https://noahgunther.com/ar">AR experiences for Instagram and Messenger</a>.</p>
       <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
     </div>
   </body>
