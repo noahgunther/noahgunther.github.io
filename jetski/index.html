@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap">
+  <!-- Fonts used by the loading screen cycling animation -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital@1&family=Space+Mono&family=Oswald:wght@300&family=Merriweather:ital@1&family=Josefin+Sans:wght@300&family=Raleway:wght@300&family=Lora:ital@1&family=Inconsolata&family=Orbitron&family=Press+Start+2P&family=Special+Elite&family=Abril+Fatface&family=Courier+Prime:ital@1&family=Righteous&family=Permanent+Marker&family=Caveat&family=Pacifico&family=VT323&family=Syne:wght@300&display=swap">
+    <!-- Synchronously extract and apply background color from main.js config before rendering to prevent color flashes -->
+    <script>
+      (function() {
+        try {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', 'main.js', false);
+          xhr.send(null);
+          if (xhr.status === 200) {
+            var matchTop = xhr.responseText.match(/backgroundColorTop\s*:\s*['"]([^'"]+)['"]/);
+            var matchBottom = xhr.responseText.match(/backgroundColorBottom\s*:\s*['"]([^'"]+)['"]/);
+            var matchText = xhr.responseText.match(/hoverColorText\s*:\s*['"]([^'"]+)['"]/);
+            var hoverStyleText = '';
+            if (matchText && matchText[1]) {
+              hoverStyleText = ':root { --hover-color: ' + matchText[1] + '; }';
+            }
+            if (matchTop && matchBottom) {
+              var grad = 'linear-gradient(to bottom, ' + matchTop[1] + ', ' + matchBottom[1] + ')';
+              var style = document.createElement('style');
+              style.innerHTML = '#bg { background: ' + grad + ' !important; } body { background: transparent !important; } ' + hoverStyleText;
+              document.head.appendChild(style);
+            } else {
+              var match = xhr.responseText.match(/backgroundColor\s*:\s*['"]([^'"]+)['"]/);
+              if (match && match[1]) {
+                document.documentElement.style.backgroundColor = match[1];
+                var style = document.createElement('style');
+                style.innerHTML = 'body, #loading { background-color: ' + match[1] + ' !important; }';
+                document.head.appendChild(style);
+              }
+            }
+          }
+        } catch(e) {}
+      })();
+    </script>
+
+    <!--Google fonts-->
+    <meta charset="UTF-8" />
+
+    <!--Logo-->
+    <link id="logo" rel="icon" type="image"/>
+
+    <!--Import Map-->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+        }
+      }
+    </script>
+
+    <!--Styles-->
+    <link rel="stylesheet" href="style.css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--Title-->
+    <title id="title"></title>
+
+  </head>
+
+  <body id="body">
+
+    <canvas id="bg"></canvas>
+
+    <!--Main script-->
+    <script id="main" type="module" src="main.js"></script>
+
+    <!--Loading div-->
+    <div id="loading">
+      <p class="loading-text">Loading<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span></p>
+    </div>
+
+    <!--Main navigation links and mobile nav links-->
+    <div id="home" style="visibility: hidden" class="logolink">
+      <div id="logolink" class="logo-tint-mask" style="width: 100%; height: 100%;"></div>
+    </div>
+    <div id="mainnavlinks" style="position: absolute; top: 0; right: 0; width: 100%; z-index: 10; pointer-events: none; visibility: hidden;"></div>
+    <div id="linkedin-desktop-wrapper" style="position: absolute; bottom: 0; right: 0; z-index: 10; pointer-events: none; visibility: hidden; margin-bottom: 50px; margin-right: clamp(20px, 2.5vw, 50px);">
+      <a id="linkedin-desktop" href="https://www.linkedin.com/in/noah-gunther-3128bb185/" target="_blank" style="pointer-events: auto; display: block; width: clamp(32px, 2.1vw, 42px); height: clamp(32px, 2.1vw, 42px); border: none; padding: 0; text-decoration: none;">
+        <div id="linkedin-desktop-icon" class="logo-tint-mask" style="-webkit-mask-image: url('graphics/li_logo_white.png'); mask-image: url('graphics/li_logo_white.png'); width: 100%; height: 100%;"></div>
+      </a>
+    </div>
+    <div id="mobilenavlinksbutton" style="visibility: hidden;">
+      <div id="mobilenavlinksbuttontop"></div>
+      <div id="mobilenavlinksbuttonmiddle"></div>
+      <div id="mobilenavlinksbuttonbottom"></div>
+    </div>
+    <div id="mobilenavmenu" style="visibility: hidden;">
+      <div id="mobilenavlinks"></div>
+      <div id="mobilenavbackgroundblur"></div>
+    </div>
+    <div id="plaintext-link" aria-hidden="true">plain text</div>
+
+    <!--About me panel-->
+    <div id="aboutmepanel" style="visibility: hidden;">
+      <div id="aboutmepanelwrapper" style="padding: min(8vw, 40px); box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+        <h2 style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(20px, 2.5vw, 28px); margin: 0 0 20px 0; color: #ffae21;">About Noah Gunther</h2>
+        <p style="font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(14px, 1.5vw, 17px); line-height: 1.6; color: #333333; margin: 0; font-weight: 400;">
+          Technical Artist and Creative Coder specializing in real-time computer graphics, interactive web design, and AR/VR development. I build tools, pipelines, and premium digital experiences from prototype to production.
+        </p>
+      </div>
+    </div>
+
+    <!--Phone screen panel-->
+    <div id="phonescreen" style="visibility: hidden;">
+
+      <img src="./graphics/phoneback.png"/>
+
+      <div id="mobilearprojectsheader">
+        <div id="mobilearprojectsheaderclock"></div>
+        <div id="mobilearprojectsheaderwidgets">
+          <img src="./graphics/phonewidgeticons.png">
+        </div>
+        <div id="mobilearprojectsheadertext">
+          Mobile AR Projects
+        </div>
+      </div>
+
+      <div id="mobilearscrollwrapper"></div>
+
+      <div id="mobileartray" style="visibility: hidden;">
+        <div class="mobileartraybuttons" style="left: 18%">
+          <div id="mobileartraybuttonlast">
+            <img>
+          </div>
+        </div>
+        <div class="mobileartraybuttons">
+          <div id="mobileartraybuttonhome">
+            <img>
+          </div>
+        </div>
+        <div class="mobileartraybuttons" style="left: 82%;">
+          <div id="mobileartraybuttonnext">
+            <img>
+          </div>
+        </div>
+      </div>
+
+      <div id="mobilearinfobuttonwrapper" style="visibility: hidden;">
+        <div id="mobilearinfobutton" style="width: 100%; height: 100%;">
+          <img>
+        </div>
+      </div>
+
+      <video id="abstractlove" loop muted playsinline disablePictureInPicture preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/AbstractLove.mp4#t=0.1">
+      </video>
+      <video id="alienattack" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/AlienAttack.mp4#t=0.1">
+      </video>
+      <video id="angelsanddemons" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/AngelsAndDemons.mp4#t=0.1">
+      </video>
+      <video id="bumperroyale" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/BumperRoyale.mp4#t=0.1">
+      </video>
+      <video id="candycottage" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/CandyCottage.mp4#t=0.1">
+      </video>
+      <video id="charades" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/Charades.mp4#t=0.1">
+      </video>
+      <video id="costumeselector" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/CostumeSelector.mp4#t=0.1">
+      </video>
+      <video id="desertofdoom" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/DesertOfDoom.mp4#t=0.1">
+      </video>
+      <video id="dontfall" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/DontFall.mp4#t=0.1">
+      </video>
+      <video id="groupselfie" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/GroupSelfie.mp4#t=0.1">
+      </video>
+      <video id="haveyouever" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/HaveYouEver.mp4#t=0.1">
+      </video>
+      <video id="hotpotato" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/HotPotato.mp4#t=0.1">
+      </video>
+      <video id="jumpwave" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/JumpWave.mp4#t=0.1">
+      </video>
+      <video id="kawaiisushi" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/KawaiiSushi.mp4#t=0.1">
+      </video>
+      <video id="mazeofmystery" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/MazeOfMystery.mp4#t=0.1">
+      </video>
+      <video id="friendsspacewalk" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/FriendsSpacewalk.mp4#t=0.1">
+      </video>
+      <video id="pestcontrol" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/PestControl.mp4#t=0.1">
+      </video>
+      <video id="poolfloaty" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/PoolFloaty.mp4#t=0.1">
+      </video>
+      <video id="reshape" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/Reshape.mp4#t=0.1">
+      </video>
+      <video id="sk8erz" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/Sk8erz.mp4#t=0.1">
+      </video>
+      <video id="snackup" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/SnackUp.mp4#t=0.1">
+      </video>
+      <video id="snapnsnack" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/SnapNSnack.mp4#t=0.1">
+      </video>
+      <video id="speedrush" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/SpeedRush.mp4#t=0.1">
+      </video>
+      <video id="trivia" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/Trivia.mp4#t=0.1">
+      </video>
+      <video id="wintercoaster" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
+        <source type='video/mp4' src="./meta_ar_captures/WinterCoaster.mp4#t=0.1">
+      </video>
+
+    </div>
+
+    <!--AR info panel-->
+    <div id="arinfopanelbackgroundblur" style="visibility: hidden;"></div>
+    <div id="arinfopanel" style="visibility: hidden;">
+      <div id="arinfopanelwrapper">
+        <div class="arinfopanelicon">
+          <div id="arinfopanelicon">
+            <img id="abstractlovethumb" src="./graphics/arthumbs/abstractlove.png" style="visibility: hidden;">
+            <img id="alienattackthumb" src="./graphics/arthumbs/alienattack.png" style="visibility: hidden;">
+            <img id="angelsanddemonsthumb" src="./graphics/arthumbs/angelsanddemons.png" style="visibility: hidden;">
+            <img id="bumperroyalethumb" src="./graphics/arthumbs/bumperroyale.png" style="visibility: hidden;">
+            <img id="candycottagethumb" src="./graphics/arthumbs/candycottage.png" style="visibility: hidden;">
+            <img id="charadesthumb" src="./graphics/arthumbs/charades.png" style="visibility: hidden;">
+            <img id="costumeselectorthumb" src="./graphics/arthumbs/costumeselector.png" style="visibility: hidden;">
+            <img id="desertofdoomthumb" src="./graphics/arthumbs/desertofdoom.png" style="visibility: hidden;">
+            <img id="dontfallthumb" src="./graphics/arthumbs/dontfall.png" style="visibility: hidden;">
+            <img id="friendsspacewalkthumb" src="./graphics/arthumbs/friendsspacewalk.png" style="visibility: hidden;">
+            <img id="groupselfiethumb" src="./graphics/arthumbs/groupselfie.png" style="visibility: hidden;">
+            <img id="haveyoueverthumb" src="./graphics/arthumbs/haveyouever.png" style="visibility: hidden;">
+            <img id="hotpotatothumb" src="./graphics/arthumbs/hotpotato.png" style="visibility: hidden;">
+            <img id="jumpwavethumb" src="./graphics/arthumbs/jumpwave.png" style="visibility: hidden;">
+            <img id="kawaiisushithumb" src="./graphics/arthumbs/kawaiisushi.png" style="visibility: hidden;">
+            <img id="mazeofmysterythumb" src="./graphics/arthumbs/mazeofmystery.png" style="visibility: hidden;">
+            <img id="pestcontrolthumb" src="./graphics/arthumbs/pestcontrol.png" style="visibility: hidden;">
+            <img id="poolfloatythumb" src="./graphics/arthumbs/poolfloaty.png" style="visibility: hidden;">
+            <img id="reshapethumb" src="./graphics/arthumbs/reshape.png" style="visibility: hidden;">
+            <img id="sk8erzthumb" src="./graphics/arthumbs/sk8erz.png" style="visibility: hidden;">
+            <img id="snackupthumb" src="./graphics/arthumbs/snackup.png" style="visibility: hidden;">
+            <img id="snapnsnackthumb" src="./graphics/arthumbs/snapnsnack.png" style="visibility: hidden;">
+            <img id="speedrushthumb" src="./graphics/arthumbs/speedrush.png" style="visibility: hidden;">
+            <img id="triviathumb" src="./graphics/arthumbs/trivia.png" style="visibility: hidden;">
+            <img id="wintercoasterthumb" src="./graphics/arthumbs/wintercoaster.png" style="visibility: hidden;">
+          </div>
+        </div>
+        <div id="arinfopaneltextwrapper" class="arinfopaneltextwrapper">
+          <div id="arinfopanelsubject"></div>
+          <div id="arinfopaneltitle"></div>
+          <div id="arinfopanelsubtitle"></div>
+          <div id="arinfopanelcontent"></div>
+        </div>
+        <div id="arinfopanelclosebuttonwrapper">
+          <div id="arinfopanelclosebuttonback">
+            <img id="arinfopanelclosebuttonbackborder">
+            <div id="arinfopanelclosebutton">
+              <img>
+            </div>
+          </div>
+        </div>
+        <div id="arinfopanelmobilebuttonswrapper" style="visibility: hidden;">
+          <div id="arinfopanelmobilebuttonsback">
+            <img>
+            <div id="arinfopanelmobilelastanim" style="position: absolute; height: 100%; width: 100%; top: 0; left: -30%;">
+              <div id="arinfopanelmobilelastbutton" class="arinfopanelmobilebuttons">
+                <img>
+              </div>
+            </div>
+            <div id="arinfopanelmobilecloseanim" style="position: absolute; height: 100%; width: 100%; top: 0;">
+              <div id="arinfopanelmobileclosebutton" class="arinfopanelmobilebuttons">
+                <img>
+              </div>
+            </div>
+            <div id="arinfopanelmobilenextanim" style="position: absolute; height: 100%; width: 100%; top: 0; left: 30%;">
+              <div id="arinfopanelmobilenextbutton" class="arinfopanelmobilebuttons">
+                <img>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!--Down arrow-->
+    <div id="downarrow" style="visibility: hidden;">
+      <div id="downarrowback" class="downarrowwrapper">
+        <img>
+      </div>
+      <div id="downarrowfront" class="downarrowwrapper">
+        <img>
+      </div>
+    </div>
+
+    <!--Left arrow-->
+    <div id="leftarrow" style="visibility: hidden;">
+      <div id="leftarrowback" class="leftarrowwrapper" style="bottom: 10%;">
+        <img>
+      </div>
+      <div id="leftarrowfront" class="leftarrowwrapper" style="bottom: 11.15%;">
+        <img>
+      </div>
+    </div>
+
+    <!--Plain text site toggle-->
+    <a id="sitemodetoggle" href=""></div>
+
+  </body>
+
+</html>
