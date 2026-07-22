@@ -96,7 +96,7 @@ const SCENE_CONFIG = {
       roughness: 0.3                        // Surface roughness
     },
     rainbow: {
-      intensity: 1.0,                       // Glow strength of oil-slick rainbow shader
+      intensity: 0.0,                       // Glow strength of oil-slick rainbow shader
       scale: 0.2,                           // Band frequency (smaller = wider bands)
       angleFactor: 6.6,                     // Fresnel angle color shift amount
       shimmer: 0.0,                         // Time-based color shifting amplitude
@@ -171,8 +171,8 @@ const SCENE_CONFIG = {
     shadowScale: 1.6,                       // Shadow scale factor
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
-      hoverInVolume: 0.3,                    // Volume for aboutHover.ogg (0.0 to 1.0)
-      hoverOutVolume: 0.3                    // Volume for aboutOut.ogg (0.0 to 1.0)
+      hoverInVolume: 0.5,                    // Volume for aboutHover.ogg (0.0 to 1.0)
+      hoverOutVolume: 0.5                    // Volume for aboutOut.ogg (0.0 to 1.0)
     },
     shatter: {
       enabled: true,                         // Enable click-to-shatter explosion
@@ -187,7 +187,7 @@ const SCENE_CONFIG = {
       sparkleSpeed: 1.5,                     // Outward sparkle velocity
       fadeSpeed: 2.5,                        // Fade-out decay rate
       soundEnabled: true,                    // Enable shatter audio effect
-      volume: 0.8,                           // Shatter audio volume (0.0 to 1.0)
+      volume: 0.9,                           // Shatter audio volume (0.0 to 1.0)
       growVolume: 0.4,                       // Regrow audio volume (0.0 to 1.0)
       respawnDelay: 200,                    // Delay before grow-back animation (ms)
       respawnDuration: 800                   // Duration of grow-back animation (ms)
@@ -905,9 +905,13 @@ function init() {
 
   aboutPanelContent.innerHTML = `
     <h1 class="about-panel__title">About</h1>
-    <div class="about-panel__divider" aria-hidden="true">///</div>
+    <div class="about-panel__portrait-wrapper">
+      <img src="./graphics/portrait.png" alt="Noah Gunther Self Portrait" class="about-panel__portrait" />
+    </div>
     <p class="about-panel__email"><a href="mailto:noah.gunther@gmail.com">noah.gunther@gmail.com</a></p>
-    <p class="about-panel__body">I'm a Technical Artist and Creative Coder with a focus on 3D graphics and rendering. I've worked in web development, VR, mobile AR, game development, and offline rendered video. My work has involved writing code and creating graphics for immersive media, as well as creating tools for artists and building more experimental projects such as AI-driven gameplay and Gaussian Splat pipelines.</p>
+    <p class="about-panel__body">I'm a Technical Artist and Creative Coder with a focus on 3D graphics and rendering. I've worked in web development, VR, mobile AR, game development, and offline rendered video.</p>
+    <br/>
+    <p class="about-panel__body">My work involves writing code and creating graphics for immersive media, as well as creating tools for artists and building more experimental projects such as AI-driven gameplay and Gaussian Splat pipelines.</p>
     <br/>
     <p class="about-panel__body">This site was created with threejs. To learn more about this site and techniques I used, click here.</p>
   `;
@@ -1101,19 +1105,28 @@ function init() {
   const camera = new THREE.PerspectiveCamera(SCENE_CONFIG.camera.fov, window.innerWidth / window.innerHeight, SCENE_CONFIG.camera.near, SCENE_CONFIG.camera.far);
   camera.position.z = 7;
 
-  const lowPowerDeviceHint =
-    /Mobi|Android/i.test(navigator.userAgent) ||
-    (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4);
+  const isMobileBrowser = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
 
-  // WebGL Renderer
+  // WebGL Renderer with hardware MSAA enabled on all devices
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
-    antialias: !lowPowerDeviceHint,
+    antialias: true,
     alpha: true // let body gradient show through
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
-  const isLowPowerDevice = lowPowerDeviceHint || renderer.capabilities.isWebGL2 === false;
+
+  // Multisampled Render Target for EffectComposer (4x MSAA enabled on all devices)
+  const renderTarget = new THREE.WebGLMultisampleRenderTarget(
+    window.innerWidth,
+    window.innerHeight,
+    {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat
+    }
+  );
+  renderTarget.samples = 4;
 
   // Three.js FPS Performance Counter
   let stats = null;
@@ -1167,7 +1180,7 @@ function init() {
   scene.add(directionalLight);
 
   // Postprocessing composer & outline pass
-  const composer = new EffectComposer(renderer);
+  const composer = new EffectComposer(renderer, renderTarget);
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
@@ -1181,7 +1194,7 @@ function init() {
   composer.addPass(houdiniOutlinePass);
 
   let fxaaPass = null;
-  if (!isLowPowerDevice) {
+  if (!isMobileBrowser) {
     fxaaPass = new ShaderPass(FXAAShader);
     const pixelRatio = renderer.getPixelRatio();
 
@@ -3663,11 +3676,14 @@ function init() {
   };
 
   // AR Phone Info panel triggers
+  // AR Phone Info panel triggers
   phoneScreenInfoButton.onmouseover = () => {
+    if (isMobileBrowser) return;
     phoneScreenInfoButton.style.setProperty('animation', 'grow 0.25s forwards');
     body.style.setProperty('cursor', 'pointer');
   };
   phoneScreenInfoButton.onmouseout = () => {
+    if (isMobileBrowser) return;
     phoneScreenInfoButton.style.setProperty('animation', 'shrink 0.25s forwards');
     body.style.setProperty('cursor', 'default');
   };
@@ -3680,10 +3696,12 @@ function init() {
   };
 
   arInfoCloseButton.onmouseover = () => {
+    if (isMobileBrowser) return;
     arInfoCloseButton.style.setProperty('animation', 'grow 0.25s forwards');
     body.style.setProperty('cursor', 'pointer');
   };
   arInfoCloseButton.onmouseout = () => {
+    if (isMobileBrowser) return;
     arInfoCloseButton.style.setProperty('animation', 'shrink 0.25s forwards');
     body.style.setProperty('cursor', 'default');
   };
@@ -3700,10 +3718,12 @@ function init() {
 
   // AR Info Mobile popup buttons
   arInfoMobileLastButton.onmouseover = () => {
+    if (isMobileBrowser) return;
     arInfoMobileLastAnim.style.setProperty('animation', 'grow 0.25s forwards');
     body.style.setProperty('cursor', 'pointer');
   }
   arInfoMobileLastButton.onmouseout = () => {
+    if (isMobileBrowser) return;
     arInfoMobileLastAnim.style.setProperty('animation', 'shrink 0.25s forwards');
     body.style.setProperty('cursor', 'default');
   }
@@ -3715,10 +3735,12 @@ function init() {
   };
 
   arInfoMobileCloseButton.onmouseover = () => {
+    if (isMobileBrowser) return;
     arInfoMobileCloseAnim.style.setProperty('animation', 'grow 0.25s forwards');
     body.style.setProperty('cursor', 'pointer');
   }
   arInfoMobileCloseButton.onmouseout = () => {
+    if (isMobileBrowser) return;
     arInfoMobileCloseAnim.style.setProperty('animation', 'shrink 0.25s forwards');
     body.style.setProperty('cursor', 'default');
   }
@@ -3730,10 +3752,12 @@ function init() {
   };
 
   arInfoMobileNextButton.onmouseover = () => {
+    if (isMobileBrowser) return;
     arInfoMobileNextAnim.style.setProperty('animation', 'grow 0.25s forwards');
     body.style.setProperty('cursor', 'pointer');
   }
   arInfoMobileNextButton.onmouseout = () => {
+    if (isMobileBrowser) return;
     arInfoMobileNextAnim.style.setProperty('animation', 'shrink 0.25s forwards');
     body.style.setProperty('cursor', 'default');
   }
@@ -3745,8 +3769,8 @@ function init() {
   };
 
   // Hamburger mobile menu click button
-  mobileNavLinksButton.onmouseover = () => { if (canUse2DMenu()) body.style.setProperty('cursor', 'pointer'); }
-  mobileNavLinksButton.onmouseout = () => { body.style.setProperty('cursor', 'default'); }
+  mobileNavLinksButton.onmouseover = () => { if (!isMobileBrowser && canUse2DMenu()) body.style.setProperty('cursor', 'pointer'); }
+  mobileNavLinksButton.onmouseout = () => { if (!isMobileBrowser) body.style.setProperty('cursor', 'default'); }
   mobileNavLinksButton.onclick = () => { if (canUse2DMenu()) showMobileNavMenu(); }
 
   // Cubic Ease In Out function
@@ -3764,7 +3788,7 @@ function init() {
   // Main navigation bindings
   homeLink._hoverActive = false;
   homeLink.onmouseenter = () => {
-    if (canUse2DMenu()) {
+    if (!isMobileBrowser && canUse2DMenu()) {
       homeLink._hoverActive = true;
       homeLink.style.setProperty('animation', 'grow 0.25s forwards');
       body.style.setProperty('cursor', 'pointer');
@@ -3784,7 +3808,7 @@ function init() {
   };
 
   const setupNavLinkEvents = (el, cfg) => {
-    const canUseLink = () => canUse2DMenu() && (!cfg.currentTarget || currentTarget !== cfg.currentTarget) && !el.classList.contains('is-panel-open');
+    const canUseLink = () => !isMobileBrowser && canUse2DMenu() && (!cfg.currentTarget || currentTarget !== cfg.currentTarget) && !el.classList.contains('is-panel-open');
 
     el._hoverActive = false; // true only when grow has actually played
 
@@ -4114,15 +4138,29 @@ function init() {
     isTabHidden = document.hidden;
   });
 
+  let lastMobileRenderTime = 0;
+  const mobileFrameInterval = 1000 / 60; // Target ~16.666ms for 60 FPS cap
+
   // ==========================================
   // Three.js Animation Render Loop
   // ==========================================
   function animate() {
     requestAnimationFrame(animate);
     if (isTabHidden) return; // Pause rendering loop when tab is unfocused / hidden
-    if (stats) stats.update();
 
     const nowFrame = performance.now();
+
+    // 60 FPS frame rate cap for mobile devices (prevents battery drain & thermal throttling on 120Hz ProMotion screens)
+    if (isMobileBrowser) {
+      const elapsed = nowFrame - lastMobileRenderTime;
+      if (elapsed < mobileFrameInterval - 1.0) {
+        return;
+      }
+      lastMobileRenderTime = nowFrame - (elapsed % mobileFrameInterval);
+    }
+
+    if (stats) stats.update();
+
     const dt = Math.min(0.1, (nowFrame - lastFrameTime) * 0.001);
     lastFrameTime = nowFrame;
 
@@ -4192,8 +4230,8 @@ function init() {
 
     const isPointerOverUI = isPointerOver2DUI(lastClientX, lastClientY);
 
-    // Raycast for hover state (only active when interaction is enabled, on main page, once loaded, and when about panel is closed)
-    if (canInteract && currentTarget === 'main' && loadingComplete && !aboutOverlayVisible && !aboutOverlayAnimating) {
+    // Raycast for hover state (only active on non-mobile devices when interaction is enabled, on main page, once loaded, and when about panel is closed)
+    if (!isMobileBrowser && canInteract && currentTarget === 'main' && loadingComplete && !aboutOverlayVisible && !aboutOverlayAnimating) {
       let hoverTargetType = null;
       let hoverTargetObject = null;
 
@@ -5840,7 +5878,10 @@ function init() {
   }
 
   // Mouse drag camera rotation & 3D pointer tracking event listeners
-  window.addEventListener('pointerdown', (event) => {
+  let pointerDownPos = { x: 0, y: 0 };
+
+  const handlePointerDown = (event) => {
+    pointerDownPos = { x: event.clientX, y: event.clientY };
     active3DPointerDownTarget = get3DHitTarget(event.clientX, event.clientY);
 
     if (!canInteract || currentTarget !== 'main') return;
@@ -5850,19 +5891,26 @@ function init() {
     if (isMobileContext) return;
 
     // Disable drag if clicking on links, logo, navigation containers, or burger menu
-    if (event.target.closest('a') ||
+    if (event.target && event.target.closest && (
+        event.target.closest('a') ||
         event.target.closest('button') ||
         event.target.closest('#mainnavlinks') ||
         event.target.closest('.link') ||
         event.target.closest('#mobilenavlinksbutton') ||
         event.target.closest('#mobilenavmenu') ||
-        event.target.closest('.logolink')) {
+        event.target.closest('.logolink'))) {
       return;
     }
 
     isDraggingPointer = true;
     previousPointerPos = { x: event.clientX, y: event.clientY };
-  });
+  };
+
+  window.addEventListener('pointerdown', handlePointerDown);
+  const mainCanvas = document.getElementById('bg');
+  if (mainCanvas) {
+    mainCanvas.addEventListener('pointerdown', handlePointerDown);
+  }
 
   window.addEventListener('pointermove', (event) => {
     if (isDraggingPointer) {
@@ -6495,12 +6543,21 @@ function init() {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   });
 
-  window.addEventListener('click', (event) => {
+  let lastTapTimestamp = 0;
+  function handle3DPointerTap(event) {
     if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating) return;
 
-    if (typeof isPointerOver2DUI === 'function' && isPointerOver2DUI(event.clientX, event.clientY)) return;
+    const now = performance.now();
+    if (now - lastTapTimestamp < 60) return; // Deduplicate pointerup and click events
+    lastTapTimestamp = now;
 
-    const upTarget = get3DHitTarget(event.clientX, event.clientY);
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+    if (clientX === undefined || clientY === undefined) return;
+
+    if (typeof isPointerOver2DUI === 'function' && isPointerOver2DUI(clientX, clientY)) return;
+
+    const upTarget = get3DHitTarget(clientX, clientY);
 
     // Require pointerdown and pointerup to land on the same 3D target!
     if (!active3DPointerDownTarget || !upTarget) {
@@ -6514,6 +6571,13 @@ function init() {
     }
 
     if (active3DPointerDownTarget.type === 'cube' && active3DPointerDownTarget.object !== upTarget.object) {
+      active3DPointerDownTarget = null;
+      return;
+    }
+
+    // Verify finger did not drag significantly across screen (> 20px displacement)
+    const distSq = Math.hypot(clientX - pointerDownPos.x, clientY - pointerDownPos.y);
+    if (distSq > 20) {
       active3DPointerDownTarget = null;
       return;
     }
@@ -6548,5 +6612,12 @@ function init() {
     } else if (target.type === 'cube' && target.object && target.object.userData && target.object.userData.onClick) {
       target.object.userData.onClick();
     }
-  });
+  }
+
+  window.addEventListener('pointerup', handle3DPointerTap);
+  window.addEventListener('click', handle3DPointerTap);
+  if (mainCanvas) {
+    mainCanvas.addEventListener('pointerup', handle3DPointerTap);
+    mainCanvas.addEventListener('click', handle3DPointerTap);
+  }
 }

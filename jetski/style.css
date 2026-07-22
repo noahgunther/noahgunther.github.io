@@ -63,6 +63,7 @@
   height: 100%;
   z-index: -3;
   overflow: hidden;
+  touch-action: manipulation;
 }
 
 /* Style for bullet lists */
@@ -447,6 +448,22 @@ ul {
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.82);
   font-weight: 400;
+}
+
+.about-panel__portrait-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: clamp(34px, 4.8vw, 46px) auto;
+  width: 100%;
+}
+
+.about-panel__portrait {
+  width: clamp(95px, 11.25vw, 138px);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .about-panel__close {
