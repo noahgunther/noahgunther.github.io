@@ -96,7 +96,7 @@ const SCENE_CONFIG = {
       roughness: 0.3                        // Surface roughness
     },
     rainbow: {
-      intensity: 0.0,                       // Glow strength of oil-slick rainbow shader
+      intensity: 0.06,                       // Glow strength of oil-slick rainbow shader
       scale: 0.2,                           // Band frequency (smaller = wider bands)
       angleFactor: 6.6,                     // Fresnel angle color shift amount
       shimmer: 0.0,                         // Time-based color shifting amplitude
@@ -4166,12 +4166,13 @@ function init() {
 
     // Handle drag-rotation physics and updates (lateral only, disabled in mobile context)
     const isMobileContext = window.innerWidth <= window.innerHeight;
+    const dragLerpAlpha = 1 - Math.pow(1 - 0.1, dt * 60.0);
     if (currentTarget === 'main' && !isMobileContext) {
-      currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+      currentRotationX += (targetRotationX - currentRotationX) * dragLerpAlpha;
     } else {
       // Smoothly return to center when navigating to panels or in mobile context
       targetRotationX = 0;
-      currentRotationX += (0 - currentRotationX) * 0.1;
+      currentRotationX += (0 - currentRotationX) * dragLerpAlpha;
     }
 
     // Calculate rotation angular speed to trigger bug falling
@@ -4404,28 +4405,33 @@ function init() {
       last3DHoveredName = active3DHoveredName;
     }
 
+    // Frame-rate independent lerp factors for 60 FPS baseline
+    const dtScale = dt * 60.0;
+    const lerp08 = 1 - Math.pow(1 - 0.08, dtScale);
+    const lerp10 = 1 - Math.pow(1 - 0.10, dtScale);
+
     // Update cube scaling, position and rotation
     cubes.forEach((cube) => {
       // Lerp position to target coordinates
       tmpCubeTargetPos.set(cube.userData.baseX, cube.userData.baseY, cube.userData.baseZ);
-      cube.position.lerp(tmpCubeTargetPos, 0.08);
+      cube.position.lerp(tmpCubeTargetPos, lerp08);
 
-      // Rotations
+      // Rotations decoupled from frame rate
       if (cube.userData.isHovered) {
         // Spin faster on hover
-        cube.rotation.y += cube.userData.rotationSpeedY * 2.5;
-        cube.rotation.x += cube.userData.rotationSpeedX * 1.5;
+        cube.rotation.y += cube.userData.rotationSpeedY * 2.5 * dtScale;
+        cube.rotation.x += cube.userData.rotationSpeedX * 1.5 * dtScale;
       } else {
         // Slow idle rotation
-        cube.rotation.y += cube.userData.rotationSpeedY;
-        cube.rotation.x += cube.userData.rotationSpeedX;
+        cube.rotation.y += cube.userData.rotationSpeedY * dtScale;
+        cube.rotation.x += cube.userData.rotationSpeedX * dtScale;
       }
 
       // Lerp scale to hide or show on hover
       const activeScale = cube.userData.isHovered ? 1.15 : 1.0;
       const s = activeScale * targetScale;
       tmpCubeScale.set(s, s, s);
-      cube.scale.lerp(tmpCubeScale, 0.1);
+      cube.scale.lerp(tmpCubeScale, lerp10);
     });
 
     // Handle scene spin animation
@@ -4463,13 +4469,13 @@ function init() {
       if (plate.visible) {
         const sVal = SCENE_CONFIG.plate.scale * targetScale;
         tmpObjectScale.set(sVal, sVal, sVal);
-        plate.scale.lerp(tmpObjectScale, 0.08);
-        plate.position.lerp(plateTargetPos, 0.08);
+        plate.scale.lerp(tmpObjectScale, lerp08);
+        plate.position.lerp(plateTargetPos, lerp08);
 
         // Smoothly lerp rotation
-        plate.rotation.x += (plateTargetRot.x - plate.rotation.x) * 0.08;
-        plate.rotation.y += (plateTargetRot.y - plate.rotation.y) * 0.08;
-        plate.rotation.z += (plateTargetRot.z - plate.rotation.z) * 0.08;
+        plate.rotation.x += (plateTargetRot.x - plate.rotation.x) * lerp08;
+        plate.rotation.y += (plateTargetRot.y - plate.rotation.y) * lerp08;
+        plate.rotation.z += (plateTargetRot.z - plate.rotation.z) * lerp08;
       }
     }
 
@@ -4479,7 +4485,7 @@ function init() {
       if (gel.visible && (!curModeCfg.gelMaterialOverride || !curModeCfg.gelMaterialOverride.override)) {
         const sVal = 1.0 * targetScale;
         tmpObjectScale.set(sVal, sVal, sVal);
-        gel.scale.lerp(tmpObjectScale, 0.08);
+        gel.scale.lerp(tmpObjectScale, lerp08);
 
         gel.children.forEach((child) => {
           if (child.isMesh && child.material) {
@@ -4821,10 +4827,11 @@ function init() {
         // Move linearly
         shard.position.addScaledVector(vel, dt);
 
-        // Rotate
-        shard.rotation.x += rotVel.x;
-        shard.rotation.y += rotVel.y;
-        shard.rotation.z += rotVel.z;
+        // Rotate (decoupled from frame rate)
+        const pDtScale = dt * 60.0;
+        shard.rotation.x += rotVel.x * pDtScale;
+        shard.rotation.y += rotVel.y * pDtScale;
+        shard.rotation.z += rotVel.z * pDtScale;
 
         // Shrink/fade based on fadeSpeed parameter
         shard.userData.lifetime -= fadeSpeed * dt;
@@ -4852,8 +4859,8 @@ function init() {
         // Billboard towards camera
         sparkle.lookAt(camera.position);
 
-        // Apply flat Z rotation
-        sparkle.rotation.z += sparkle.userData.rotVelocityZ;
+        // Apply flat Z rotation (decoupled from frame rate)
+        sparkle.rotation.z += sparkle.userData.rotVelocityZ * (dt * 60.0);
 
         // Fade scale and opacity based on fadeSpeed parameter
         sparkle.userData.lifetime -= fadeSpeed * dt;
@@ -4951,7 +4958,7 @@ function init() {
           const vel = sparkle.userData.velocity;
           sparkle.position.addScaledVector(vel, dt);
           sparkle.lookAt(camera.position);
-          sparkle.rotation.z += sparkle.userData.rotVelocityZ;
+          sparkle.rotation.z += sparkle.userData.rotVelocityZ * (dt * 60.0);
 
           sparkle.userData.lifetime -= dt;
           if (sparkle.userData.lifetime > 0) {
@@ -5107,8 +5114,9 @@ function init() {
       } else {
         // Rotation speed multiplier based on hover (always 1.0 during respawning/interaction locks since hover is disabled)
         const rotSpeedMult = isQBoxHovered ? (SCENE_CONFIG.questionBox.hoverSpinMultiplier !== undefined ? SCENE_CONFIG.questionBox.hoverSpinMultiplier : 2.5) : 1.0;
-        questionBoxGroup.rotation.x += (SCENE_CONFIG.questionBox.rotationSpeedX || 0.003) * rotSpeedMult;
-        questionBoxGroup.rotation.y += (SCENE_CONFIG.questionBox.rotationSpeedY || 0.005) * rotSpeedMult;
+        const qBoxDtScale = dt * 60.0;
+        questionBoxGroup.rotation.x += (SCENE_CONFIG.questionBox.rotationSpeedX || 0.003) * rotSpeedMult * qBoxDtScale;
+        questionBoxGroup.rotation.y += (SCENE_CONFIG.questionBox.rotationSpeedY || 0.005) * rotSpeedMult * qBoxDtScale;
 
         // Calculate dynamic vertical floating oscillation (use userData.baseY so mobile/desktop positions are respected)
         const freq = SCENE_CONFIG.questionBox.floatFrequency !== undefined ? SCENE_CONFIG.questionBox.floatFrequency : 0.003;
@@ -5127,7 +5135,8 @@ function init() {
           const qBoxTargetScale = qBoxBaseScale * qBoxActiveScale * targetScale;
 
           const currentQScale = questionBoxGroup.scale.x;
-          const nextQScale = THREE.MathUtils.lerp(currentQScale, qBoxTargetScale, 0.1);
+          const qBoxScaleLerp = 1 - Math.pow(1 - 0.1, qBoxDtScale);
+          const nextQScale = THREE.MathUtils.lerp(currentQScale, qBoxTargetScale, qBoxScaleLerp);
           questionBoxGroup.scale.set(nextQScale, nextQScale, nextQScale);
 
           if (isQBoxHovered && qBoxBaseScale > 0) {
@@ -5148,7 +5157,9 @@ function init() {
         // Lerp morph target "Inflated" influence on hover first so we can use nextInfluence for position.y
         const targetInfluence = isHoudiniToyHovered ? 1.0 : 0.0;
         const currentInfluence = (houdiniToyGroup.userData.inflatedInfluence !== undefined) ? houdiniToyGroup.userData.inflatedInfluence : 0.0;
-        const nextInfluence = THREE.MathUtils.lerp(currentInfluence, targetInfluence, 0.1);
+        const houdiniDtScale = dt * 60.0;
+        const houdiniLerpFactor = 1 - Math.pow(1 - 0.1, houdiniDtScale);
+        const nextInfluence = THREE.MathUtils.lerp(currentInfluence, targetInfluence, houdiniLerpFactor);
         houdiniToyGroup.userData.inflatedInfluence = nextInfluence;
 
         if (isHoudiniToyHovered && nextInfluence >= 0.85) {
@@ -5259,7 +5270,7 @@ function init() {
           const toyTargetScale = toyBaseScale * targetScale;
 
           const currentToyScale = houdiniToyGroup.scale.x;
-          const nextToyScale = THREE.MathUtils.lerp(currentToyScale, toyTargetScale, 0.1);
+          const nextToyScale = THREE.MathUtils.lerp(currentToyScale, toyTargetScale, houdiniLerpFactor);
           houdiniToyGroup.scale.set(nextToyScale, nextToyScale, nextToyScale);
         }
       }
@@ -5282,7 +5293,8 @@ function init() {
       }
 
       const baseSpinSpd = wCfg.rotationSpeedY !== undefined ? wCfg.rotationSpeedY : (wCfg.rotationSpeed || 0.015);
-      const spinSpd = baseSpinSpd * rotSpeedMult * clickSpinMult;
+      const webDtScale = dt * 60.0;
+      const spinSpd = baseSpinSpd * rotSpeedMult * clickSpinMult * webDtScale;
       const axis = wCfg.rotationAxis || 'y';
 
       if (webGlobeMesh) {
@@ -5308,7 +5320,7 @@ function init() {
       if (webMoonMesh) {
         const mMoonCfg = wCfg.moon || {};
         const moonBaseSpinSpd = mMoonCfg.rotationSpeed !== undefined ? mMoonCfg.rotationSpeed : (mMoonCfg.rotationSpeedY !== undefined ? mMoonCfg.rotationSpeedY : 0.01);
-        const moonSpinSpd = moonBaseSpinSpd * rotSpeedMult * clickSpinMult;
+        const moonSpinSpd = moonBaseSpinSpd * rotSpeedMult * clickSpinMult * webDtScale;
         const moonAxis = mMoonCfg.rotationAxis || 'y';
 
         if (typeof moonAxis === 'string') {
@@ -5417,7 +5429,8 @@ function init() {
         // Normal hover lerp for position Y + floatOffset and scale
         const targetHoverInf = isWebGlobeHovered ? 1.0 : 0.0;
         const currentHoverInf = webGlobeGroup.userData.hoverInfluence !== undefined ? webGlobeGroup.userData.hoverInfluence : 0.0;
-        const nextHoverInf = THREE.MathUtils.lerp(currentHoverInf, targetHoverInf, 0.1);
+        const webLerpFactor = 1 - Math.pow(1 - 0.1, dt * 60.0);
+        const nextHoverInf = THREE.MathUtils.lerp(currentHoverInf, targetHoverInf, webLerpFactor);
         webGlobeGroup.userData.hoverInfluence = nextHoverInf;
 
         webGlobeGroup.position.y = baseY + (hoverOffsetVal * nextHoverInf) + floatOffset;
@@ -5427,7 +5440,7 @@ function init() {
         const webTargetScale = webBaseScale * webActiveScale * targetScale;
 
         const currentWebScale = webGlobeGroup.scale.x;
-        const nextWebScale = THREE.MathUtils.lerp(currentWebScale, webTargetScale, 0.1);
+        const nextWebScale = THREE.MathUtils.lerp(currentWebScale, webTargetScale, webLerpFactor);
         webGlobeGroup.scale.set(nextWebScale, nextWebScale, nextWebScale);
 
         if (isWebGlobeHovered && currentWebScale >= webTargetScale * 0.98) {
