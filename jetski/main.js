@@ -8,6 +8,7 @@ import { RGBELoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders
 import { OBJLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/OBJLoader.js';
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.128.0/examples/jsm/utils/BufferGeometryUtils.js';
 import { FBXLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/FBXLoader.js';
+import Stats from 'https://unpkg.com/three@0.128.0/examples/jsm/libs/stats.module.js';
 
 /* ==========================================
    WebGL & Layout Customization Config (`SCENE_CONFIG`)
@@ -454,13 +455,13 @@ const SCENE_CONFIG = {
 
     // SOUND EFFECTS MAP PER RENDER STYLE MODE
     modeSounds: {
-      'default': { src: '', volume: 0.8 },
-      'multiBit': { src: '', volume: 0.8 },
-      'oneBit': { src: '', volume: 0.8 },
-      'pixelated': { src: '', volume: 0.8 },
-      'gameBoy': { src: 'sound/rm_gameboy.ogg', volume: 0.26 },
+      'default': { src: 'sound/rm_wind.ogg', volume: 0.5 },
+      'multiBit': { src: 'sound/rm_lazer.ogg', volume: 0.2 },
+      'oneBit': { src: 'sound/rm_123.ogg', volume: 0.23 },
+      'pixelated': { src: 'sound/rm_pixelate.ogg', volume: 0.26 },
+      'gameBoy': { src: 'sound/rm_gameboy.ogg', volume: 0.23 },
       'blueprint': { src: 'sound/rm_bubble.ogg', volume: 0.9 },
-      'ascii': { src: '', volume: 0.8 }
+      'ascii': { src: 'sound/rm_tone.ogg', volume: 0.2 }
     },
 
     // Mode-specific configuration parameters
@@ -587,6 +588,14 @@ const SCENE_CONFIG = {
         color: '#373737'
       }
     }
+  },
+
+  // ==========================================
+  // 13. THREE.JS FPS PERFORMANCE COUNTER (TEMPORARY)
+  // ==========================================
+  fpsCounter: {
+    enabled: true,                          // Toggle FPS counter display (set to false to hide)
+    panel: 0                                // 0: FPS, 1: MS frame time, 2: MB memory
   }
 };
 
@@ -1105,6 +1114,19 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
   const isLowPowerDevice = lowPowerDeviceHint || renderer.capabilities.isWebGL2 === false;
+
+  // Three.js FPS Performance Counter
+  let stats = null;
+  if (SCENE_CONFIG.fpsCounter && SCENE_CONFIG.fpsCounter.enabled !== false) {
+    stats = new Stats();
+    stats.showPanel(SCENE_CONFIG.fpsCounter.panel || 0);
+    stats.dom.id = 'fps-stats';
+    stats.dom.style.position = 'fixed';
+    stats.dom.style.zIndex = '100000';
+    stats.dom.style.top = '10px';
+    stats.dom.style.left = '10px';
+    document.body.appendChild(stats.dom);
+  }
 
   // ==========================================
   // HDR Environment Map Loading
@@ -4098,6 +4120,7 @@ function init() {
   function animate() {
     requestAnimationFrame(animate);
     if (isTabHidden) return; // Pause rendering loop when tab is unfocused / hidden
+    if (stats) stats.update();
 
     const nowFrame = performance.now();
     const dt = Math.min(0.1, (nowFrame - lastFrameTime) * 0.001);
