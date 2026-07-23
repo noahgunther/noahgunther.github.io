@@ -76,6 +76,7 @@ const SCENE_CONFIG = {
     hoverColor3D: '#91bfff',                 // Color glow tint for hovered 3D objects
     defaultModeShadowBoost: 1.6,            // Shadow opacity boost factor exclusively in default render mode (darker shadows on gel)
     minDragRadiusThreshold: 3.5,            // World units radius threshold below which central drag rotation speed is dampened
+    rotationDamping: 0.95,                  // Inertial momentum friction on drag release (0.90 = quick stop, 0.95 = smooth coast, 0.98 = long glide)
     outline: {
       edgeStrength: 3.0,                     // Intensity of glowing selection outlines (matches Question Box)
       edgeGlow: 1.0,                         // Glowing halo blur dissipation range (matches Question Box)
@@ -175,7 +176,8 @@ const SCENE_CONFIG = {
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
       hoverInVolume: 0.5,                    // Volume for aboutHover.ogg (0.0 to 1.0)
-      hoverOutVolume: 0.5                    // Volume for aboutOut.ogg (0.0 to 1.0)
+      hoverOutVolume: 0.5,                   // Volume for aboutOut.ogg (0.0 to 1.0)
+      hysteresisRadius: 1.0                 // 3D ray-to-center radius (world units) to hold hover state
     },
     shatter: {
       enabled: true,                         // Enable click-to-shatter explosion
@@ -211,7 +213,8 @@ const SCENE_CONFIG = {
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
       hoverInVolume: 0.16,                    // Volume for houdiniHover.ogg (0.0 to 1.0)
-      hoverOutVolume: 0.2                    // Volume for houdiniOut.ogg (0.0 to 1.0)
+      hoverOutVolume: 0.2,                   // Volume for houdiniOut.ogg (0.0 to 1.0)
+      hysteresisRadius: 1.35                 // 3D ray-to-center radius (world units) to hold hover state
     },
     material: {
       color: 0xcccccc,                      // Diffuse color tint
@@ -333,7 +336,8 @@ const SCENE_CONFIG = {
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
       hoverInVolume: 0.16,                    // Volume for webHover.ogg (0.0 to 1.0)
-      hoverOutVolume: 0.16                    // Volume for webOut.ogg (0.0 to 1.0)
+      hoverOutVolume: 0.16,                   // Volume for webOut.ogg (0.0 to 1.0)
+      hysteresisRadius: 1.2                 // 3D ray-to-center radius (world units) to hold hover state
     },
     clickAnimation: {
       enabled: true,                         // Enable click animation
@@ -377,7 +381,7 @@ const SCENE_CONFIG = {
       position: { x: 3.9, y: 1.3, z: 2.0 }  // Desktop 3D position
     },
     mobile: {
-      position: { x: 2.0, y: 0.7, z: 2.0 }  // Mobile 3D position
+      position: { x: 2.0, y: 1.3, z: 2.0 }  // Mobile 3D position
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 2.0,                       // Shadow plane scale factor
@@ -387,8 +391,25 @@ const SCENE_CONFIG = {
       metalness: 0.8,
       roughness: 0.1
     },
+    hover: {
+      soundEnabled: true,                    // Enable mouse hover & out sound effects
+      hoverInSoundSrc: 'sound/gamesHover.ogg', // Mouse hover enter sound
+      hoverOutSoundSrc: 'sound/gamesOut.ogg', // Mouse hover exit sound
+      hoverInVolume: 0.1,                    // Hover enter volume
+      hoverOutVolume: 0.1,                   // Hover exit volume
+      hoverInCooldown: 180,                  // Min time in ms between rapid hover-in sounds
+      hoverOutCooldown: 180,                 // Min time in ms between rapid hover-out sounds
+      hysteresisRadius: 1.5                 // 3D ray-to-center radius (world units) to hold hover state
+    },
     pop: {
       enabled: true,                         // Enable click-to-pop animation
+      soundEnabled: true,                    // Enable sound effects for click pop sequence
+      laserSoundSrc: 'sound/lazer.ogg',      // Laser sound played on alien click
+      laserVolume: 0.6,                      // Laser sound volume
+      explodeSoundSrc: 'sound/8bitExplode.ogg', // Explosion sound played on Pop1 transition
+      explodeVolume: 0.35,                    // Explosion sound volume
+      growSoundSrc: 'sound/alienGrow.ogg',   // Regrow sound played when alien starts regrowing
+      growVolume: 0.4,                       // Regrow sound volume
       pop0Duration: 400,                     // Duration of Pop0 initial phase (ms)
       pop1Duration: 550,                     // Duration of Pop1 final phase (ms)
       shadowFadeDuration: 400,               // Smooth shadow fade-out duration when click animation starts (ms)
@@ -1044,6 +1065,11 @@ function init() {
   let gamesPopStartTime = 0;
   let gamesRespawnStartTime = 0;
   let isGamesRegrowingSoundPlayed = false;
+  let isGamesExplodeSoundPlayed = false;
+  let lastGamesHoverInSoundTime = 0;
+  let lastGamesHoverOutSoundTime = 0;
+  const tmpHoverCheckWorldPos = new THREE.Vector3();
+  let activeHoverHysteresisTarget = null;
 
   // Bug walking state variables
   let bugTargetPos = null;
@@ -2690,6 +2716,7 @@ function init() {
   let targetRotationY = 0;
   let currentRotationX = 0;
   let currentRotationY = 0;
+  let rotationVelocity = 0;
   let spinStartTime = 0;
   let startSpinRotation = 0;
   let lastRotationX = 0;
@@ -4306,11 +4333,30 @@ function init() {
     // Handle drag-rotation physics and updates (lateral only, disabled in mobile context)
     const isMobileContext = window.innerWidth <= window.innerHeight;
     if (currentTarget === 'main' && !isMobileContext) {
-      const lerpFactor = isDraggingPointer ? (1.0 - Math.pow(1.0 - 0.35, dt * 60.0)) : (1.0 - Math.pow(1.0 - 0.12, dt * 60.0));
-      currentRotationX += (targetRotationX - currentRotationX) * lerpFactor;
+      if (isDraggingPointer) {
+        const lerpFactor = 1.0 - Math.pow(1.0 - 0.35, dt * 60.0);
+        const prevRot = currentRotationX;
+        currentRotationX += (targetRotationX - currentRotationX) * lerpFactor;
+
+        // Track visual scene rotational velocity during active drag
+        const instantVel = (currentRotationX - prevRot) / Math.max(0.001, dt);
+        rotationVelocity = THREE.MathUtils.lerp(rotationVelocity, instantVel, 0.4);
+      } else {
+        // Apply smooth inertial spin down on release
+        const iCfg = SCENE_CONFIG.interaction || {};
+        const damping = iCfg.rotationDamping !== undefined ? iCfg.rotationDamping : 0.94;
+
+        targetRotationX += rotationVelocity * dt;
+        rotationVelocity *= Math.pow(damping, dt * 60.0);
+        if (Math.abs(rotationVelocity) < 0.0001) rotationVelocity = 0;
+
+        const lerpFactor = 1.0 - Math.pow(1.0 - 0.12, dt * 60.0);
+        currentRotationX += (targetRotationX - currentRotationX) * lerpFactor;
+      }
     } else {
       // Smoothly return to center when navigating to panels or in mobile context
       targetRotationX = 0;
+      rotationVelocity = 0;
       const lerpFactor = 1.0 - Math.pow(1.0 - 0.12, dt * 60.0);
       currentRotationX += (0 - currentRotationX) * lerpFactor;
     }
@@ -4423,6 +4469,42 @@ function init() {
         } else if (gamesAlienGroup && tmpGamesIntersects.length > 0) {
           hoverTargetType = 'gamesAlien';
         }
+
+        // Hysteresis fallback: if ray missed the mesh because object moved/scaled on hover, maintain hover if ray is still near target
+        if (!hoverTargetType && activeHoverHysteresisTarget) {
+          let checkGroup = null;
+          let maxRadius = 0.55;
+          if (activeHoverHysteresisTarget === 'questionBox') {
+            checkGroup = questionBoxGroup;
+            const hCfg = SCENE_CONFIG.questionBox ? SCENE_CONFIG.questionBox.hover : null;
+            maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.55;
+          } else if (activeHoverHysteresisTarget === 'houdiniToy') {
+            checkGroup = houdiniToyGroup;
+            const hCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.hover : null;
+            maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.55;
+          } else if (activeHoverHysteresisTarget === 'webGlobe') {
+            checkGroup = webGlobeGroup;
+            const hCfg = SCENE_CONFIG.web3D ? SCENE_CONFIG.web3D.hover : null;
+            maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.55;
+          } else if (activeHoverHysteresisTarget === 'gamesAlien') {
+            checkGroup = gamesAlienGroup;
+            const hCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.hover : null;
+            maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.55;
+          } else if (activeHoverHysteresisTarget === 'bug') {
+            checkGroup = bugCubeGroup;
+            const hCfg = SCENE_CONFIG.linkedin3D ? SCENE_CONFIG.linkedin3D.hover : null;
+            maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.35;
+          }
+
+          if (checkGroup) {
+            checkGroup.getWorldPosition(tmpHoverCheckWorldPos);
+            const rayDist = raycaster.ray.distanceToPoint(tmpHoverCheckWorldPos);
+            if (rayDist <= maxRadius) {
+              hoverTargetType = activeHoverHysteresisTarget;
+            }
+          }
+        }
+        activeHoverHysteresisTarget = hoverTargetType;
       }
 
       isQBoxHovered = hoverTargetType === 'questionBox';
@@ -4490,6 +4572,23 @@ function init() {
         webGlobeReachedFullHoverScale = false;
       }
       lastWebGlobeHoveredState = isWebGlobeHovered;
+    }
+
+    if (isGamesAlienHovered !== lastGamesAlienHoveredState) {
+      if (!isGamesPopping && gamesRespawnStartTime === 0) {
+        if (isGamesAlienHovered) {
+          gamesAlienReachedFullHoverScale = false;
+          playGamesHoverSound();
+        } else {
+          if (gamesAlienReachedFullHoverScale) {
+            playGamesOutSound();
+          }
+          gamesAlienReachedFullHoverScale = false;
+        }
+      } else {
+        gamesAlienReachedFullHoverScale = false;
+      }
+      lastGamesAlienHoveredState = isGamesAlienHovered;
     }
 
     // Sync 3D hover state back to text menu links (only if hover wasn't initiated by the text links themselves)
@@ -5231,6 +5330,11 @@ function init() {
 
       // Phase 1: Pop0 for first pop0Duration (500ms); Phase 2: Pop1 for remaining time
       const isPop0Phase = elapsed < pop0Duration;
+      if (!isPop0Phase && !isGamesExplodeSoundPlayed) {
+        isGamesExplodeSoundPlayed = true;
+        playGamesExplodeSound();
+      }
+
       gamesAlienGroup.traverse((child) => {
         if (child.isMesh) {
           if (isPop0Phase && child === gamesAlienPop0Mesh) {
@@ -5311,6 +5415,11 @@ function init() {
         gamesAlienGroup.visible = false;
         if (gamesShadowMesh) gamesShadowMesh.visible = false;
       } else {
+        if (!isGamesRegrowingSoundPlayed) {
+          isGamesRegrowingSoundPlayed = true;
+          playGamesGrowSound();
+        }
+
         const regrowProgress = Math.min(1.0, (elapsed - delay) / Math.max(1, duration));
         const easeOutCubic = 1.0 - Math.pow(1.0 - regrowProgress, 3.0);
 
@@ -5841,6 +5950,10 @@ function init() {
         const currentGamesScale = gamesAlienGroup.scale.x;
         const nextGamesScale = THREE.MathUtils.lerp(currentGamesScale, gamesTargetScale, 0.1);
         gamesAlienGroup.scale.set(nextGamesScale, nextGamesScale, nextGamesScale);
+
+        if (isHovered && currentGamesScale >= gamesTargetScale * 0.98) {
+          gamesAlienReachedFullHoverScale = true;
+        }
       }
     }
 
@@ -6526,7 +6639,7 @@ function init() {
       });
   }
 
-  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/rm_gameboy.ogg'].forEach(loadSoundBuffer);
+  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/rm_gameboy.ogg', 'sound/lazer.ogg', 'sound/8bitExplode.ogg', 'sound/alienGrow.ogg', 'sound/gamesHover.ogg', 'sound/gamesOut.ogg'].forEach(loadSoundBuffer);
 
   // Global user gesture listener to un-suspend AudioContext on the first interaction anywhere on the page
   function unlockAudioContext() {
@@ -6645,6 +6758,58 @@ function init() {
     playWebAudioSound('sound/ring.ogg', vol);
   }
 
+  function playGamesLaserSound() {
+    const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
+    if (!pCfg || pCfg.soundEnabled === false) return;
+    const vol = pCfg.laserVolume !== undefined ? pCfg.laserVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
+    const src = pCfg.laserSoundSrc || 'sound/lazer.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playGamesExplodeSound() {
+    const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
+    if (!pCfg || pCfg.soundEnabled === false) return;
+    const vol = pCfg.explodeVolume !== undefined ? pCfg.explodeVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
+    const src = pCfg.explodeSoundSrc || 'sound/8bitExplode.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playGamesGrowSound() {
+    const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
+    if (!pCfg || pCfg.soundEnabled === false) return;
+    const vol = pCfg.growVolume !== undefined ? pCfg.growVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
+    const src = pCfg.growSoundSrc || 'sound/alienGrow.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playGamesHoverSound() {
+    const hCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.hover : null;
+    if (!hCfg || hCfg.soundEnabled === false) return;
+
+    const now = performance.now();
+    const cooldown = hCfg.hoverInCooldown !== undefined ? hCfg.hoverInCooldown : 180;
+    if (now - lastGamesHoverInSoundTime < cooldown) return;
+    lastGamesHoverInSoundTime = now;
+
+    const rawVol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
+    const src = hCfg.hoverInSoundSrc || 'sound/gamesHover.ogg';
+    playWebAudioSound(src, rawVol);
+  }
+
+  function playGamesOutSound() {
+    const hCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.hover : null;
+    if (!hCfg || hCfg.soundEnabled === false) return;
+
+    const now = performance.now();
+    const cooldown = hCfg.hoverOutCooldown !== undefined ? hCfg.hoverOutCooldown : 180;
+    if (now - lastGamesHoverOutSoundTime < cooldown) return;
+    lastGamesHoverOutSoundTime = now;
+
+    const rawVol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
+    const src = hCfg.hoverOutSoundSrc || 'sound/gamesOut.ogg';
+    playWebAudioSound(src, rawVol);
+  }
+
   function playGameBoyModeSound() {
     const gCfg = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles.gameBoy) ? SCENE_CONFIG.renderStyles.gameBoy : null;
     const vol = (gCfg && gCfg.soundVolume !== undefined) ? gCfg.soundVolume : 0.8;
@@ -6718,6 +6883,9 @@ function init() {
     const gCfg = SCENE_CONFIG.games3D;
     const pCfg = gCfg ? gCfg.pop : null;
     if (pCfg && pCfg.enabled === false) return false;
+
+    isGamesExplodeSoundPlayed = false;
+    playGamesLaserSound();
 
     // 1. Traverse gamesAlienGroup and set ONLY gamesAlienPop0Mesh to visible BEFORE updating rotation!
     gamesAlienGroup.traverse((child) => {
