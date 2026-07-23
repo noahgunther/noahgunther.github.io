@@ -356,6 +356,53 @@ const SCENE_CONFIG = {
   },
 
   // ==========================================
+  // 11. GAMES 3D ALIEN
+  // ==========================================
+  games3D: {
+    enabled: true,                          // Toggle to enable/disable Games 3D Alien
+    scale: 0.00086,                           // Model scale factor
+    rotation: { x: 0, y: 90, z: 20 },         // Initial base rotation in degrees
+    lookAtCamera: {
+      enabled: true,                         // Smoothly rotate alien to look towards camera when scene is rotated
+      speed: 0.01                            // Lazy tracking lerp speed factor (0.01 = very lazy/slow, 0.04 = smooth lazy turn, 0.1 = fast)
+    },
+    floatFrequency: 0.002,                  // Bobbing float frequency
+    floatAmplitude: 0.12,                    // Bobbing float amplitude
+    pauseFloatOnHover: true,                // Freeze up/down bobbing while hovered
+    poseInterval: 700,                      // Base duration in ms to toggle between Pose0 and Pose1
+    hoverPoseSpeedMultiplier: 3.0,          // Speed multiplier for pose animation when hovered (faster steps)
+    hoverScale: 1.15,                       // Scale multiplier when hovered
+    hoverYOffset: 0.0,                     // Vertical lift offset when hovered
+    desktop: {
+      position: { x: 3.9, y: 1.3, z: 2.0 }  // Desktop 3D position
+    },
+    mobile: {
+      position: { x: 2.0, y: 0.7, z: 2.0 }  // Mobile 3D position
+    },
+    shadowY: 0.335,                         // Shadow plane height
+    shadowScale: 2.0,                       // Shadow plane scale factor
+    shadowOpacity: 0.85,                    // Shadow opacity factor
+    material: {
+      color: 0x28aebd,                      // Metallic blue/green color tint
+      metalness: 0.8,
+      roughness: 0.1
+    },
+    pop: {
+      enabled: true,                         // Enable click-to-pop animation
+      pop0Duration: 400,                     // Duration of Pop0 initial phase (ms)
+      pop1Duration: 550,                     // Duration of Pop1 final phase (ms)
+      shadowFadeDuration: 400,               // Smooth shadow fade-out duration when click animation starts (ms)
+      respawnDelay: 100,                     // Delay before regrowing back (ms)
+      respawnDuration: 400,                   // Duration of springy regrow animation (ms)
+      material: {
+        color: 0xd62828,                    // Opaque metallic red color matching blue shader
+        metalness: 0.8,
+        roughness: 0.2
+      }
+    }
+  },
+
+  // ==========================================
   // 11. CRAWLING LINKEDIN 3D BUG
   // ==========================================
   linkedin3D: {
@@ -518,6 +565,15 @@ const SCENE_CONFIG = {
         color: '#434343',
         roughness: 0.4,
         metalness: 0.1
+      },
+
+      // Mode-specific alien material override (makes alien pop brightly in Game Boy LCD shader)
+      alienMaterialOverride: {
+        override: true,
+        type: 'lit',
+        color: '#2e2e2e',          // Pure white diffuse for high luminance in Game Boy pass
+        roughness: 0.1,
+        metalness: 0.0
       }
     },
 
@@ -555,6 +611,15 @@ const SCENE_CONFIG = {
         override: true,            // Enable gel material override
         type: 'unlit',             // Material type: 'unlit' or 'lit'
         color: '#373737'
+      },
+
+      // Mode-specific alien material override (makes alien pop brightly in Game Boy LCD shader)
+      alienMaterialOverride: {
+        override: true,
+        type: 'lit',
+        color: '#2e2e2e',          // Pure white diffuse for high luminance in Game Boy pass
+        roughness: 0.1,
+        metalness: 0.0
       }
     }
   },
@@ -957,6 +1022,28 @@ function init() {
   let bugObstacleMesh = null;
   let houdiniObstacleMesh = null;
   let webGlobeObstacleMesh = null;
+  let gamesObstacleMesh = null;
+
+  // Games 3D Alien state variables
+  let gamesAlienGroup = null;
+  let gamesAlienPose0Mesh = null;
+  let gamesAlienPose1Mesh = null;
+  let gamesAlienPop0Mesh = null;
+  let gamesAlienPop1Mesh = null;
+  let gamesShadowMesh = null;
+  let gamesShadowMaterial = null;
+  let gamesMaterial = null;
+  let gamesPopMaterial = null;
+  let isGamesAlienHovered = false;
+  let linkHoveredGames = false;
+  let lastGamesAlienHoveredState = false;
+  let gamesAlienReachedFullHoverScale = false;
+
+  // Games popping & respawn state
+  let isGamesPopping = false;
+  let gamesPopStartTime = 0;
+  let gamesRespawnStartTime = 0;
+  let isGamesRegrowingSoundPlayed = false;
 
   // Bug walking state variables
   let bugTargetPos = null;
@@ -1039,10 +1126,12 @@ function init() {
   const tmpPerpVec = new THREE.Vector3();
   const tmpSteerVec = new THREE.Vector3();
   const tmpPushVec = new THREE.Vector3();
+  const tmpAlienWorldPos = new THREE.Vector3();
   const tmpBugIntersects = [];
   const tmpQBoxIntersects = [];
   const tmpHoudiniToyIntersects = [];
   const tmpCubeIntersects = [];
+  const tmpGamesIntersects = [];
 
   let isSpinning = false;
   let introScale = 0.0;    // computed from elapsed time on load
@@ -1914,19 +2003,20 @@ function init() {
 
       let attempts = 0;
       while (attempts < 100) {
+        let collides = false;
         const angle = Math.random() * Math.PI * 2;
         const dist = Math.random(); // uniformly distributed distance factor
         const x = Math.cos(angle) * dist * walkRx;
         const z = Math.sin(angle) * dist * walkRz;
 
-        // Avoid center Question Box
-        const qBoxDist = Math.sqrt(x * x + z * z);
+        // Avoid Question Box
+        const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
+        const dxQ = x - qBoxPos.x;
+        const dzQ = z - qBoxPos.z;
+        const qBoxDist = Math.sqrt(dxQ * dxQ + dzQ * dzQ);
         if (qBoxDist < minObs) {
-          attempts++;
-          continue;
+          collides = true;
         }
-
-
 
         // Avoid Houdini Toy
         if (houdiniToyGroup) {
@@ -1942,6 +2032,16 @@ function init() {
         if (webGlobeGroup) {
           const dx = x - webGlobeGroup.position.x;
           const dz = z - webGlobeGroup.position.z;
+          const d = Math.sqrt(dx * dx + dz * dz);
+          if (d < minObs) {
+            collides = true;
+          }
+        }
+
+        // Avoid Games Alien
+        if (gamesAlienGroup) {
+          const dx = x - gamesAlienGroup.position.x;
+          const dz = z - gamesAlienGroup.position.z;
           const d = Math.sqrt(dx * dx + dz * dz);
           if (d < minObs) {
             collides = true;
@@ -1983,7 +2083,8 @@ function init() {
       opacity: 0.15
     });
     const qBoxBoundaryMesh = new THREE.Mesh(qBoxBoundaryGeo, qBoxBoundaryMat);
-    qBoxBoundaryMesh.position.set(0, visualShadowBaseY, 0);
+    const initialQBoxPos = isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position;
+    qBoxBoundaryMesh.position.set(initialQBoxPos.x, visualShadowBaseY, initialQBoxPos.z);
     sceneGroup.add(qBoxBoundaryMesh);
     bugObstacleMesh = qBoxBoundaryMesh; // Store reference for dynamic visibility toggling
 
@@ -2010,6 +2111,20 @@ function init() {
     });
     webGlobeObstacleMesh = new THREE.Mesh(webBoundaryGeo, webBoundaryMat);
     sceneGroup.add(webGlobeObstacleMesh);
+
+    // Temporary Games Alien collision boundary visualizer sphere
+    const gamesMinObs = SCENE_CONFIG.linkedin3D.minObstacleDist !== undefined ? SCENE_CONFIG.linkedin3D.minObstacleDist : 1.0;
+    const gamesBoundaryGeo = new THREE.SphereGeometry(gamesMinObs, 32, 16);
+    const gamesBoundaryMat = new THREE.MeshBasicMaterial({
+      color: 0xff0000,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.15
+    });
+    gamesObstacleMesh = new THREE.Mesh(gamesBoundaryGeo, gamesBoundaryMat);
+    const initialGamesPos = isMobileInitial && SCENE_CONFIG.games3D && SCENE_CONFIG.games3D.mobile ? SCENE_CONFIG.games3D.mobile.position : (SCENE_CONFIG.games3D.desktop ? SCENE_CONFIG.games3D.desktop.position : { x: 3.8, y: 0.7, z: 1.5 });
+    gamesObstacleMesh.position.set(initialGamesPos.x, visualShadowBaseY, initialGamesPos.z);
+    sceneGroup.add(gamesObstacleMesh);
 
     // Load bug_cube.obj for 3D LinkedIn link
     const bugTexture = new THREE.TextureLoader().load('graphics/li_logo_blue.png');
@@ -2161,8 +2276,9 @@ function init() {
   if (SCENE_CONFIG.questionBox.enabled !== false) {
     shadowMesh = new THREE.Mesh(shadowGeo, shadowMaterial);
     shadowMesh.rotation.x = -Math.PI / 2; // Lie flat on the gel surface
-    const qBoxPos = SCENE_CONFIG.questionBox.position;
-    const shadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.33;
+    const qbCfg = SCENE_CONFIG.questionBox;
+    const qBoxPos = isMobileInitial && qbCfg.mobile ? qbCfg.mobile.position : (qbCfg.desktop ? qbCfg.desktop.position : qbCfg.position);
+    const shadowBaseY = qbCfg.shadowY !== undefined ? qbCfg.shadowY : 0.33;
     shadowMesh.position.set(qBoxPos.x, shadowBaseY, qBoxPos.z);
     shadowMesh.renderOrder = 3; // Render right after dish & gel surfaces
     sceneGroup.add(shadowMesh);
@@ -2455,6 +2571,108 @@ function init() {
       sceneGroup.add(fbx);
     }, undefined, (error) => {
       console.error("Error loading FBX globe:", error);
+    });
+  }
+
+  // Load Games 3D Alien textures, FBX, and contact shadow
+  if (SCENE_CONFIG.games3D && SCENE_CONFIG.games3D.enabled !== false) {
+    const gCfg = SCENE_CONFIG.games3D;
+    const matCfg = gCfg.material || {};
+    const popMatCfg = (gCfg.pop && gCfg.pop.material) || {};
+
+    gamesMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(matCfg.color !== undefined ? matCfg.color : 0x1da57a),
+      roughness: matCfg.roughness !== undefined ? matCfg.roughness : 0.2,
+      metalness: matCfg.metalness !== undefined ? matCfg.metalness : 0.8
+    });
+
+    gamesPopMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(popMatCfg.color !== undefined ? popMatCfg.color : 0xd62828), // Metallic red
+      roughness: popMatCfg.roughness !== undefined ? popMatCfg.roughness : 0.2,
+      metalness: popMatCfg.metalness !== undefined ? popMatCfg.metalness : 0.8
+    });
+
+    // Contact shadow plane for the Games Alien
+    const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const gOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
+    gamesShadowMaterial = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      opacity: gOpacity,
+      depthWrite: false,
+      depthTest: true,
+      side: THREE.FrontSide,
+      blending: THREE.NormalBlending
+    });
+    const shadowGeo = new THREE.PlaneGeometry(1.5, 1.5);
+    gamesShadowMesh = new THREE.Mesh(shadowGeo, gamesShadowMaterial);
+    gamesShadowMesh.rotation.x = -Math.PI / 2;
+    const initialPos = isMobileInitial ? gCfg.mobile.position : gCfg.desktop.position;
+    const shadowBaseY = gCfg.shadowY !== undefined ? gCfg.shadowY : 0.335;
+    gamesShadowMesh.position.set(initialPos.x, shadowBaseY, initialPos.z);
+    gamesShadowMesh.renderOrder = 3;
+    sceneGroup.add(gamesShadowMesh);
+
+    fbxLoader.load('geometry/alien.fbx', (fbx) => {
+      gamesAlienPose0Mesh = null;
+      gamesAlienPose1Mesh = null;
+      gamesAlienPop0Mesh = null;
+      gamesAlienPop1Mesh = null;
+
+      fbx.traverse((child) => {
+        if (child.isMesh) {
+          child.renderOrder = 10;
+          const nameLower = (child.name || '').toLowerCase();
+          if (nameLower.includes('pop0') || nameLower === 'pop0') {
+            gamesAlienPop0Mesh = child;
+            child.material = gamesPopMaterial;
+            child.visible = false;
+          } else if (nameLower.includes('pop1') || nameLower === 'pop1' || nameLower.includes('pop')) {
+            gamesAlienPop1Mesh = child;
+            child.material = gamesPopMaterial;
+            child.visible = false;
+          } else if (nameLower.includes('pose0')) {
+            gamesAlienPose0Mesh = child;
+            child.material = gamesMaterial;
+            child.visible = true;
+          } else if (nameLower.includes('pose1')) {
+            gamesAlienPose1Mesh = child;
+            child.material = gamesMaterial;
+            child.visible = false;
+          } else {
+            child.material = gamesMaterial;
+          }
+        }
+      });
+
+      gamesAlienGroup = fbx;
+      gamesAlienGroup.renderOrder = 10;
+
+      fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
+      fbx.userData.baseX = initialPos.x;
+      fbx.userData.baseY = initialPos.y;
+      fbx.userData.baseZ = initialPos.z;
+      fbx.userData.currentHoverY = 0;
+
+      const s = gCfg.scale !== undefined ? gCfg.scale : 0.005;
+      fbx.scale.set(s, s, s);
+
+      if (gCfg.rotation) {
+        fbx.rotation.set(
+          (gCfg.rotation.x || 0) * Math.PI / 180,
+          (gCfg.rotation.y || 0) * Math.PI / 180,
+          (gCfg.rotation.z || 0) * Math.PI / 180
+        );
+      }
+
+      const box3 = new THREE.Box3().setFromObject(fbx);
+      const sizeVec = new THREE.Vector3();
+      box3.getSize(sizeVec);
+      console.log("[Games 3D Alien] Loaded! Size:", sizeVec);
+
+      sceneGroup.add(fbx);
+    }, undefined, (error) => {
+      console.error("Error loading FBX alien:", error);
     });
   }
 
@@ -3202,12 +3420,12 @@ function init() {
     playMenuSelect(gamesLink, gamesLinkMobile);
     body.style.setProperty('cursor', 'default');
 
-    canInteract = false;
-    body.style.transition = 'opacity 0.8s ease';
-    body.style.opacity = 0;
-    requestTimeout(() => {
-      window.open("https://noahgunther.com/games", "_top");
-    }, 800);
+    if (isGamesPopping || gamesRespawnStartTime > 0) return;
+
+    const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
+    if (pCfg && pCfg.enabled !== false) {
+      triggerGamesAlienPop();
+    }
   }
 
   function webLinkClicked() {
@@ -3715,6 +3933,8 @@ function init() {
         linkHoveredHoudini = true;
       } else if (cfg.hoverType === 'web') {
         linkHoveredWeb = true;
+      } else if (cfg.hoverType === 'games') {
+        linkHoveredGames = true;
       }
     };
 
@@ -3735,6 +3955,9 @@ function init() {
       } else if (cfg.hoverType === 'web') {
         linkHoveredWeb = false;
         clearOutlines();
+      } else if (cfg.hoverType === 'games') {
+        linkHoveredGames = false;
+        clearOutlines();
       }
     };
 
@@ -3748,7 +3971,7 @@ function init() {
   const navConfigsList = [
     { elements: [aboutLink, aboutLinkMobile], name: 'about', currentTarget: 'about', hoverType: 'about', onClick: aboutLinkClicked },
     { elements: [arLink, arLinkMobile], name: 'ar', currentTarget: 'ar', hoverType: 'none', onClick: arLinkClicked },
-    { elements: [gamesLink, gamesLinkMobile], name: 'games', hoverType: 'none', onClick: gamesLinkClicked },
+    { elements: [gamesLink, gamesLinkMobile], name: 'games', hoverType: 'games', onClick: gamesLinkClicked },
     { elements: [webLink, webLinkMobile], name: 'web', hoverType: 'web', onClick: webLinkClicked },
     { elements: [houdiniLink, houdiniLinkMobile], name: 'houdini', hoverType: 'houdini', onClick: houdiniLinkClicked }
   ];
@@ -3819,6 +4042,8 @@ function init() {
       );
     } else if (targetType === 'webGlobe') {
       selectRegularOutline(webGlobeGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
+    } else if (targetType === 'gamesAlien') {
+      selectRegularOutline(gamesAlienGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
     } else if (targetType === 'bug') {
       selectDeformerOutline(
         bugCubeGroup,
@@ -3898,8 +4123,10 @@ function init() {
 
   let activeDishOverrideMat = null;
   let activeGelOverrideMat = null;
+  let activeAlienOverrideMat = null;
   let lastAppliedDishOverrideKey = null;
   let lastAppliedGelOverrideKey = null;
+  let lastAppliedAlienOverrideKey = null;
 
   function updateDishAndGelMaterialOverrides(modeName) {
     const cfg = SCENE_CONFIG.renderStyles;
@@ -3993,6 +4220,53 @@ function init() {
               child.material = child.userData.originalMaterial;
             }
           });
+        }
+      }
+    }
+
+    // 3. Alien Material Override (Game Boy & custom render mode overrides)
+    const alienOv = modeCfg.alienMaterialOverride;
+    if (gamesAlienPose0Mesh || gamesAlienPose1Mesh) {
+      if (alienOv && alienOv.override) {
+        const key = `${modeName}_alien_${alienOv.type}_${alienOv.color}_${alienOv.emissive}_${alienOv.emissiveIntensity}_${alienOv.roughness}_${alienOv.metalness}`;
+        if (lastAppliedAlienOverrideKey !== key) {
+          lastAppliedAlienOverrideKey = key;
+          const color = new THREE.Color(alienOv.color || '#ffffff');
+          const emissive = new THREE.Color(alienOv.emissive || '#000000');
+          const emissiveIntensity = alienOv.emissiveIntensity !== undefined ? alienOv.emissiveIntensity : 0.0;
+          if (alienOv.type === 'unlit') {
+            activeAlienOverrideMat = new THREE.MeshBasicMaterial({
+              color: color,
+              transparent: false,
+              opacity: 1.0,
+              depthWrite: true,
+              side: THREE.FrontSide
+            });
+          } else {
+            activeAlienOverrideMat = new THREE.MeshStandardMaterial({
+              color: color,
+              emissive: emissive,
+              emissiveIntensity: emissiveIntensity,
+              roughness: alienOv.roughness !== undefined ? alienOv.roughness : 0.1,
+              metalness: alienOv.metalness !== undefined ? alienOv.metalness : 0.0,
+              transparent: false,
+              opacity: 1.0,
+              depthWrite: true,
+              side: THREE.FrontSide
+            });
+          }
+        }
+        if (gamesAlienPose0Mesh) gamesAlienPose0Mesh.material = activeAlienOverrideMat;
+        if (gamesAlienPose1Mesh) gamesAlienPose1Mesh.material = activeAlienOverrideMat;
+        if (gamesAlienPop0Mesh) gamesAlienPop0Mesh.material = activeAlienOverrideMat;
+        if (gamesAlienPop1Mesh) gamesAlienPop1Mesh.material = activeAlienOverrideMat;
+      } else {
+        if (lastAppliedAlienOverrideKey !== 'default') {
+          lastAppliedAlienOverrideKey = 'default';
+          if (gamesAlienPose0Mesh) gamesAlienPose0Mesh.material = gamesMaterial;
+          if (gamesAlienPose1Mesh) gamesAlienPose1Mesh.material = gamesMaterial;
+          if (gamesAlienPop0Mesh) gamesAlienPop0Mesh.material = gamesPopMaterial;
+          if (gamesAlienPop1Mesh) gamesAlienPop1Mesh.material = gamesPopMaterial;
         }
       }
     }
@@ -4108,6 +4382,8 @@ function init() {
         hoverTargetType = 'houdiniToy';
       } else if (linkHoveredWeb && webGlobeGroup) {
         hoverTargetType = 'webGlobe';
+      } else if (linkHoveredGames && gamesAlienGroup && !isGamesPopping && gamesRespawnStartTime === 0) {
+        hoverTargetType = 'gamesAlien';
       } else if (linkHoveredLinkedin && bugCubeGroup) {
         hoverTargetType = 'bug';
       } else if (!isPointerOverUI) {
@@ -4118,6 +4394,7 @@ function init() {
         tmpQBoxIntersects.length = 0;
         tmpHoudiniToyIntersects.length = 0;
         tmpCubeIntersects.length = 0;
+        tmpGamesIntersects.length = 0;
 
         if (bugCubeGroup) {
           raycaster.intersectObject(bugCubeGroup, true, tmpBugIntersects);
@@ -4131,6 +4408,9 @@ function init() {
         if (webGlobeGroup) {
           raycaster.intersectObject(webGlobeGroup, true, tmpCubeIntersects);
         }
+        if (gamesAlienGroup && !isGamesPopping && gamesRespawnStartTime === 0) {
+          raycaster.intersectObject(gamesAlienGroup, true, tmpGamesIntersects);
+        }
 
         if (tmpBugIntersects.length > 0) {
           hoverTargetType = 'bug';
@@ -4140,18 +4420,22 @@ function init() {
           hoverTargetType = 'houdiniToy';
         } else if (webGlobeGroup && tmpCubeIntersects.length > 0) {
           hoverTargetType = 'webGlobe';
+        } else if (gamesAlienGroup && tmpGamesIntersects.length > 0) {
+          hoverTargetType = 'gamesAlien';
         }
       }
 
       isQBoxHovered = hoverTargetType === 'questionBox';
       isHoudiniToyHovered = hoverTargetType === 'houdiniToy';
       isWebGlobeHovered = hoverTargetType === 'webGlobe';
+      isGamesAlienHovered = hoverTargetType === 'gamesAlien';
       isBugCubeHovered = hoverTargetType === 'bug';
       applyHoverTarget(hoverTargetType, hoverTargetObject);
     } else {
       isQBoxHovered = false;
       isHoudiniToyHovered = false;
       isWebGlobeHovered = false;
+      isGamesAlienHovered = false;
       isBugCubeHovered = false;
       clearOutlines();
       body.style.setProperty('cursor', 'default');
@@ -4216,6 +4500,8 @@ function init() {
       active3DHoveredName = 'houdini';
     } else if (isWebGlobeHovered) {
       active3DHoveredName = 'web';
+    } else if (isGamesAlienHovered) {
+      active3DHoveredName = 'games';
     } else if (isBugCubeHovered) {
       active3DHoveredName = 'linkedin';
     }
@@ -4225,6 +4511,7 @@ function init() {
       if (name === 'about') return linkHoveredAbout;
       if (name === 'houdini') return linkHoveredHoudini;
       if (name === 'web') return linkHoveredWeb;
+      if (name === 'games') return linkHoveredGames;
       if (name === 'linkedin') return linkHoveredLinkedin;
       return false;
     }
@@ -4282,6 +4569,7 @@ function init() {
               if (cfg.hoverType === 'about') linkHoveredAbout = true;
               else if (cfg.hoverType === 'houdini') linkHoveredHoudini = true;
               else if (cfg.hoverType === 'web') linkHoveredWeb = true;
+              else if (cfg.hoverType === 'games') linkHoveredGames = true;
             }
           }
         });
@@ -4479,8 +4767,9 @@ function init() {
 
           // 3. Obstacle Avoidance (Question Box & Cubes)
           if (lCfg.avoidanceEnabled !== false) {
-            // Avoid center Question Box at (0, 0)
-            const toInsectQ = tmpToInsectQ.set(currentPos.x, 0, currentPos.z);
+            // Avoid Question Box
+            const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
+            const toInsectQ = tmpToInsectQ.set(currentPos.x - qBoxPos.x, 0, currentPos.z - qBoxPos.z);
             const distQ = toInsectQ.length();
             if (distQ < avoidRadius) {
               const tQ = Math.max(0, Math.min(1, (distQ - minObs) / (avoidRadius - minObs)));
@@ -4563,6 +4852,33 @@ function init() {
                 walkDir.lerp(steerVec, steerFactor).normalize();
               }
             }
+
+            // Avoid Games Alien
+            if (gamesAlienGroup) {
+              const toInsectG = tmpToInsectCube.subVectors(currentPos, gamesAlienGroup.position);
+              toInsectG.y = 0;
+              const distG = toInsectG.length();
+              if (distG < avoidRadius) {
+                const tG = Math.max(0, Math.min(1, (distG - minObs) / (avoidRadius - minObs)));
+
+                const avoidVec = distG < 0.001
+                  ? tmpAvoidVec.set(1, 0, 0)
+                  : tmpAvoidVec.copy(toInsectG).normalize();
+
+                let crossG = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+                if (Math.abs(crossG) < 0.05) {
+                  crossG = 1.0;
+                }
+
+                const perpG = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+                if (crossG < 0) perpG.negate();
+
+                const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpG, 0.3).normalize();
+
+                const steerFactor = Math.min(1.0, (1.0 - tG) * 0.9 * 60.0 * dt);
+                walkDir.lerp(steerVec, steerFactor).normalize();
+              }
+            }
           }
 
           // Re-normalize final direction vector and project back onto internal wander angle
@@ -4585,17 +4901,20 @@ function init() {
 
           // Physical colliders (if avoidance is enabled)
           if (lCfg.avoidanceEnabled !== false) {
-            const qBoxDistAfter = Math.sqrt(bugCubeGroup.position.x * bugCubeGroup.position.x + bugCubeGroup.position.z * bugCubeGroup.position.z);
+            const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
+            const dxQ = bugCubeGroup.position.x - qBoxPos.x;
+            const dzQ = bugCubeGroup.position.z - qBoxPos.z;
+            const qBoxDistAfter = Math.sqrt(dxQ * dxQ + dzQ * dzQ);
             if (qBoxDistAfter < minObs) {
               let pushVec;
               if (qBoxDistAfter < 0.001) {
                 const randomAngle = Math.random() * Math.PI * 2;
                 pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
               } else {
-                pushVec = tmpPushVec.set(bugCubeGroup.position.x, 0, bugCubeGroup.position.z).normalize();
+                pushVec = tmpPushVec.set(dxQ, 0, dzQ).normalize();
               }
-              bugCubeGroup.position.x = pushVec.x * (minObs + 0.02);
-              bugCubeGroup.position.z = pushVec.z * (minObs + 0.02);
+              bugCubeGroup.position.x = qBoxPos.x + pushVec.x * (minObs + 0.02);
+              bugCubeGroup.position.z = qBoxPos.z + pushVec.z * (minObs + 0.02);
             }
 
             if (webGlobeGroup) {
@@ -4611,6 +4930,22 @@ function init() {
                   pushVec = tmpPushVec.set(dx, 0, dz).normalize();
                 }
                 bugCubeGroup.position.copy(webGlobeGroup.position).addScaledVector(pushVec, minObs + 0.02);
+              }
+            }
+
+            if (gamesAlienGroup) {
+              const dx = bugCubeGroup.position.x - gamesAlienGroup.position.x;
+              const dz = bugCubeGroup.position.z - gamesAlienGroup.position.z;
+              const d = Math.sqrt(dx * dx + dz * dz);
+              if (d < minObs) {
+                let pushVec;
+                if (d < 0.001) {
+                  const randomAngle = Math.random() * Math.PI * 2;
+                  pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
+                } else {
+                  pushVec = tmpPushVec.set(dx, 0, dz).normalize();
+                }
+                bugCubeGroup.position.copy(gamesAlienGroup.position).addScaledVector(pushVec, minObs + 0.02);
               }
             }
           }
@@ -4878,6 +5213,147 @@ function init() {
         }
         if (regrowProgress >= 1.0) {
           houdiniRespawnStartTime = 0;
+        }
+      }
+    }
+
+    // Handle Games 3D Alien popping animation sequence (Pop0 for 500ms, then Pop1)
+    if (isGamesPopping && gamesAlienGroup) {
+      const gCfg = SCENE_CONFIG.games3D || {};
+      const now = performance.now();
+      const pCfg = gCfg.pop || {};
+      const pop0Duration = pCfg.pop0Duration !== undefined ? pCfg.pop0Duration : 500;
+      const pop1Duration = pCfg.pop1Duration !== undefined ? pCfg.pop1Duration : 450;
+      const totalPopDuration = pop0Duration + pop1Duration;
+
+      const elapsed = now - gamesPopStartTime;
+      const linearProgress = Math.min(1.0, elapsed / Math.max(1, totalPopDuration));
+
+      // Phase 1: Pop0 for first pop0Duration (500ms); Phase 2: Pop1 for remaining time
+      const isPop0Phase = elapsed < pop0Duration;
+      gamesAlienGroup.traverse((child) => {
+        if (child.isMesh) {
+          if (isPop0Phase && child === gamesAlienPop0Mesh) {
+            child.visible = true;
+          } else if (!isPop0Phase && child === gamesAlienPop1Mesh) {
+            child.visible = true;
+          } else {
+            child.visible = false;
+          }
+        }
+      });
+
+      // Keep rotation facing camera directly during pop animation
+      const baseYDeg = (gCfg.rotation && gCfg.rotation.y !== undefined) ? gCfg.rotation.y : 90;
+      const baseRad = baseYDeg * Math.PI / 180.0;
+      const alienWorldPos = tmpAlienWorldPos.setFromMatrixPosition(gamesAlienGroup.matrixWorld);
+      const dxWorld = camera.position.x - alienWorldPos.x;
+      const dzWorld = camera.position.z - alienWorldPos.z;
+      const currentCamAngle = Math.atan2(dxWorld, dzWorld);
+
+      if (gamesAlienGroup.userData.initialCamAngle === undefined) {
+        const initPos = (isMobileInitial && gCfg.mobile ? gCfg.mobile.position : null) || (gCfg.desktop ? gCfg.desktop.position : { x: 4.8, z: 2.0 });
+        gamesAlienGroup.userData.initialCamAngle = Math.atan2(camera.position.x - initPos.x, camera.position.z - initPos.z);
+      }
+
+      const angleCorrection = currentCamAngle - gamesAlienGroup.userData.initialCamAngle;
+      const targetRotY = baseRad - sceneGroup.rotation.y + angleCorrection;
+      gamesAlienGroup.rotation.y = targetRotY;
+
+      // Smooth 600ms shadow fade-out during click animation
+      if (gamesShadowMesh && gamesShadowMaterial) {
+        const shadowFadeDuration = pCfg.shadowFadeDuration !== undefined ? pCfg.shadowFadeDuration : 600;
+        const shadowFadePct = Math.min(1.0, elapsed / Math.max(1, shadowFadeDuration));
+        const fadeFactor = Math.max(0.0, 1.0 - shadowFadePct);
+
+        const shadowBaseY = gCfg.shadowY !== undefined ? gCfg.shadowY : 0.335;
+        const h = gamesAlienGroup.position.y - shadowBaseY;
+        const gShadowOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
+        const baseOpacity = Math.max(0.0, (1.0 - h * 0.45) * gShadowOpacity) * defaultModeShadowMult;
+
+        const baseShadowScale = gCfg.shadowScale !== undefined ? gCfg.shadowScale : 2.0;
+        const sFactor = Math.max(0.3, 1.0 - h * 0.2) * baseShadowScale * targetScale;
+
+        gamesShadowMesh.position.x = gamesAlienGroup.position.x;
+        gamesShadowMesh.position.z = gamesAlienGroup.position.z;
+        gamesShadowMesh.position.y = shadowBaseY;
+        gamesShadowMesh.scale.set(sFactor, sFactor, 1.0);
+        gamesShadowMaterial.opacity = baseOpacity * fadeFactor;
+        gamesShadowMesh.visible = fadeFactor > 0.001;
+      }
+
+      // Expand pop mesh scale during burst
+      const popScaleFactor = 1.0 + linearProgress * 0.4;
+      const gamesBaseScale = gCfg.scale || 0.0009;
+      const curPopScale = gamesBaseScale * popScaleFactor * targetScale;
+      gamesAlienGroup.scale.set(curPopScale, curPopScale, curPopScale);
+
+      if (linearProgress >= 1.0) {
+        gamesAlienGroup.visible = false;
+        if (gamesAlienPop0Mesh) gamesAlienPop0Mesh.visible = false;
+        if (gamesAlienPop1Mesh) gamesAlienPop1Mesh.visible = false;
+        if (gamesShadowMesh) gamesShadowMesh.visible = false;
+
+        isGamesPopping = false;
+        startGamesAlienRespawn();
+      }
+    }
+
+    // Handle Games 3D Alien respawn/grow transition
+    if (!isGamesPopping && gamesRespawnStartTime > 0 && gamesAlienGroup) {
+      const now = performance.now();
+      const pCfg = (SCENE_CONFIG.games3D && SCENE_CONFIG.games3D.pop) || {};
+      const delay = pCfg.respawnDelay !== undefined ? pCfg.respawnDelay : 100;
+      const duration = pCfg.respawnDuration !== undefined ? pCfg.respawnDuration : 400;
+      const elapsed = now - gamesRespawnStartTime;
+
+      if (elapsed < delay) {
+        gamesAlienGroup.visible = false;
+        if (gamesShadowMesh) gamesShadowMesh.visible = false;
+      } else {
+        const regrowProgress = Math.min(1.0, (elapsed - delay) / Math.max(1, duration));
+        const easeOutCubic = 1.0 - Math.pow(1.0 - regrowProgress, 3.0);
+
+        gamesAlienGroup.visible = true;
+        if (gamesAlienPop0Mesh) gamesAlienPop0Mesh.visible = false;
+        if (gamesAlienPop1Mesh) gamesAlienPop1Mesh.visible = false;
+
+        // Ensure active pose mesh is visible during regrowing scale transition
+        const interval = (SCENE_CONFIG.games3D && SCENE_CONFIG.games3D.poseInterval) || 700;
+        if (gamesAlienGroup.userData.poseTime === undefined) gamesAlienGroup.userData.poseTime = 0;
+        gamesAlienGroup.userData.poseTime += dt;
+        const isPose1Active = Math.floor(gamesAlienGroup.userData.poseTime / (interval * 0.001)) % 2 === 1;
+
+        if (gamesAlienPose0Mesh && gamesAlienPose1Mesh) {
+          gamesAlienPose0Mesh.visible = !isPose1Active;
+          gamesAlienPose1Mesh.visible = isPose1Active;
+        }
+
+        if (gamesShadowMesh && gamesShadowMaterial) {
+          gamesShadowMesh.visible = true;
+          const gCfg = SCENE_CONFIG.games3D;
+          const shadowBaseY = gCfg.shadowY !== undefined ? gCfg.shadowY : 0.335;
+          const h = gamesAlienGroup.position.y - shadowBaseY;
+          const baseShadowScale = gCfg.shadowScale !== undefined ? gCfg.shadowScale : 2.0;
+          const idleShadowScale = Math.max(0.3, 1.0 - h * 0.2) * baseShadowScale * targetScale;
+          const currentShadowScale = idleShadowScale * easeOutCubic;
+          gamesShadowMesh.scale.set(currentShadowScale, currentShadowScale, 1.0);
+
+          const gShadowOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
+          const idleShadowOpacity = Math.max(0.0, (1.0 - h * 0.45) * gShadowOpacity) * defaultModeShadowMult;
+          gamesShadowMaterial.opacity = idleShadowOpacity * easeOutCubic;
+        }
+
+        const gamesBaseScale = SCENE_CONFIG.games3D.scale || 0.0009;
+        const gamesTargetScale = gamesBaseScale * targetScale;
+        const curScale = gamesTargetScale * easeOutCubic;
+        gamesAlienGroup.scale.set(curScale, curScale, curScale);
+
+        if (regrowProgress >= 0.3 && !canInteract) {
+          canInteract = true;
+        }
+        if (regrowProgress >= 1.0) {
+          gamesRespawnStartTime = 0;
         }
       }
     }
@@ -5283,6 +5759,91 @@ function init() {
       }
     }
 
+    // Games 3D Alien pose toggling & floating & hover updates
+    if (gamesAlienGroup && SCENE_CONFIG.games3D && SCENE_CONFIG.games3D.enabled !== false) {
+      if (isGamesPopping) {
+        // Handled in the popping loop above!
+      } else if (gamesRespawnStartTime > 0) {
+        // Handled in the regrow loop above!
+      } else {
+        const gCfg = SCENE_CONFIG.games3D;
+        const isHovered = isGamesAlienHovered || linkHoveredGames;
+
+        // 1. Pose animation toggling (speeds up when hovered)
+        if (gamesAlienGroup.userData.poseTime === undefined) {
+          gamesAlienGroup.userData.poseTime = 0;
+        }
+        const hoverPoseMult = isHovered ? (gCfg.hoverPoseSpeedMultiplier || 3.0) : 1.0;
+        gamesAlienGroup.userData.poseTime += dt * hoverPoseMult;
+
+        const baseIntervalSec = (gCfg.poseInterval || 700) * 0.001;
+        const isPose1Active = Math.floor(gamesAlienGroup.userData.poseTime / baseIntervalSec) % 2 === 1;
+
+        if (gamesAlienPose0Mesh && gamesAlienPose1Mesh) {
+          gamesAlienPose0Mesh.visible = !isPose1Active;
+          gamesAlienPose1Mesh.visible = isPose1Active;
+        }
+        if (gamesAlienPop0Mesh) gamesAlienPop0Mesh.visible = false;
+        if (gamesAlienPop1Mesh) gamesAlienPop1Mesh.visible = false;
+
+        // 2. Up / down float bobbing (pauses when hovered)
+        if (gamesAlienGroup.userData.floatTime === undefined) {
+          gamesAlienGroup.userData.floatTime = 0;
+        }
+        const pauseFloat = isHovered && (gCfg.pauseFloatOnHover !== false);
+        if (!pauseFloat) {
+          gamesAlienGroup.userData.floatTime += dt;
+        }
+
+        const freq = gCfg.floatFrequency !== undefined ? gCfg.floatFrequency : 0.002;
+        const amp = gCfg.floatAmplitude !== undefined ? gCfg.floatAmplitude : 0.16;
+        const baseY = (gamesAlienGroup.userData.baseY !== undefined) ? gamesAlienGroup.userData.baseY : (gCfg.desktop ? gCfg.desktop.position.y : 0.7);
+
+        const targetHoverY = isHovered ? (gCfg.hoverYOffset !== undefined ? gCfg.hoverYOffset : 0.15) : 0.0;
+        const currentHoverY = gamesAlienGroup.userData.currentHoverY !== undefined ? gamesAlienGroup.userData.currentHoverY : 0.0;
+        const nextHoverY = THREE.MathUtils.lerp(currentHoverY, targetHoverY, 0.1);
+        gamesAlienGroup.userData.currentHoverY = nextHoverY;
+
+        const floatOffset = Math.sin(gamesAlienGroup.userData.floatTime * freq * 1000.0) * amp;
+        gamesAlienGroup.position.y = baseY + nextHoverY + floatOffset;
+
+        // Dynamic lazy camera-tracking Y-rotation
+        const lookCfg = gCfg.lookAtCamera || {};
+        if (lookCfg.enabled !== false) {
+          const baseYDeg = (gCfg.rotation && gCfg.rotation.y !== undefined) ? gCfg.rotation.y : 90;
+          const baseRad = baseYDeg * Math.PI / 180.0;
+
+          const alienWorldPos = tmpAlienWorldPos.setFromMatrixPosition(gamesAlienGroup.matrixWorld);
+          const dxWorld = camera.position.x - alienWorldPos.x;
+          const dzWorld = camera.position.z - alienWorldPos.z;
+          const currentCamAngle = Math.atan2(dxWorld, dzWorld);
+
+          if (gamesAlienGroup.userData.initialCamAngle === undefined) {
+            const initPos = (isMobileInitial && gCfg.mobile ? gCfg.mobile.position : null) || (gCfg.desktop ? gCfg.desktop.position : { x: 4.8, z: 2.0 });
+            gamesAlienGroup.userData.initialCamAngle = Math.atan2(camera.position.x - initPos.x, camera.position.z - initPos.z);
+          }
+
+          const angleCorrection = currentCamAngle - gamesAlienGroup.userData.initialCamAngle;
+          const targetRotY = baseRad - sceneGroup.rotation.y + angleCorrection;
+
+          let diffY = targetRotY - gamesAlienGroup.rotation.y;
+          diffY = Math.atan2(Math.sin(diffY), Math.cos(diffY));
+
+          const speedParam = lookCfg.speed !== undefined ? lookCfg.speed : 0.04;
+          const lerpSpeed = 1.0 - Math.pow(1.0 - Math.min(1.0, speedParam * 60.0), dt);
+          gamesAlienGroup.rotation.y += diffY * lerpSpeed;
+        }
+
+        const gamesBaseScale = gCfg.scale !== undefined ? gCfg.scale : 0.005;
+        const hoverScaleMult = isHovered ? (gCfg.hoverScale || 1.15) : 1.0;
+        const gamesTargetScale = gamesBaseScale * hoverScaleMult * targetScale;
+
+        const currentGamesScale = gamesAlienGroup.scale.x;
+        const nextGamesScale = THREE.MathUtils.lerp(currentGamesScale, gamesTargetScale, 0.1);
+        gamesAlienGroup.scale.set(nextGamesScale, nextGamesScale, nextGamesScale);
+      }
+    }
+
     // Update Web Globe click animation (emissive flash & god rays)
     if (isWebGlobeClickAnimating && SCENE_CONFIG.web3D) {
       const wCfg = SCENE_CONFIG.web3D;
@@ -5410,6 +5971,14 @@ function init() {
         bugBoundaryMesh.visible = !!lCfg.showDebug;
       }
       if (bugObstacleMesh) {
+        if (questionBoxGroup) {
+          const visualShadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.22;
+          bugObstacleMesh.position.set(
+            questionBoxGroup.position.x,
+            visualShadowBaseY,
+            questionBoxGroup.position.z
+          );
+        }
         bugObstacleMesh.visible = !!lCfg.showDebug;
       }
       if (houdiniObstacleMesh) {
@@ -5433,6 +6002,17 @@ function init() {
           );
         }
         webGlobeObstacleMesh.visible = !!lCfg.showDebug;
+      }
+      if (gamesObstacleMesh) {
+        if (gamesAlienGroup) {
+          const visualShadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.22;
+          gamesObstacleMesh.position.set(
+            gamesAlienGroup.position.x,
+            visualShadowBaseY,
+            gamesAlienGroup.position.z
+          );
+        }
+        gamesObstacleMesh.visible = !!lCfg.showDebug;
       }
 
       // Hardcode the bug cube's Y position to its configured base height (0.8)
@@ -5472,6 +6052,28 @@ function init() {
       }
     }
 
+    // Contact shadow updates for Games 3D Alien
+    if (gamesShadowMesh && gamesShadowMaterial && gamesAlienGroup && SCENE_CONFIG.games3D) {
+      if (isGamesPopping || gamesRespawnStartTime > 0) {
+        // Bypassed completely during pop and regrow (handled by regrow loop)
+      } else {
+        gamesShadowMesh.visible = !shouldHideShadows;
+        if (!shouldHideShadows) {
+          const gCfg = SCENE_CONFIG.games3D;
+          const shadowBaseY = gCfg.shadowY !== undefined ? gCfg.shadowY : 0.335;
+          gamesShadowMesh.position.x = gamesAlienGroup.position.x;
+          gamesShadowMesh.position.z = gamesAlienGroup.position.z;
+          gamesShadowMesh.position.y = shadowBaseY;
+          const baseShadowScale = gCfg.shadowScale !== undefined ? gCfg.shadowScale : 1.6;
+          const h = gamesAlienGroup.position.y - shadowBaseY;
+          const sFactor = Math.max(0.3, 1.0 - h * 0.2) * baseShadowScale * targetScale;
+          gamesShadowMesh.scale.set(sFactor, sFactor, 1.0);
+          const gShadowOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
+          gamesShadowMaterial.opacity = Math.max(0.0, (1.0 - h * 0.45) * gShadowOpacity) * defaultModeShadowMult;
+        }
+      }
+    }
+
     // Dynamic contact shadow updates based on floating height for Question Box
     if (shadowMesh && shadowMaterial && questionBoxGroup && SCENE_CONFIG.questionBox) {
       if (isShattering || respawnStartTime > 0) {
@@ -5484,7 +6086,9 @@ function init() {
           const qBoxCfg = SCENE_CONFIG.questionBox;
           const shadowBaseY = qBoxCfg.shadowY !== undefined ? qBoxCfg.shadowY : 0.33;
 
-          // Update Y position dynamically
+          // Update position dynamically to follow the question box
+          shadowMesh.position.x = questionBoxGroup.position.x;
+          shadowMesh.position.z = questionBoxGroup.position.z;
           shadowMesh.position.y = shadowBaseY;
 
           const h = questionBoxGroup.position.y - shadowBaseY; // Height difference
@@ -5729,6 +6333,11 @@ function init() {
     if (webGlobeGroup) {
       const webIntersects = raycaster.intersectObject(webGlobeGroup, true);
       if (webIntersects.length > 0) return { type: 'webGlobe' };
+    }
+
+    if (gamesAlienGroup) {
+      const gamesIntersects = raycaster.intersectObject(gamesAlienGroup, true);
+      if (gamesIntersects.length > 0) return { type: 'gamesAlien' };
     }
 
 
@@ -6096,6 +6705,56 @@ function init() {
     urlsToPreload.forEach(loadSoundBuffer);
   }
   preloadRenderModeSounds();
+
+  function startGamesAlienRespawn() {
+    isGamesRegrowingSoundPlayed = false;
+    gamesRespawnStartTime = performance.now();
+    canInteract = false;
+  }
+
+  function triggerGamesAlienPop() {
+    if (isGamesPopping || !gamesAlienGroup) return false;
+
+    const gCfg = SCENE_CONFIG.games3D;
+    const pCfg = gCfg ? gCfg.pop : null;
+    if (pCfg && pCfg.enabled === false) return false;
+
+    // 1. Traverse gamesAlienGroup and set ONLY gamesAlienPop0Mesh to visible BEFORE updating rotation!
+    gamesAlienGroup.traverse((child) => {
+      if (child.isMesh) {
+        if (child === gamesAlienPop0Mesh) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
+      }
+    });
+
+    // 2. Immediately snap Y rotation to face camera directly when click animation starts
+    const baseYDeg = (gCfg && gCfg.rotation && gCfg.rotation.y !== undefined) ? gCfg.rotation.y : 90;
+    const baseRad = baseYDeg * Math.PI / 180.0;
+    const alienWorldPos = tmpAlienWorldPos.setFromMatrixPosition(gamesAlienGroup.matrixWorld);
+    const dxWorld = camera.position.x - alienWorldPos.x;
+    const dzWorld = camera.position.z - alienWorldPos.z;
+    const currentCamAngle = Math.atan2(dxWorld, dzWorld);
+
+    if (gamesAlienGroup.userData.initialCamAngle === undefined) {
+      const initPos = (isMobileInitial && gCfg && gCfg.mobile ? gCfg.mobile.position : null) || (gCfg && gCfg.desktop ? gCfg.desktop.position : { x: 4.8, z: 2.0 });
+      gamesAlienGroup.userData.initialCamAngle = Math.atan2(camera.position.x - initPos.x, camera.position.z - initPos.z);
+    }
+
+    const angleCorrection = currentCamAngle - gamesAlienGroup.userData.initialCamAngle;
+    const targetRotY = baseRad - sceneGroup.rotation.y + angleCorrection;
+    gamesAlienGroup.rotation.y = targetRotY;
+
+    isGamesPopping = true;
+    canInteract = false;
+    gamesPopStartTime = performance.now();
+    gamesRespawnStartTime = 0;
+
+    clearOutlines();
+    return true;
+  }
 
   function startHoudiniToyRespawn() {
     isHoudiniRegrowingSoundPlayed = false;
@@ -6514,6 +7173,13 @@ function init() {
         triggerWebGlobeClickAnimation();
       } else {
         webLinkClicked();
+      }
+    } else if (target.type === 'gamesAlien') {
+      const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
+      if (pCfg && pCfg.enabled !== false) {
+        triggerGamesAlienPop();
+      } else {
+        gamesLinkClicked();
       }
     } else if (target.type === 'bug') {
       window.open('https://www.linkedin.com/in/noah-gunther-3128bb185/', '_blank');
