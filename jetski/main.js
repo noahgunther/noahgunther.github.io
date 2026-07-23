@@ -2022,6 +2022,7 @@ function init() {
     });
 
     bugCubeGroup = new THREE.Group();
+    bugCubeGroup.renderOrder = 10;
 
     const bugFbxLoader = new FBXLoader();
     bugFbxLoader.load('geometry/bug_cube.fbx', (object) => {
