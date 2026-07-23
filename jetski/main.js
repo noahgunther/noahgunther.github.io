@@ -2108,9 +2108,6 @@ function init() {
         opacity: lOpacity,
         depthWrite: false,
         depthTest: true,
-        polygonOffset: true,
-        polygonOffsetFactor: -1.0,
-        polygonOffsetUnits: -1.0,
         side: THREE.FrontSide,
         blending: THREE.NormalBlending
       });
@@ -2157,9 +2154,6 @@ function init() {
     opacity: qOpacity,
     depthWrite: false,
     depthTest: true,
-    polygonOffset: true,
-    polygonOffsetFactor: -1.0,
-    polygonOffsetUnits: -1.0,
     side: THREE.FrontSide,
     blending: THREE.NormalBlending
   });
@@ -2282,9 +2276,6 @@ function init() {
       opacity: hOpacity,
       depthWrite: false,
       depthTest: true,
-      polygonOffset: true,
-      polygonOffsetFactor: -1.0,
-      polygonOffsetUnits: -1.0,
       side: THREE.FrontSide,
       blending: THREE.NormalBlending
     });
@@ -2394,9 +2385,6 @@ function init() {
       opacity: wOpacity,
       depthWrite: false,
       depthTest: true,
-      polygonOffset: true,
-      polygonOffsetFactor: -1.0,
-      polygonOffsetUnits: -1.0,
       side: THREE.FrontSide,
       blending: THREE.NormalBlending
     });
