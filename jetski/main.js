@@ -74,6 +74,8 @@ const SCENE_CONFIG = {
     spinDuration: 1.5,                      // Duration of Y-axis scene spin on home logo click (seconds)
     spinZoom: 0.25,                         // Camera zoom-out multiplier during scene spin
     hoverColor3D: '#91bfff',                 // Color glow tint for hovered 3D objects
+    defaultModeShadowBoost: 1.6,            // Shadow opacity boost factor exclusively in default render mode (darker shadows on gel)
+    minDragRadiusThreshold: 3.5,            // World units radius threshold below which central drag rotation speed is dampened
     outline: {
       edgeStrength: 3.0,                     // Intensity of glowing selection outlines (matches Question Box)
       edgeGlow: 1.0,                         // Glowing halo blur dissipation range (matches Question Box)
@@ -96,7 +98,7 @@ const SCENE_CONFIG = {
       roughness: 0.3                        // Surface roughness
     },
     rainbow: {
-      intensity: 0.5,                       // Glow strength of oil-slick rainbow shader
+      intensity: 0.66,                       // Glow strength of oil-slick rainbow shader
       scale: 0.2,                           // Band frequency (smaller = wider bands)
       angleFactor: 6.6,                     // Fresnel angle color shift amount
       shimmer: 0.0,                         // Time-based color shifting amplitude
@@ -167,8 +169,9 @@ const SCENE_CONFIG = {
     planeScale: 82.0,                       // Scale of inner question mark graphic
     floatFrequency: 0.003,                  // Bobbing float frequency
     floatAmplitude: 0.1,                    // Bobbing float amplitude
-    shadowY: 0.33,                          // Height of shadow plane
+    shadowY: 0.335,                         // Height of shadow plane
     shadowScale: 1.6,                       // Shadow scale factor
+    shadowOpacity: 0.85,                    // Shadow opacity factor
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
       hoverInVolume: 0.5,                    // Volume for aboutHover.ogg (0.0 to 1.0)
@@ -176,21 +179,21 @@ const SCENE_CONFIG = {
     },
     shatter: {
       enabled: true,                         // Enable click-to-shatter explosion
-      shardCount: 30,                        // Number of 3D glass shards
-      sparkleCount: 6,                      // Number of billboard sparkle quads
+      shardCount: 18,                        // Number of 3D glass shards
+      sparkleCount: 8,                      // Number of billboard sparkle quads
       sparkleColors: ['#28a200', '#ffa527', '#3150ff'], // Sparkle color palette
       minShardScale: 0.3,                    // Min size of shards
       maxShardScale: 0.6,                    // Max size of shards
       minSparkleScale: 1.3,                  // Min size of sparkles
       maxSparkleScale: 2.0,                  // Max size of sparkles
-      explosionSpeed: 3.0,                   // Outward shard velocity
+      explosionSpeed: 4.0,                   // Outward shard velocity
       sparkleSpeed: 1.5,                     // Outward sparkle velocity
       fadeSpeed: 2.5,                        // Fade-out decay rate
       soundEnabled: true,                    // Enable shatter audio effect
       volume: 0.9,                           // Shatter audio volume (0.0 to 1.0)
       growVolume: 0.4,                       // Regrow audio volume (0.0 to 1.0)
-      respawnDelay: 200,                    // Delay before grow-back animation (ms)
-      respawnDuration: 800                   // Duration of grow-back animation (ms)
+      respawnDelay: 100,                    // Delay before grow-back animation (ms)
+      respawnDuration: 400                  // Duration of grow-back animation (ms)
     }
   },
 
@@ -201,8 +204,9 @@ const SCENE_CONFIG = {
     enabled: true,                          // Toggle to enable/disable Houdini Toy
     scale: 1.0,                             // Scale factor
     rotation: { x: 0, y: 226, z: 0 },       // Initial rotation in degrees
-    shadowY: 0.33,                          // Shadow plane height
+    shadowY: 0.335,                         // Shadow plane height
     shadowScale: 2.0,                       // Shadow plane scale factor
+    shadowOpacity: 0.66,                    // Shadow opacity factor
     hoverYOffset: 0.15,                     // Vertical lift offset when hovered
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
@@ -255,8 +259,8 @@ const SCENE_CONFIG = {
       soundEnabled: true,                    // Enable pop audio effect
       volume: 0.2,                           // Pop audio volume (0.0 to 1.0)
       growVolume: 0.4,                       // Regrow audio volume (0.0 to 1.0)
-      respawnDelay: 200,                    // Delay before growing back (ms)
-      respawnDuration: 800                   // Regrow animation duration (ms)
+      respawnDelay: 100,                    // Delay before growing back (ms)
+      respawnDuration: 400                   // Regrow animation duration (ms)
     }
   },
 
@@ -294,8 +298,9 @@ const SCENE_CONFIG = {
     mobile: {
       position: { x: -2.0, y: 1.2, z: 2.0 } // Mobile 3D position
     },
-    shadowY: 0.33,                          // Shadow plane height
+    shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.4,                       // Shadow plane scale factor
+    shadowOpacity: 0.66,                    // Shadow opacity factor
     materials: {
       grid: {
         color: 0x000000,                    // Diffuse color tint
@@ -345,8 +350,8 @@ const SCENE_CONFIG = {
       maxRayWidth: 0.2,                     // Max width of god ray beam
       raySpeed: 2.0,                         // Outward expansion speed of rays
       rayColors: ['#ffffff', '#21ffd8', '#91bfff', '#70aaff'], // Radiant god ray beam colors
-      respawnDelay: 200,                       // Delay before shrink-back transition (ms)
-      respawnDuration: 1000                   // Duration of shrink-back transition (ms)
+      respawnDelay: 50,                        // Delay before shrink-back transition (ms)
+      respawnDuration: 400                    // Duration of shrink-back transition (ms)
     }
   },
 
@@ -375,54 +380,12 @@ const SCENE_CONFIG = {
     speed: 0.005,                           // Walk speed per frame
     hoverDelay: 500,                        // Wait duration after hover ends (ms)
     showDebug: false,                       // Toggle red debug vector guides
-    shadowY: 0.35,                          // Shadow plane height
+    shadowY: 0.335,                         // Shadow plane height
+    shadowOpacity: 0.66,                    // Shadow opacity factor
     fallRotationSpeedThreshold: 2.0         // Rotation speed threshold to trigger bug fall
   },
 
-  // ==========================================
-  // 12. 3D MENU LAYOUT POSITIONS
-  // ==========================================
-  placeholderCubes: {
-    enabled: true,                          // Toggle 3D menu navigation layout guides
-    material: {
-      color: 0x181024,
-      roughness: 0.15,
-      metalness: 0.1,
-      transmission: 0.0,
-      opacity: 0.85,
-      transparent: true,
-      clearcoat: 0.0,
-      clearcoatRoughness: 0.0
-    },
-    layout: {
-      desktop: {
-        useIndividual: true,
-        spacing: 2.2,
-        individual: {
-          about: { x: -4.4, y: 0, z: 10 },
-          ar: { x: -2.2, y: 0, z: 10 },
-          games: { x: 0, y: 0, z: 10 },
-          web: { x: 2.2, y: 0, z: 10 },
-          houdini: { x: 4.4, y: 0, z: 10 }
-        }
-      },
-      mobile: {
-        useIndividual: true,
-        spacing: 1.8,
-        individual: {
-          about: { x: -3.6, y: 0, z: 0 },
-          ar: { x: -1.8, y: 0, z: 0 },
-          games: { x: 0, y: 0, z: 0 },
-          web: { x: 1.8, y: 0, z: 0 },
-          houdini: { x: 3.6, y: 0, z: 0 }
-        }
-      }
-    },
-    items: [
-      { name: 'ar', label: 'AR', color: '#ff21a6' },
-      { name: 'games', label: 'Games', color: '#2175ff' }
-    ]
-  },
+
 
   // ==========================================
   // 12. POST-PROCESSING RENDER STYLES & RETRO SHADERS
@@ -470,7 +433,8 @@ const SCENE_CONFIG = {
       textColor: '#ffffff',          // White rest color for text & logos
       hoverColor: '#91bfff',         // Default electric cyan/blue hover color
       soundSrc: '',                  // Sound file path for this mode (e.g. 'sound/rm_default.ogg')
-      soundVolume: 0.8               // Transition sound volume (0.0 to 1.0)
+      soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
+      shadowBoost: 2.0,              // Shadow opacity boost multiplier for this mode (e.g. 1.45 for darker shadows)
     },
 
     multiBit: {
@@ -480,7 +444,8 @@ const SCENE_CONFIG = {
       textColor: '#ffffff',          // White rest color for text & logos
       hoverColor: '#aaaaff',         // Retro vibrant pink/magenta hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_multibit.ogg')
-      soundVolume: 0.8               // Transition sound volume (0.0 to 1.0)
+      soundVolume: 0.8,               // Transition sound volume (0.0 to 1.0)
+      shadowBoost: 1.2
     },
 
     oneBit: {
@@ -511,6 +476,7 @@ const SCENE_CONFIG = {
       hoverColor: '#91bfff',         // Warm arcade gold/orange hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_pixelated.ogg')
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
+      shadowBoost: 0.6,
 
       // Mode-specific gel material override
       gelMaterialOverride: {
@@ -534,6 +500,7 @@ const SCENE_CONFIG = {
       hoverColor: '#adcd1e',         // Bright 1989 Game Boy LCD olive green hover color
       soundSrc: 'sound/rm_gameboy.ogg', // Sound file path for Game Boy mode
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
+      shadowBoost: 0.4,
 
       // Mode-specific dish material override
       dishMaterialOverride: {
@@ -561,7 +528,8 @@ const SCENE_CONFIG = {
       textColor: '#ffffff',          // Soft CAD blueprint blue rest color
       hoverColor: '#badaff',         // Bright cyan CAD wireframe line hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_blueprint.ogg')
-      soundVolume: 0.8               // Transition sound volume (0.0 to 1.0)
+      soundVolume: 0.8,               // Transition sound volume (0.0 to 1.0)
+      shadowBoost: 2.0
     },
 
     ascii: {
@@ -580,6 +548,7 @@ const SCENE_CONFIG = {
       hoverColor: '#c3ffc3',         // Matrix terminal radiant green hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_ascii.ogg')
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
+      shadowBoost: 0.8,
 
       // Mode-specific gel material override
       gelMaterialOverride: {
@@ -939,14 +908,11 @@ function init() {
   let plateTargetRot;
   let plate = null;
   let gel = null;
-  let cubes = [];
-  let hoveredCube = null;
   let raycaster = new THREE.Raycaster();
   let mouse = new THREE.Vector2(-9999, -9999);
   let lastClientX = -9999;
   let lastClientY = -9999;
   let active3DPointerDownTarget = null;
-  let linkHoveredCube = null;
   let linkHoveredAbout = false;
   let linkHoveredHoudini = false;
   let linkHoveredLinkedin = false;
@@ -1746,7 +1712,7 @@ function init() {
     metalness: 0.05,
     ior: SCENE_CONFIG.plate.glass.ior, // physical glass IOR
     side: THREE.FrontSide,
-    depthWrite: false
+    depthWrite: true
   });
 
   plateMaterial.onBeforeCompile = (shader) => {
@@ -1872,7 +1838,7 @@ function init() {
     clearcoat: SCENE_CONFIG.gel.glass.clearcoat !== undefined ? SCENE_CONFIG.gel.glass.clearcoat : 0.0,
     clearcoatRoughness: SCENE_CONFIG.gel.glass.clearcoatRoughness !== undefined ? SCENE_CONFIG.gel.glass.clearcoatRoughness : 0.05,
     side: THREE.FrontSide,
-    transparent: true,
+    transparent: false,
     depthWrite: false,
     opacity: SCENE_CONFIG.gel.glass.opacity !== undefined ? SCENE_CONFIG.gel.glass.opacity : 0.85
   });
@@ -1960,18 +1926,7 @@ function init() {
           continue;
         }
 
-        // Avoid menu cubes
-        let collides = false;
-        if (typeof cubes !== 'undefined' && cubes) {
-          cubes.forEach((cube) => {
-            const dx = x - cube.position.x;
-            const dz = z - cube.position.z;
-            const d = Math.sqrt(dx * dx + dz * dz);
-            if (d < minObs) {
-              collides = true;
-            }
-          });
-        }
+
 
         // Avoid Houdini Toy
         if (houdiniToyGroup) {
@@ -2145,11 +2100,17 @@ function init() {
       sceneGroup.add(bugCubeGroup);
 
       // Create shadow under the LinkedIn block
+      const lOpacity = SCENE_CONFIG.linkedin3D.shadowOpacity !== undefined ? SCENE_CONFIG.linkedin3D.shadowOpacity : 0.85;
       linkedinShadowMaterial = new THREE.MeshBasicMaterial({
         map: new THREE.TextureLoader().load('graphics/shadow.png'),
         transparent: true,
-        opacity: 0.6,
+        opacity: lOpacity,
         depthWrite: false,
+        depthTest: true,
+        polygonOffset: true,
+        polygonOffsetFactor: -1.0,
+        polygonOffsetUnits: -1.0,
+        side: THREE.FrontSide,
         blending: THREE.NormalBlending
       });
 
@@ -2157,13 +2118,13 @@ function init() {
       linkedinShadowMesh = new THREE.Mesh(bugShadowGeo, linkedinShadowMaterial);
       linkedinShadowMesh.rotation.x = -Math.PI / 2;
 
-      const shadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.22;
+      const shadowBaseY = SCENE_CONFIG.linkedin3D.shadowY !== undefined ? SCENE_CONFIG.linkedin3D.shadowY : 0.35;
       linkedinShadowMesh.position.set(
         bugInitPos.x,
         shadowBaseY,
         bugInitPos.z
       );
-      linkedinShadowMesh.renderOrder = 10; // Force rendering after refractive gel to prevent depth-sorting issues
+      linkedinShadowMesh.renderOrder = 3; // Render right after dish & gel surfaces
       sceneGroup.add(linkedinShadowMesh);
       isBugModelLoaded = true;
 
@@ -2188,11 +2149,17 @@ function init() {
 
   // Load and construct contact shadow plane below the question box
   const shadowTexture = textureLoader.load('graphics/shadow.png');
+  const qOpacity = SCENE_CONFIG.questionBox.shadowOpacity !== undefined ? SCENE_CONFIG.questionBox.shadowOpacity : 0.85;
   shadowMaterial = new THREE.MeshBasicMaterial({
     map: shadowTexture,
     transparent: true,
-    opacity: 0.6,
+    opacity: qOpacity,
     depthWrite: false,
+    depthTest: true,
+    polygonOffset: true,
+    polygonOffsetFactor: -1.0,
+    polygonOffsetUnits: -1.0,
+    side: THREE.FrontSide,
     blending: THREE.NormalBlending
   });
   const shadowGeo = new THREE.PlaneGeometry(1.5, 1.5);
@@ -2200,9 +2167,9 @@ function init() {
     shadowMesh = new THREE.Mesh(shadowGeo, shadowMaterial);
     shadowMesh.rotation.x = -Math.PI / 2; // Lie flat on the gel surface
     const qBoxPos = SCENE_CONFIG.questionBox.position;
-    const shadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.08;
+    const shadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.33;
     shadowMesh.position.set(qBoxPos.x, shadowBaseY, qBoxPos.z);
-    shadowMesh.renderOrder = 10; // Force rendering after refractive gel to prevent depth-sorting issues
+    shadowMesh.renderOrder = 3; // Render right after dish & gel surfaces
     sceneGroup.add(shadowMesh);
   }
 
@@ -2242,6 +2209,7 @@ function init() {
     fbxLoader.load('geometry/question_box.fbx', (fbx) => {
       fbx.traverse((child) => {
         if (child.isMesh) {
+          child.renderOrder = 10;
           // Robust check of child name and parent name for flat/hierarchical FBX imports (case-insensitive)
           const fullName = (child.name + " " + (child.parent ? child.parent.name : "")).toLowerCase();
           if (fullName.includes('exterior')) {
@@ -2262,6 +2230,7 @@ function init() {
       });
 
       questionBoxGroup = fbx;
+      questionBoxGroup.renderOrder = 10;
 
       // Position and scale based on SCENE_CONFIG — pick mobile or desktop position
       if (SCENE_CONFIG.questionBox) {
@@ -2305,26 +2274,33 @@ function init() {
 
     // Create shadow plane for the rubber toy
     const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const hOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
     houdiniShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
       transparent: true,
-      opacity: 0.6,
+      opacity: hOpacity,
       depthWrite: false,
+      depthTest: true,
+      polygonOffset: true,
+      polygonOffsetFactor: -1.0,
+      polygonOffsetUnits: -1.0,
+      side: THREE.FrontSide,
       blending: THREE.NormalBlending
     });
     const shadowGeo = new THREE.PlaneGeometry(1.5, 1.5);
     houdiniShadowMesh = new THREE.Mesh(shadowGeo, houdiniShadowMaterial);
     houdiniShadowMesh.rotation.x = -Math.PI / 2;
     const hCfg = isMobileInitial ? SCENE_CONFIG.houdini3D.mobile : SCENE_CONFIG.houdini3D.desktop;
-    const shadowBaseY = SCENE_CONFIG.houdini3D.shadowY !== undefined ? SCENE_CONFIG.houdini3D.shadowY : 0.08;
+    const shadowBaseY = SCENE_CONFIG.houdini3D.shadowY !== undefined ? SCENE_CONFIG.houdini3D.shadowY : 0.33;
     houdiniShadowMesh.position.set(hCfg.position.x, shadowBaseY, hCfg.position.z);
-    houdiniShadowMesh.renderOrder = 10;
+    houdiniShadowMesh.renderOrder = 3;
     sceneGroup.add(houdiniShadowMesh);
 
     fbxLoader.load('geometry/rubbertoy.fbx', (fbx) => {
       rubberToyMeshes = [];
       fbx.traverse((child) => {
         if (child.isMesh) {
+          child.renderOrder = 10;
           const mat = toyMaterial.clone();
           mat.morphTargets = true;
           mat.skinning = child.isSkinnedMesh === true;
@@ -2340,6 +2316,7 @@ function init() {
       });
 
       houdiniToyGroup = fbx;
+      houdiniToyGroup.renderOrder = 10;
 
       // Position, scale, and rotate based on initial screen context
       const pos = hCfg.position;
@@ -2409,11 +2386,17 @@ function init() {
 
     // Contact shadow plane for the Web Globe
     const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const wOpacity = wCfg.shadowOpacity !== undefined ? wCfg.shadowOpacity : 0.85;
     webShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
       transparent: true,
-      opacity: 0.6,
+      opacity: wOpacity,
       depthWrite: false,
+      depthTest: true,
+      polygonOffset: true,
+      polygonOffsetFactor: -1.0,
+      polygonOffsetUnits: -1.0,
+      side: THREE.FrontSide,
       blending: THREE.NormalBlending
     });
     const shadowGeo = new THREE.PlaneGeometry(1.5, 1.5);
@@ -2422,7 +2405,7 @@ function init() {
     const initialPos = isMobileInitial ? wCfg.mobile.position : wCfg.desktop.position;
     const shadowBaseY = wCfg.shadowY !== undefined ? wCfg.shadowY : 0.33;
     webShadowMesh.position.set(initialPos.x, shadowBaseY, initialPos.z);
-    webShadowMesh.renderOrder = 10;
+    webShadowMesh.renderOrder = 3;
     sceneGroup.add(webShadowMesh);
 
     webSignalInnerMesh = null;
@@ -2457,6 +2440,7 @@ function init() {
       });
 
       webGlobeGroup = fbx;
+      webGlobeGroup.renderOrder = 10;
       fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
       fbx.userData.baseX = initialPos.x;
       fbx.userData.baseY = initialPos.y;
@@ -2489,12 +2473,8 @@ function init() {
   plateTargetPos = new THREE.Vector3(0, -0.8, 0);
   plateTargetRot = new THREE.Vector3(0, 0, 0);
 
-  // Cubes Array & Hover trackers (reassigned/initialized)
-  cubes = [];
-  hoveredCube = null;
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2(-9999, -9999);
-  linkHoveredCube = null;
   isSpinning = false;
   // Drag-rotation variables
   let isDraggingPointer = false;
@@ -2612,96 +2592,7 @@ function init() {
     return texture;
   }
 
-  // Cubes Configurations (About cube removed - replaced by 3D question box)
-  if (SCENE_CONFIG.placeholderCubes.enabled !== false) {
-    const clickHandlers = {
-      ar: arLinkClicked,
-      games: gamesLinkClicked,
-      web: webLinkClicked,
-      houdini: houdiniLinkClicked
-    };
 
-    const cubesConfig = [];
-    if (SCENE_CONFIG.placeholderCubes.items) {
-      SCENE_CONFIG.placeholderCubes.items.forEach(item => {
-        cubesConfig.push({
-          name: item.name,
-          label: item.label,
-          color: item.color,
-          onClick: clickHandlers[item.name]
-        });
-      });
-    }
-
-    const m = SCENE_CONFIG.placeholderCubes.material || {};
-    const baseMaterial = new THREE.MeshPhysicalMaterial({
-      color: m.color !== undefined ? m.color : 0x181024,
-      roughness: m.roughness !== undefined ? m.roughness : 0.15,
-      metalness: m.metalness !== undefined ? m.metalness : 0.1,
-      transmission: m.transmission !== undefined ? m.transmission : 0.6,
-      opacity: m.opacity !== undefined ? m.opacity : 0.85,
-      transparent: m.transparent !== undefined ? m.transparent : true,
-      clearcoat: m.clearcoat !== undefined ? m.clearcoat : 1.0,
-      clearcoatRoughness: m.clearcoatRoughness !== undefined ? m.clearcoatRoughness : 0.1
-    });
-
-    // Construct Cubes
-    cubesConfig.forEach((cfg) => {
-      const textTex = createTextTexture(cfg.label, cfg.color);
-      const frontMaterial = new THREE.MeshPhysicalMaterial({
-        map: textTex,
-        roughness: m.roughness !== undefined ? m.roughness : 0.15,
-        metalness: m.metalness !== undefined ? m.metalness : 0.1,
-        clearcoat: m.clearcoat !== undefined ? m.clearcoat : 1.0,
-        clearcoatRoughness: m.clearcoatRoughness !== undefined ? m.clearcoatRoughness : 0.1
-      });
-
-      const materials = [
-        baseMaterial, // Right
-        baseMaterial, // Left
-        baseMaterial, // Top
-        baseMaterial, // Bottom
-        frontMaterial, // Front
-        baseMaterial  // Back
-      ];
-
-      const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-      const cube = new THREE.Mesh(geometry, materials);
-
-      const layout = isMobileInitial
-        ? SCENE_CONFIG.placeholderCubes.layout.mobile
-        : SCENE_CONFIG.placeholderCubes.layout.desktop;
-
-      let baseX = 0, baseY = 0, baseZ = 0;
-      if (layout.useIndividual && layout.individual && layout.individual[cfg.name]) {
-        const pos = layout.individual[cfg.name];
-        baseX = pos.x;
-        baseY = pos.y;
-        baseZ = pos.z;
-      } else {
-        const i = cubes.length;
-        baseX = (i - (cubesConfig.length - 1) / 2) * layout.spacing;
-        baseY = 0;
-        baseZ = 0;
-      }
-
-      cube.userData = {
-        name: cfg.name,
-        color: cfg.color,
-        onClick: cfg.onClick,
-        isHovered: false,
-        baseX: baseX,
-        baseY: baseY,
-        baseZ: baseZ,
-        rotationSpeedX: 0.003 + Math.random() * 0.002,
-        rotationSpeedY: 0.005 + Math.random() * 0.003
-      };
-      cube.position.set(baseX, baseY, baseZ);
-
-      sceneGroup.add(cube);
-      cubes.push(cube);
-    });
-  }
 
 
   const arHomeButton = document.getElementById('mobileartraybuttonhome');
@@ -3792,7 +3683,9 @@ function init() {
 
   // Main navigation bindings
   homeLink._hoverActive = false;
+  homeLink._isMouseInside = false;
   homeLink.onmouseenter = () => {
+    homeLink._isMouseInside = true;
     if (!isMobileBrowser && canUse2DMenu()) {
       homeLink._hoverActive = true;
       homeLink.style.setProperty('animation', 'grow 0.25s forwards');
@@ -3800,6 +3693,7 @@ function init() {
     }
   };
   homeLink.onmouseleave = () => {
+    homeLink._isMouseInside = false;
     if (homeLink._hoverActive) {
       homeLink._hoverActive = false;
       homeLink.style.setProperty('animation', 'shrink 0.25s forwards');
@@ -3816,8 +3710,10 @@ function init() {
     const canUseLink = () => !isMobileBrowser && canUse2DMenu() && (!cfg.currentTarget || currentTarget !== cfg.currentTarget) && !el.classList.contains('is-panel-open');
 
     el._hoverActive = false; // true only when grow has actually played
+    el._isMouseInside = false;
 
     el.onmouseenter = () => {
+      el._isMouseInside = true;
       if (!canUseLink()) return;
 
       el._hoverActive = true;
@@ -3830,18 +3726,13 @@ function init() {
         linkHoveredHoudini = true;
       } else if (cfg.hoverType === 'web') {
         linkHoveredWeb = true;
-      } else if (cfg.hoverType === 'cube' && typeof cubes !== 'undefined' && cubes) {
-        linkHoveredCube = cubes.find(c => c.userData.name === cfg.name);
       }
     };
 
     el.onmouseleave = () => {
-      // Only shrink if we actually grew — prevents phantom shrink when the mouse
-      // leaves while the link was blocked (e.g. during question-box respawn).
+      el._isMouseInside = false;
       if (!el._hoverActive) return;
       el._hoverActive = false;
-
-      if (!canUseLink()) return;
 
       el.style.setProperty('animation', 'shrink 0.25s forwards');
       body.style.setProperty('cursor', 'default');
@@ -3855,11 +3746,6 @@ function init() {
       } else if (cfg.hoverType === 'web') {
         linkHoveredWeb = false;
         clearOutlines();
-      } else if (cfg.hoverType === 'cube' && linkHoveredCube && linkHoveredCube.userData.name === cfg.name) {
-        linkHoveredCube.userData.isHovered = false;
-        linkHoveredCube = null;
-        hoveredCube = null;
-        clearOutlines();
       }
     };
 
@@ -3870,27 +3756,35 @@ function init() {
     };
   };
 
-  [
+  const navConfigsList = [
     { elements: [aboutLink, aboutLinkMobile], name: 'about', currentTarget: 'about', hoverType: 'about', onClick: aboutLinkClicked },
-    { elements: [arLink, arLinkMobile], name: 'ar', currentTarget: 'ar', hoverType: 'cube', onClick: arLinkClicked },
-    { elements: [gamesLink, gamesLinkMobile], name: 'games', hoverType: 'cube', onClick: gamesLinkClicked },
+    { elements: [arLink, arLinkMobile], name: 'ar', currentTarget: 'ar', hoverType: 'none', onClick: arLinkClicked },
+    { elements: [gamesLink, gamesLinkMobile], name: 'games', hoverType: 'none', onClick: gamesLinkClicked },
     { elements: [webLink, webLinkMobile], name: 'web', hoverType: 'web', onClick: webLinkClicked },
     { elements: [houdiniLink, houdiniLinkMobile], name: 'houdini', hoverType: 'houdini', onClick: houdiniLinkClicked }
-  ].forEach((cfg) => {
+  ];
+
+  navConfigsList.forEach((cfg) => {
     cfg.elements.forEach((el) => setupNavLinkEvents(el, cfg));
   });
 
   // LinkedIn logo interactions
   const setupLinkedinEvents = (el) => {
+    el._hoverActive = false;
+    el._isMouseInside = false;
     el.onmouseenter = () => {
+      el._isMouseInside = true;
       if (canUse2DMenu()) {
+        el._hoverActive = true;
         el.style.setProperty('animation', 'grow 0.25s forwards');
         body.style.setProperty('cursor', 'pointer');
         linkHoveredLinkedin = true;
       }
     };
     el.onmouseleave = () => {
-      if (canUse2DMenu()) {
+      el._isMouseInside = false;
+      if (el._hoverActive) {
+        el._hoverActive = false;
         el.style.setProperty('animation', 'shrink 0.25s forwards');
         body.style.setProperty('cursor', 'default');
         linkHoveredLinkedin = false;
@@ -3918,24 +3812,8 @@ function init() {
     };
   }
 
-  function setHoveredMenuCube(cube) {
-    if (hoveredCube !== cube) {
-      if (hoveredCube) hoveredCube.userData.isHovered = false;
-      hoveredCube = cube;
-      hoveredCube.userData.isHovered = true;
-    }
-  }
-
-  function clearHoveredMenuCube() {
-    if (hoveredCube) {
-      hoveredCube.userData.isHovered = false;
-      hoveredCube = null;
-    }
-  }
-
   function applyHoverTarget(targetType, targetObject) {
     if (!targetType) {
-      clearHoveredMenuCube();
       clearOutlines();
       body.style.setProperty('cursor', 'default');
       return;
@@ -3944,26 +3822,19 @@ function init() {
     body.style.setProperty('cursor', 'pointer');
 
     if (targetType === 'questionBox') {
-      clearHoveredMenuCube();
       selectRegularOutline(questionBoxGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
     } else if (targetType === 'houdiniToy') {
-      clearHoveredMenuCube();
       selectHoudiniOutline(
         houdiniToyGroup,
         SCENE_CONFIG.interaction.hoverColor3D || '#91bfff'
       );
     } else if (targetType === 'webGlobe') {
-      clearHoveredMenuCube();
       selectRegularOutline(webGlobeGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
     } else if (targetType === 'bug') {
-      clearHoveredMenuCube();
       selectDeformerOutline(
         bugCubeGroup,
         SCENE_CONFIG.interaction.hoverColor3D || '#91bfff'
       );
-    } else if (targetType === 'cube') {
-      setHoveredMenuCube(targetObject);
-      selectRegularOutline(hoveredCube, SCENE_CONFIG.interaction.hoverColor3D || hoveredCube.userData.color);
     }
   }
 
@@ -4172,11 +4043,13 @@ function init() {
     // Handle drag-rotation physics and updates (lateral only, disabled in mobile context)
     const isMobileContext = window.innerWidth <= window.innerHeight;
     if (currentTarget === 'main' && !isMobileContext) {
-      currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+      const lerpFactor = isDraggingPointer ? (1.0 - Math.pow(1.0 - 0.35, dt * 60.0)) : (1.0 - Math.pow(1.0 - 0.12, dt * 60.0));
+      currentRotationX += (targetRotationX - currentRotationX) * lerpFactor;
     } else {
       // Smoothly return to center when navigating to panels or in mobile context
       targetRotationX = 0;
-      currentRotationX += (0 - currentRotationX) * 0.1;
+      const lerpFactor = 1.0 - Math.pow(1.0 - 0.12, dt * 60.0);
+      currentRotationX += (0 - currentRotationX) * lerpFactor;
     }
 
     // Calculate rotation angular speed to trigger bug falling
@@ -4248,9 +4121,6 @@ function init() {
         hoverTargetType = 'webGlobe';
       } else if (linkHoveredLinkedin && bugCubeGroup) {
         hoverTargetType = 'bug';
-      } else if (typeof linkHoveredCube !== 'undefined' && linkHoveredCube) {
-        hoverTargetType = 'cube';
-        hoverTargetObject = linkHoveredCube;
       } else if (!isPointerOverUI) {
         raycaster.setFromCamera(mouse, camera);
 
@@ -4271,8 +4141,6 @@ function init() {
         }
         if (webGlobeGroup) {
           raycaster.intersectObject(webGlobeGroup, true, tmpCubeIntersects);
-        } else {
-          raycaster.intersectObjects(cubes, false, tmpCubeIntersects);
         }
 
         if (tmpBugIntersects.length > 0) {
@@ -4283,9 +4151,6 @@ function init() {
           hoverTargetType = 'houdiniToy';
         } else if (webGlobeGroup && tmpCubeIntersects.length > 0) {
           hoverTargetType = 'webGlobe';
-        } else if (tmpCubeIntersects.length > 0) {
-          hoverTargetType = 'cube';
-          hoverTargetObject = tmpCubeIntersects[0].object;
         }
       }
 
@@ -4299,7 +4164,6 @@ function init() {
       isHoudiniToyHovered = false;
       isWebGlobeHovered = false;
       isBugCubeHovered = false;
-      clearHoveredMenuCube();
       clearOutlines();
       body.style.setProperty('cursor', 'default');
     }
@@ -4365,8 +4229,6 @@ function init() {
       active3DHoveredName = 'web';
     } else if (isBugCubeHovered) {
       active3DHoveredName = 'linkedin';
-    } else if (hoveredCube) {
-      active3DHoveredName = hoveredCube.userData.name;
     }
 
     // Helper to check if a specific link is currently hovered directly via 2D mouse event
@@ -4375,7 +4237,6 @@ function init() {
       if (name === 'houdini') return linkHoveredHoudini;
       if (name === 'web') return linkHoveredWeb;
       if (name === 'linkedin') return linkHoveredLinkedin;
-      if (linkHoveredCube && linkHoveredCube.userData && linkHoveredCube.userData.name === name) return true;
       return false;
     }
 
@@ -4409,29 +4270,46 @@ function init() {
       last3DHoveredName = active3DHoveredName;
     }
 
-    // Update cube scaling, position and rotation
-    cubes.forEach((cube) => {
-      // Lerp position to target coordinates
-      tmpCubeTargetPos.set(cube.userData.baseX, cube.userData.baseY, cube.userData.baseZ);
-      cube.position.lerp(tmpCubeTargetPos, 0.08);
-
-      // Rotations
-      if (cube.userData.isHovered) {
-        // Spin faster on hover
-        cube.rotation.y += cube.userData.rotationSpeedY * 2.5;
-        cube.rotation.x += cube.userData.rotationSpeedX * 1.5;
-      } else {
-        // Slow idle rotation
-        cube.rotation.y += cube.userData.rotationSpeedY;
-        cube.rotation.x += cube.userData.rotationSpeedX;
+    // Per-frame pending 2D hover re-evaluation for NG logo & text links
+    if (!isMobileBrowser && canUse2DMenu()) {
+      if (homeLink) {
+        const isHovered = homeLink._isMouseInside || (homeLink.matches && homeLink.matches(':hover'));
+        if (isHovered && !homeLink._hoverActive) {
+          homeLink._hoverActive = true;
+          homeLink.style.setProperty('animation', 'grow 0.25s forwards');
+          body.style.setProperty('cursor', 'pointer');
+        }
       }
 
-      // Lerp scale to hide or show on hover
-      const activeScale = cube.userData.isHovered ? 1.15 : 1.0;
-      const s = activeScale * targetScale;
-      tmpCubeScale.set(s, s, s);
-      cube.scale.lerp(tmpCubeScale, 0.1);
-    });
+      navConfigsList.forEach((cfg) => {
+        const canUseLink = (!cfg.currentTarget || currentTarget !== cfg.currentTarget);
+        cfg.elements.forEach((el) => {
+          if (el && !el.classList.contains('is-panel-open') && canUseLink) {
+            const isHovered = el._isMouseInside || (el.matches && el.matches(':hover'));
+            if (isHovered && !el._hoverActive) {
+              el._hoverActive = true;
+              el.style.setProperty('animation', 'grow 0.25s forwards');
+              body.style.setProperty('cursor', 'pointer');
+              if (cfg.hoverType === 'about') linkHoveredAbout = true;
+              else if (cfg.hoverType === 'houdini') linkHoveredHoudini = true;
+              else if (cfg.hoverType === 'web') linkHoveredWeb = true;
+            }
+          }
+        });
+      });
+
+      [linkedinDesktop, linkedinMobile].forEach((el) => {
+        if (el) {
+          const isHovered = el._isMouseInside || (el.matches && el.matches(':hover'));
+          if (isHovered && !el._hoverActive) {
+            el._hoverActive = true;
+            el.style.setProperty('animation', 'grow 0.25s forwards');
+            body.style.setProperty('cursor', 'pointer');
+            linkHoveredLinkedin = true;
+          }
+        }
+      });
+    }
 
     // Handle scene spin animation
     if (isSpinning) {
@@ -4455,6 +4333,11 @@ function init() {
     const activeIdx = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles.currentModeIndex !== undefined) ? SCENE_CONFIG.renderStyles.currentModeIndex : 0;
     const curModeName = activeModesList[activeIdx % activeModesList.length] || 'default';
     const curModeCfg = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles[curModeName]) || {};
+
+    const defaultModeShadowBoost = (SCENE_CONFIG.interaction && SCENE_CONFIG.interaction.defaultModeShadowBoost !== undefined) ? SCENE_CONFIG.interaction.defaultModeShadowBoost : 1.45;
+    const defaultModeShadowMult = (curModeCfg && curModeCfg.shadowBoost !== undefined)
+      ? curModeCfg.shadowBoost
+      : ((curModeName === 'default') ? defaultModeShadowBoost : 1.0);
 
     const shouldHideDish = curModeCfg.hideDish === true;
     const shouldHideGel = curModeCfg.hideGel === true;
@@ -4636,34 +4519,7 @@ function init() {
               walkDir.lerp(steerVec, steerFactor).normalize();
             }
 
-            // Avoid other project menu cubes
-            if (typeof cubes !== 'undefined' && cubes) {
-              cubes.forEach((cube) => {
-                const toInsectCube = tmpToInsectCube.subVectors(currentPos, cube.position);
-                toInsectCube.y = 0;
-                const distC = toInsectCube.length();
-                if (distC < avoidRadius) {
-                  const tC = Math.max(0, Math.min(1, (distC - minObs) / (avoidRadius - minObs)));
 
-                  const avoidVec = distC < 0.001
-                    ? tmpAvoidVec.set(1, 0, 0)
-                    : tmpAvoidVec.copy(toInsectCube).normalize();
-
-                  let crossC = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-                  if (Math.abs(crossC) < 0.05) {
-                    crossC = 1.0;
-                  }
-
-                  const perpC = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-                  if (crossC < 0) perpC.negate();
-
-                  const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpC, 0.3).normalize();
-
-                  const steerFactor = Math.min(1.0, (1.0 - tC) * 0.9 * 60.0 * dt);
-                  walkDir.lerp(steerVec, steerFactor).normalize();
-                }
-              });
-            }
 
             // Avoid Houdini Toy
             if (houdiniToyGroup) {
@@ -4752,23 +4608,7 @@ function init() {
               bugCubeGroup.position.x = pushVec.x * (minObs + 0.02);
               bugCubeGroup.position.z = pushVec.z * (minObs + 0.02);
             }
-            if (typeof cubes !== 'undefined' && cubes) {
-              cubes.forEach((cube) => {
-                const dx = bugCubeGroup.position.x - cube.position.x;
-                const dz = bugCubeGroup.position.z - cube.position.z;
-                const d = Math.sqrt(dx * dx + dz * dz);
-                if (d < minObs) {
-                  let pushVec;
-                  if (d < 0.001) {
-                    const randomAngle = Math.random() * Math.PI * 2;
-                    pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
-                  } else {
-                    pushVec = tmpPushVec.set(dx, 0, dz).normalize();
-                  }
-                  bugCubeGroup.position.copy(cube.position).addScaledVector(pushVec, minObs + 0.02);
-                }
-              });
-            }
+
             if (webGlobeGroup) {
               const dx = bugCubeGroup.position.x - webGlobeGroup.position.x;
               const dz = bugCubeGroup.position.z - webGlobeGroup.position.z;
@@ -4882,11 +4722,15 @@ function init() {
       // If all particles have finished their lifetime, remove the group
       if (allFaded) {
         sceneGroup.remove(shatterGroup);
-        // Clean up geometries and materials
+
+        // Clean up unique geometries and materials
+        const uniqueGeoms = new Set();
         shatterShards.forEach((shard) => {
           if (shard.geometry) shard.geometry.dispose();
           if (shard.material) shard.material.dispose();
         });
+        uniqueGeoms.forEach((g) => g.dispose());
+
         shatterSparkles.forEach((sparkle) => {
           if (sparkle.geometry) sparkle.geometry.dispose();
           if (sparkle.material) sparkle.material.dispose();
@@ -4947,7 +4791,8 @@ function init() {
         }
       });
       if (houdiniShadowMesh && houdiniShadowMaterial) {
-        houdiniShadowMaterial.opacity = 0.6 * currentOpacity;
+        const hShadowOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
+        houdiniShadowMaterial.opacity = hShadowOpacity * currentOpacity * defaultModeShadowMult;
       }
 
       // 3. Update billboarded sparkles
@@ -4993,8 +4838,8 @@ function init() {
     if (!isHoudiniPopping && houdiniRespawnStartTime > 0 && houdiniToyGroup) {
       const now = performance.now();
       const pCfg = (SCENE_CONFIG.houdini3D && SCENE_CONFIG.houdini3D.pop) || {};
-      const delay = pCfg.respawnDelay !== undefined ? pCfg.respawnDelay : 1000;
-      const duration = pCfg.respawnDuration !== undefined ? pCfg.respawnDuration : 800;
+      const delay = pCfg.respawnDelay !== undefined ? pCfg.respawnDelay : 100;
+      const duration = pCfg.respawnDuration !== undefined ? pCfg.respawnDuration : 400;
 
       const elapsed = now - houdiniRespawnStartTime;
 
@@ -5030,7 +4875,8 @@ function init() {
           const shadowBaseScale = SCENE_CONFIG.houdini3D.shadowScale !== undefined ? SCENE_CONFIG.houdini3D.shadowScale : 2.0;
           const currentShadowScale = shadowBaseScale * easeOutCubic * targetScale;
           houdiniShadowMesh.scale.set(currentShadowScale, currentShadowScale, 1.0);
-          houdiniShadowMaterial.opacity = 0.6 * easeOutCubic * targetScale;
+          const hShadowOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
+          houdiniShadowMaterial.opacity = hShadowOpacity * easeOutCubic * targetScale * defaultModeShadowMult;
         }
 
         const toyBaseScale = SCENE_CONFIG.houdini3D.scale || 0.015;
@@ -5038,9 +4884,11 @@ function init() {
         const curScale = toyTargetScale * easeOutCubic;
         houdiniToyGroup.scale.set(curScale, curScale, curScale);
 
+        if (regrowProgress >= 0.3 && !canInteract) {
+          canInteract = true;
+        }
         if (regrowProgress >= 1.0) {
           houdiniRespawnStartTime = 0;
-          canInteract = true;
         }
       }
     }
@@ -5049,8 +4897,8 @@ function init() {
     if (!isShattering && respawnStartTime > 0 && questionBoxGroup) {
       const now = performance.now();
       const sCfg = SCENE_CONFIG.questionBox.shatter;
-      const delay = sCfg.respawnDelay !== undefined ? sCfg.respawnDelay : 1500;
-      const duration = sCfg.respawnDuration !== undefined ? sCfg.respawnDuration : 800;
+      const delay = sCfg.respawnDelay !== undefined ? sCfg.respawnDelay : 100;
+      const duration = sCfg.respawnDuration !== undefined ? sCfg.respawnDuration : 400;
 
       const elapsed = now - respawnStartTime;
 
@@ -5083,24 +4931,26 @@ function init() {
 
         // shadow scale and opacity grow back in sync
         if (shadowMesh && shadowMaterial) {
-          const shadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.08;
+          const shadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.33;
           const h = questionBoxGroup.position.y - shadowBaseY;
 
           // Calculate the exact target scale/opacity from the standard loop
           const shadowBaseScale = SCENE_CONFIG.questionBox.shadowScale !== undefined ? SCENE_CONFIG.questionBox.shadowScale : 1.6;
+          const qShadowOpacity = SCENE_CONFIG.questionBox.shadowOpacity !== undefined ? SCENE_CONFIG.questionBox.shadowOpacity : 0.85;
           const targetScaleFactor = Math.max(0.3, 1.0 - h * 0.2) * shadowBaseScale;
-          const targetOpacityFactor = Math.max(0.0, (1.0 - h * 0.45) * 0.6);
+          const targetOpacityFactor = Math.max(0.0, (1.0 - h * 0.45) * qShadowOpacity);
 
           // Interpolate using easeOutCubic
           const currentShadowScale = targetScaleFactor * easeOutCubic * targetScale;
           shadowMesh.scale.set(currentShadowScale, currentShadowScale, 1.0);
-          shadowMaterial.opacity = targetOpacityFactor * easeOutCubic * targetScale;
+          shadowMaterial.opacity = targetOpacityFactor * easeOutCubic * targetScale * defaultModeShadowMult;
         }
 
-        if (pct >= 1.0) {
-          // Animation completed: unlock interaction and restore normal hover state
-          respawnStartTime = 0;
+        if (pct >= 0.3 && !canInteract) {
           canInteract = true;
+        }
+        if (pct >= 1.0) {
+          respawnStartTime = 0;
         }
       }
     }
@@ -5257,7 +5107,8 @@ function init() {
           });
           if (houdiniShadowMesh && houdiniShadowMaterial) {
             houdiniShadowMesh.visible = true;
-            houdiniShadowMaterial.opacity = 0.6;
+            const hShadowOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
+            houdiniShadowMaterial.opacity = hShadowOpacity * defaultModeShadowMult;
           }
 
           const toyBaseScale = hCfg.scale || 0.015;
@@ -5373,8 +5224,8 @@ function init() {
 
       if (webRespawnStartTime > 0) {
         const cCfg = wCfg.clickAnimation || {};
-        const delay = cCfg.respawnDelay !== undefined ? cCfg.respawnDelay : 0;
-        const duration = cCfg.respawnDuration !== undefined ? cCfg.respawnDuration : 600;
+        const delay = cCfg.respawnDelay !== undefined ? cCfg.respawnDelay : 50;
+        const duration = cCfg.respawnDuration !== undefined ? cCfg.respawnDuration : 400;
         const elapsed = performance.now() - webRespawnStartTime;
 
         if (elapsed < delay) {
@@ -5405,9 +5256,11 @@ function init() {
           webGlobeGroup.position.y = baseY + currentYOffset + floatOffset;
           webGlobeGroup.userData.hoverInfluence = 1.0 - easeOutCubic;
 
+          if (pct >= 0.3 && !canInteract) {
+            canInteract = true;
+          }
           if (pct >= 1.0) {
             webRespawnStartTime = 0;
-            canInteract = true;
           }
         }
       } else if (isWebGlobeClickAnimating) {
@@ -5608,69 +5461,84 @@ function init() {
       const sFactor = baseShadowScale * targetScale * 0.45;
       linkedinShadowMesh.scale.set(sFactor, sFactor, 1.0);
 
-      linkedinShadowMaterial.opacity = 0.6 * targetScale;
+      const lShadowOpacity = lCfg.shadowOpacity !== undefined ? lCfg.shadowOpacity : 0.85;
+      linkedinShadowMaterial.opacity = lShadowOpacity * targetScale * defaultModeShadowMult;
     }
 
-    // Per-style hideShadows toggle
+    // Per-style hideShadows toggle & dynamic shadow updates
     const shouldHideShadows = (curModeCfg.hideShadows === true || curModeCfg.shadows === false);
-    if (shadowMesh && shouldHideShadows) shadowMesh.visible = false;
-    if (houdiniShadowMesh && shouldHideShadows) houdiniShadowMesh.visible = false;
-    if (linkedinShadowMesh && shouldHideShadows) linkedinShadowMesh.visible = false;
-    if (webShadowMesh && shouldHideShadows) webShadowMesh.visible = false;
 
     // Contact shadow updates for Web 3D Globe
-    if (!shouldHideShadows && webShadowMesh && webShadowMaterial && webGlobeGroup && SCENE_CONFIG.web3D) {
-      const wCfg = SCENE_CONFIG.web3D;
-      const shadowBaseY = wCfg.shadowY !== undefined ? wCfg.shadowY : 0.33;
-      webShadowMesh.position.set(webGlobeGroup.position.x, shadowBaseY, webGlobeGroup.position.z);
-      const baseShadowScale = wCfg.shadowScale !== undefined ? wCfg.shadowScale : 1.6;
-      const sFactor = baseShadowScale * targetScale;
-      webShadowMesh.scale.set(sFactor, sFactor, 1.0);
-      webShadowMaterial.opacity = 0.6 * targetScale;
+    if (webShadowMesh && webShadowMaterial && webGlobeGroup && SCENE_CONFIG.web3D) {
+      webShadowMesh.visible = !shouldHideShadows;
+      if (!shouldHideShadows) {
+        const wCfg = SCENE_CONFIG.web3D;
+        const shadowBaseY = wCfg.shadowY !== undefined ? wCfg.shadowY : 0.33;
+        webShadowMesh.position.set(webGlobeGroup.position.x, shadowBaseY, webGlobeGroup.position.z);
+        const baseShadowScale = wCfg.shadowScale !== undefined ? wCfg.shadowScale : 1.6;
+        const sFactor = baseShadowScale * targetScale;
+        webShadowMesh.scale.set(sFactor, sFactor, 1.0);
+        const wShadowOpacity = wCfg.shadowOpacity !== undefined ? wCfg.shadowOpacity : 0.85;
+        webShadowMaterial.opacity = wShadowOpacity * targetScale * defaultModeShadowMult;
+      }
     }
 
-    // Dynamic contact shadow updates based on floating height
-    if (!shouldHideShadows && shadowMesh && shadowMaterial && questionBoxGroup && SCENE_CONFIG.questionBox) {
+    // Dynamic contact shadow updates based on floating height for Question Box
+    if (shadowMesh && shadowMaterial && questionBoxGroup && SCENE_CONFIG.questionBox) {
       if (isShattering || respawnStartTime > 0) {
-        // Bypass to avoid overriding the shadow visibility during shatter and grow
+        // Bypassed completely during shatter and grow (handled by regrow loop)
+      } else if (!questionBoxGroup.visible || aboutOverlayVisible || aboutOverlayAnimating) {
+        shadowMesh.visible = false;
       } else {
-      const qBoxCfg = SCENE_CONFIG.questionBox;
-      const shadowBaseY = qBoxCfg.shadowY !== undefined ? qBoxCfg.shadowY : 0.08;
+        shadowMesh.visible = !shouldHideShadows;
+        if (!shouldHideShadows) {
+          const qBoxCfg = SCENE_CONFIG.questionBox;
+          const shadowBaseY = qBoxCfg.shadowY !== undefined ? qBoxCfg.shadowY : 0.33;
 
-      // Update Y position dynamically
-      shadowMesh.position.y = shadowBaseY;
+          // Update Y position dynamically
+          shadowMesh.position.y = shadowBaseY;
 
-      const h = questionBoxGroup.position.y - shadowBaseY; // Height difference
+          const h = questionBoxGroup.position.y - shadowBaseY; // Height difference
 
-      // Base scale times the dynamic distance factor
-      const baseScale = qBoxCfg.shadowScale !== undefined ? qBoxCfg.shadowScale : 1.5;
-      const sFactor = Math.max(0.3, 1.0 - h * 0.2) * baseScale;
-      shadowMesh.scale.set(sFactor, sFactor, 1.0);
+          // Base scale times the dynamic distance factor
+          const baseScale = qBoxCfg.shadowScale !== undefined ? qBoxCfg.shadowScale : 1.5;
+          const sFactor = Math.max(0.3, 1.0 - h * 0.2) * baseScale;
+          shadowMesh.scale.set(sFactor, sFactor, 1.0);
 
-      // Fade out shadow as box floats higher
-      shadowMaterial.opacity = Math.max(0.0, (1.0 - h * 0.45) * 0.6);
+          // Fade out shadow as box floats higher
+          const qShadowOpacity = qBoxCfg.shadowOpacity !== undefined ? qBoxCfg.shadowOpacity : 0.85;
+          shadowMaterial.opacity = Math.max(0.0, (1.0 - h * 0.45) * qShadowOpacity) * defaultModeShadowMult;
+        }
       }
     }
 
     // Dynamic contact shadow updates for Houdini toy based on floating height
-    if (!shouldHideShadows && houdiniShadowMesh && houdiniShadowMaterial && houdiniToyGroup && SCENE_CONFIG.houdini3D) {
+    if (houdiniShadowMesh && houdiniShadowMaterial && houdiniToyGroup && SCENE_CONFIG.houdini3D) {
       if (isHoudiniPopping || houdiniRespawnStartTime > 0) {
         // Bypassed completely during pop and regrow
       } else {
-        const shadowBaseY = SCENE_CONFIG.houdini3D.shadowY !== undefined ? SCENE_CONFIG.houdini3D.shadowY : 0.08;
+        houdiniShadowMesh.visible = !shouldHideShadows;
+        if (!shouldHideShadows) {
+          const shadowBaseY = SCENE_CONFIG.houdini3D.shadowY !== undefined ? SCENE_CONFIG.houdini3D.shadowY : 0.33;
 
-        // Update position dynamically to follow the toy
-        houdiniShadowMesh.position.x = houdiniToyGroup.position.x;
-        houdiniShadowMesh.position.z = houdiniToyGroup.position.z;
-        houdiniShadowMesh.position.y = shadowBaseY;
+          // Update position dynamically to follow the toy
+          houdiniShadowMesh.position.x = houdiniToyGroup.position.x;
+          houdiniShadowMesh.position.z = houdiniToyGroup.position.z;
+          houdiniShadowMesh.position.y = shadowBaseY;
 
-        // Simple constant scale and opacity linked to targetScale transition
-        const baseScale = SCENE_CONFIG.houdini3D.shadowScale !== undefined ? SCENE_CONFIG.houdini3D.shadowScale : 1.6;
-        const sFactor = baseScale * targetScale;
-        houdiniShadowMesh.scale.set(sFactor, sFactor, 1.0);
+          // Simple constant scale and opacity linked to targetScale transition
+          const baseScale = SCENE_CONFIG.houdini3D.shadowScale !== undefined ? SCENE_CONFIG.houdini3D.shadowScale : 1.6;
+          const sFactor = baseScale * targetScale;
+          houdiniShadowMesh.scale.set(sFactor, sFactor, 1.0);
 
-        houdiniShadowMaterial.opacity = 0.6 * targetScale;
+          const hShadowOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
+          houdiniShadowMaterial.opacity = hShadowOpacity * targetScale * defaultModeShadowMult;
+        }
       }
+    }
+
+    if (linkedinShadowMesh) {
+      linkedinShadowMesh.visible = !shouldHideShadows;
     }
 
     // Update vignette pass uniforms dynamically (checking per-style disableVignette & backgroundColor toggles)
@@ -5874,12 +5742,35 @@ function init() {
       if (webIntersects.length > 0) return { type: 'webGlobe' };
     }
 
-    if (cubes && cubes.length > 0) {
-      const intersects = raycaster.intersectObjects(cubes);
-      if (intersects.length > 0) return { type: 'cube', object: intersects[0].object };
-    }
+
 
     return null;
+  }
+
+  // Helper to calculate exact polar angle & distance of cursor on the dish plane in world space
+  let previousPointerInfo = null;
+
+  function getPointerDishInfo(clientX, clientY) {
+    if (!camera) return null;
+    const normX = (clientX / window.innerWidth) * 2 - 1;
+    const normY = -(clientY / window.innerHeight) * 2 + 1;
+
+    const dragRaycaster = new THREE.Raycaster();
+    dragRaycaster.setFromCamera(new THREE.Vector2(normX, normY), camera);
+
+    const dishPlaneY = -0.4; // Average 3D height of dish surface
+    const ray = dragRaycaster.ray;
+
+    if (Math.abs(ray.direction.y) < 1e-4) return null;
+
+    const t = (dishPlaneY - ray.origin.y) / ray.direction.y;
+    if (t < 0) return null;
+
+    const px = ray.origin.x + t * ray.direction.x;
+    const pz = ray.origin.z + t * ray.direction.z;
+    const radius = Math.sqrt(px * px + pz * pz);
+
+    return { angle: Math.atan2(px, pz), radius: radius };
   }
 
   // Mouse drag camera rotation & 3D pointer tracking event listeners
@@ -5909,6 +5800,7 @@ function init() {
 
     isDraggingPointer = true;
     previousPointerPos = { x: event.clientX, y: event.clientY };
+    previousPointerInfo = getPointerDishInfo(event.clientX, event.clientY);
   };
 
   window.addEventListener('pointerdown', handlePointerDown);
@@ -5919,12 +5811,35 @@ function init() {
 
   window.addEventListener('pointermove', (event) => {
     if (isDraggingPointer) {
-      const deltaX = event.clientX - previousPointerPos.x;
+      const currentDishInfo = getPointerDishInfo(event.clientX, event.clientY);
 
-      // Horizontal drag rotates around Y axis (unlimited)
-      targetRotationX += deltaX * 0.003;
+      if (currentDishInfo !== null && previousPointerInfo !== null) {
+        let deltaAngle = currentDishInfo.angle - previousPointerInfo.angle;
+
+        // Normalize deltaAngle to [-PI, PI] to handle 180 deg boundary crossing
+        while (deltaAngle > Math.PI) deltaAngle -= Math.PI * 2;
+        while (deltaAngle < -Math.PI) deltaAngle += Math.PI * 2;
+
+        // Dampen rotation speed when grabbing near the dish center to prevent hyper-fast spinning
+        const minRadiusThreshold = (SCENE_CONFIG.interaction && SCENE_CONFIG.interaction.minDragRadiusThreshold !== undefined)
+          ? SCENE_CONFIG.interaction.minDragRadiusThreshold
+          : 3.5;
+        const avgRadius = (currentDishInfo.radius + previousPointerInfo.radius) * 0.5;
+        const radiusDampening = Math.min(1.0, Math.max(0.0, avgRadius / minRadiusThreshold));
+
+        deltaAngle *= radiusDampening;
+
+        targetRotationX += deltaAngle;
+      } else {
+        // Fallback for pointer outside dish plane: direction sign accounts for top-half vs bottom-half screen positions
+        const deltaX = event.clientX - previousPointerPos.x;
+        const isTopHalf = event.clientY < window.innerHeight * 0.45;
+        const directionSign = isTopHalf ? -1.0 : 1.0;
+        targetRotationX += deltaX * 0.0015 * directionSign;
+      }
 
       previousPointerPos = { x: event.clientX, y: event.clientY };
+      previousPointerInfo = currentDishInfo;
 
       // Move raycast pointer away during active drags to prevent accidental hovering highlights
       mouse.set(-9999, -9999);
@@ -5933,10 +5848,12 @@ function init() {
 
   window.addEventListener('pointerup', () => {
     isDraggingPointer = false;
+    previousPointerInfo = null;
   });
 
   window.addEventListener('pointercancel', () => {
     isDraggingPointer = false;
+    previousPointerInfo = null;
   });
 
   function updateHoudiniMorphTargets(meshGroup, inflatedVal, popVal) {
@@ -6224,6 +6141,7 @@ function init() {
     // Capture toy position before popping
     const toyPos = houdiniToyGroup.position.clone();
     houdiniPopGroup = new THREE.Group();
+    houdiniPopGroup.renderOrder = 10;
     sceneGroup.add(houdiniPopGroup);
 
     houdiniPopSparkles = [];
@@ -6402,6 +6320,7 @@ function init() {
 
     // Create shatterGroup container
     shatterGroup = new THREE.Group();
+    shatterGroup.renderOrder = 10;
     sceneGroup.add(shatterGroup);
 
     shatterShards = [];
@@ -6575,11 +6494,6 @@ function init() {
       return;
     }
 
-    if (active3DPointerDownTarget.type === 'cube' && active3DPointerDownTarget.object !== upTarget.object) {
-      active3DPointerDownTarget = null;
-      return;
-    }
-
     // Verify finger did not drag significantly across screen (> 20px displacement)
     const distSq = Math.hypot(clientX - pointerDownPos.x, clientY - pointerDownPos.y);
     if (distSq > 20) {
@@ -6614,8 +6528,6 @@ function init() {
       }
     } else if (target.type === 'bug') {
       window.open('https://www.linkedin.com/in/noah-gunther-3128bb185/', '_blank');
-    } else if (target.type === 'cube' && target.object && target.object.userData && target.object.userData.onClick) {
-      target.object.userData.onClick();
     }
   }
 
