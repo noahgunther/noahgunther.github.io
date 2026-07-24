@@ -335,14 +335,14 @@ const SCENE_CONFIG = {
     },
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
-      hoverInVolume: 0.16,                    // Volume for webHover.ogg (0.0 to 1.0)
-      hoverOutVolume: 0.16,                   // Volume for webOut.ogg (0.0 to 1.0)
+      hoverInVolume: 0.14,                    // Volume for webHover.ogg (0.0 to 1.0)
+      hoverOutVolume: 0.14,                   // Volume for webOut.ogg (0.0 to 1.0)
       hysteresisRadius: 1.2                 // 3D ray-to-center radius (world units) to hold hover state
     },
     clickAnimation: {
       enabled: true,                         // Enable click animation
       soundEnabled: true,                    // Enable click audio effect (ring.ogg)
-      volume: 0.4,                           // Click audio volume (0.0 to 1.0)
+      volume: 0.26,                           // Click audio volume (0.0 to 1.0)
       duration: 1000,                        // Duration of emissive flash & god rays (ms)
       clickSpinMultiplier: 16.0,             // Fast spin speed multiplier on click (slowly returns to normal)
       emissiveFlashIntensity: 3.5,           // Peak emissive intensity for grid map during flash
@@ -405,13 +405,13 @@ const SCENE_CONFIG = {
       enabled: true,                         // Enable click-to-pop animation
       soundEnabled: true,                    // Enable sound effects for click pop sequence
       laserSoundSrc: 'sound/lazer.ogg',      // Laser sound played on alien click
-      laserVolume: 0.6,                      // Laser sound volume
+      laserVolume: 0.35,                      // Laser sound volume
       explodeSoundSrc: 'sound/8bitExplode.ogg', // Explosion sound played on Pop1 transition
-      explodeVolume: 0.35,                    // Explosion sound volume
+      explodeVolume: 0.12,                    // Explosion sound volume
       growSoundSrc: 'sound/alienGrow.ogg',   // Regrow sound played when alien starts regrowing
-      growVolume: 0.4,                       // Regrow sound volume
-      pop0Duration: 400,                     // Duration of Pop0 initial phase (ms)
-      pop1Duration: 550,                     // Duration of Pop1 final phase (ms)
+      growVolume: 0.35,                       // Regrow sound volume
+      pop0Duration: 350,                     // Duration of Pop0 initial phase (ms)
+      pop1Duration: 450,                     // Duration of Pop1 final phase (ms)
       shadowFadeDuration: 400,               // Smooth shadow fade-out duration when click animation starts (ms)
       respawnDelay: 100,                     // Delay before regrowing back (ms)
       respawnDuration: 400,                   // Duration of springy regrow animation (ms)
@@ -3239,6 +3239,18 @@ function init() {
         mobileNavMenu.style.visibility = 'hidden';
       }, 200);
     } else {
+      // Dismiss About panel if active when opening the mobile navigation menu
+      if (aboutOverlayVisible || aboutOverlayAnimating || currentTarget === 'about') {
+        hideAboutOverlay();
+        if (aboutMePanel) {
+          aboutMePanel.style.visibility = 'hidden';
+        }
+        if (downArrow) {
+          downArrow.style.visibility = 'hidden';
+        }
+        currentTarget = 'main';
+      }
+
       canInteract = false;
       mobileNavMenu.style.visibility = 'visible';
       requestAnimationFrame(() => {
@@ -4464,19 +4476,6 @@ function init() {
     let isQBoxHovered = false;
     let isHoudiniToyHovered = false;
     let isBugCubeHovered = false;
-
-    // Helper to check if pointer is over 2D UI elements
-    function isPointerOver2DUI(clientX, clientY) {
-      if (typeof mobileNavMenuVisible !== 'undefined' && mobileNavMenuVisible) return true;
-      if (clientX === undefined || clientY === undefined) return false;
-      const target = document.elementFromPoint(clientX, clientY);
-      if (!target) return false;
-      return !!target.closest(
-        '#mainnavlinks, #home, #linkedin-desktop-wrapper, #linkedin-desktop, #linkedin-mobile, ' +
-        '#mobilenavmenu, #mobilenavlinksbutton, #plaintext-link, .link, .mobilelink, .logolink, ' +
-        '#aboutmepanel, #aboutmepanelwrapper, .logo-tint-mask'
-      );
-    }
 
     const isPointerOverUI = isPointerOver2DUI(lastClientX, lastClientY);
 
@@ -6483,9 +6482,23 @@ function init() {
   }
   animate();
 
+  // Helper to check if pointer is over 2D UI elements
+  function isPointerOver2DUI(clientX, clientY) {
+    if (typeof mobileNavMenuVisible !== 'undefined' && mobileNavMenuVisible) return true;
+    if (typeof aboutOverlayVisible !== 'undefined' && aboutOverlayVisible) return true;
+    if (clientX === undefined || clientY === undefined) return false;
+    const target = document.elementFromPoint(clientX, clientY);
+    if (!target) return false;
+    return !!target.closest(
+      '#mainnavlinks, #home, #linkedin-desktop-wrapper, #linkedin-desktop, #linkedin-mobile, ' +
+      '#mobilenavmenu, #mobilenavlinksbutton, #plaintext-link, .link, .mobilelink, .logolink, ' +
+      '#aboutmepanel, #aboutmepanelwrapper, .logo-tint-mask'
+    );
+  }
+
   function get3DHitTarget(clientX, clientY) {
-    if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating) return null;
-    if (typeof isPointerOver2DUI === 'function' && isPointerOver2DUI(clientX, clientY)) return null;
+    if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating || mobileNavMenuVisible) return null;
+    if (isPointerOver2DUI(clientX, clientY)) return null;
 
     const hitMouse = new THREE.Vector2(
       (clientX / window.innerWidth) * 2 - 1,
@@ -6555,6 +6568,10 @@ function init() {
 
   const handlePointerDown = (event) => {
     pointerDownPos = { x: event.clientX, y: event.clientY };
+    if (mobileNavMenuVisible || aboutOverlayVisible || isPointerOver2DUI(event.clientX, event.clientY)) {
+      active3DPointerDownTarget = null;
+      return;
+    }
     active3DPointerDownTarget = get3DHitTarget(event.clientX, event.clientY);
 
     if (!canInteract || currentTarget !== 'main') return;
@@ -7351,7 +7368,7 @@ function init() {
 
   let lastTapTimestamp = 0;
   function handle3DPointerTap(event) {
-    if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating) return;
+    if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating || mobileNavMenuVisible) return;
 
     const now = performance.now();
     if (now - lastTapTimestamp < 60) return; // Deduplicate pointerup and click events
@@ -7361,7 +7378,7 @@ function init() {
     const clientY = event.clientY;
     if (clientX === undefined || clientY === undefined) return;
 
-    if (typeof isPointerOver2DUI === 'function' && isPointerOver2DUI(clientX, clientY)) return;
+    if (isPointerOver2DUI(clientX, clientY)) return;
 
     const upTarget = get3DHitTarget(clientX, clientY);
 
