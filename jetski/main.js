@@ -971,6 +971,16 @@ function init() {
     ].join(' '));
   }
 
+  // Recalculate border paths dynamically when aboutPanel resizes
+  if (window.ResizeObserver && aboutPanel) {
+    const aboutResizeObserver = new ResizeObserver(() => {
+      if (aboutOverlayVisible || aboutOverlayAnimating) {
+        updateBorderPaths();
+      }
+    });
+    aboutResizeObserver.observe(aboutPanel);
+  }
+
   aboutPanelContent.innerHTML = `
     <h1 class="about-panel__title">About</h1>
     <div class="about-panel__portrait-wrapper">
@@ -3675,6 +3685,9 @@ function init() {
     plateTargetPos.set(0, SCENE_CONFIG.plate.yPos, 0);
     plateTargetRot.set(0, 0, 0);
 
+    if (aboutOverlayVisible || aboutOverlayAnimating) {
+      updateBorderPaths();
+    }
   }
   window.onresize = handleResize;
 
