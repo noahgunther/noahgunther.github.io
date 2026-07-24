@@ -4002,14 +4002,15 @@ function init() {
   };
 
   const setupNavLinkEvents = (el, cfg) => {
-    const canUseLink = () => !isMobileBrowser && canUse2DMenu() && (!cfg.currentTarget || currentTarget !== cfg.currentTarget) && !el.classList.contains('is-panel-open');
+    const canUseHover = () => !isMobileBrowser && canUse2DMenu() && (!cfg.currentTarget || currentTarget !== cfg.currentTarget) && !el.classList.contains('is-panel-open');
+    const canClickLink = () => canUse2DMenu() && (!cfg.currentTarget || currentTarget !== cfg.currentTarget) && !el.classList.contains('is-panel-open');
 
     el._hoverActive = false; // true only when grow has actually played
     el._isMouseInside = false;
 
     el.onmouseenter = () => {
       el._isMouseInside = true;
-      if (!canUseLink()) return;
+      if (!canUseHover()) return;
 
       el._hoverActive = true;
       el.style.setProperty('animation', 'grow 0.25s forwards');
@@ -4050,7 +4051,7 @@ function init() {
     };
 
     el.onclick = () => {
-      if (canUseLink()) {
+      if (canClickLink()) {
         cfg.onClick();
       }
     };
@@ -4466,6 +4467,7 @@ function init() {
 
     // Helper to check if pointer is over 2D UI elements
     function isPointerOver2DUI(clientX, clientY) {
+      if (typeof mobileNavMenuVisible !== 'undefined' && mobileNavMenuVisible) return true;
       if (clientX === undefined || clientY === undefined) return false;
       const target = document.elementFromPoint(clientX, clientY);
       if (!target) return false;
