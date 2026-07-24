@@ -416,7 +416,7 @@ const SCENE_CONFIG = {
       respawnDelay: 100,                     // Delay before regrowing back (ms)
       respawnDuration: 400,                   // Duration of springy regrow animation (ms)
       material: {
-        color: 0xd62828,                    // Opaque metallic red color matching blue shader
+        color: 0xffb600,                    // Opaque metallic red color matching blue shader
         metalness: 0.8,
         roughness: 0.2
       }
@@ -431,12 +431,25 @@ const SCENE_CONFIG = {
     inspectEnabled: true,                   // Enable pause-and-inspect stance animations
     avoidanceEnabled: true,                 // Enable obstacle & boundary avoidance
     desktop: {
-      position: { x: -3.6, y: 0.63, z: -4.6 }, // Starting 3D position on gel (Desktop)
+      spawnPositions: [
+        { x: -3.6, y: 0.63, z: -4.6 },         // 1. Back-Left Quadrant
+        { x: -5.2, y: 0.63, z: -2.2 },          // 2. Front-Left Quadrant
+        { x: 1.0, y: 0.63, z: 4.6 },           // 3. Front-Right Quadrant
+        { x: 6.0, y: 0.63, z: -1.2 },          // 4. Back-Right Quadrant
+        { x: 0.5, y: 0.63, z: -5.8 },          // 5. Far-Back Center
+        { x: -2.8, y: 0.63, z: 4.8 }           // 6. Far-Front Center
+      ],
+      position: { x: -3.6, y: 0.63, z: -4.6 }, // Default starting 3D position on gel (Desktop)
       walkRadiusX: 9.0,                      // Max walk bound radius X (Desktop)
       walkRadiusZ: 9.0                       // Max walk bound radius Z (Desktop)
     },
     mobile: {
-      position: { x: -2.0, y: 0.63, z: -6.0 }, // Starting 3D position on gel (Mobile)
+      spawnPositions: [
+        { x: -2.0, y: 0.63, z: -6.0 },         // 1. Back-Left Mobile
+        { x: 2.2, y: 0.63, z: -2.2 },          // 2. Back-Right Mobile
+        { x: -0.2, y: 0.63, z: 3.5 }           // 3. Front-Left Mobile
+      ],
+      position: { x: -2.0, y: 0.63, z: -6.0 }, // Default starting 3D position on gel (Mobile)
       walkRadiusX: 3.6,                      // Max walk bound radius X (Mobile)
       walkRadiusZ: 9.0                       // Max walk bound radius Z (Mobile)
     },
@@ -1041,6 +1054,7 @@ function init() {
   let linkedinShadowMaterial = null;
   let bugBoundaryMesh = null;
   let bugObstacleMesh = null;
+  let bugDebugSpawnGroup = null;
   let houdiniObstacleMesh = null;
   let webGlobeObstacleMesh = null;
   let gamesObstacleMesh = null;
@@ -1112,11 +1126,22 @@ function init() {
   function getLinkedInBugInitialPos() {
     const lCfg = SCENE_CONFIG.linkedin3D;
     if (!lCfg) return { x: -3.6, y: 0.63, z: -4.6 };
-    if (typeof isMobileInitial !== 'undefined' && isMobileInitial && lCfg.mobile && lCfg.mobile.position) {
-      return lCfg.mobile.position;
+
+    // Return memoized random spawn selection for this page session
+    if (lCfg._selectedSpawnPos) return lCfg._selectedSpawnPos;
+
+    const isMobile = typeof isMobileInitial !== 'undefined' && isMobileInitial;
+    const ctxCfg = isMobile ? lCfg.mobile : lCfg.desktop;
+
+    if (ctxCfg && Array.isArray(ctxCfg.spawnPositions) && ctxCfg.spawnPositions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * ctxCfg.spawnPositions.length);
+      lCfg._selectedSpawnPos = ctxCfg.spawnPositions[randomIndex];
+      return lCfg._selectedSpawnPos;
     }
-    if (lCfg.desktop && lCfg.desktop.position) {
-      return lCfg.desktop.position;
+
+    if (ctxCfg && ctxCfg.position) {
+      lCfg._selectedSpawnPos = ctxCfg.position;
+      return lCfg._selectedSpawnPos;
     }
     return lCfg.position || { x: -3.6, y: 0.63, z: -4.6 };
   }
@@ -2151,6 +2176,42 @@ function init() {
     const initialGamesPos = isMobileInitial && SCENE_CONFIG.games3D && SCENE_CONFIG.games3D.mobile ? SCENE_CONFIG.games3D.mobile.position : (SCENE_CONFIG.games3D.desktop ? SCENE_CONFIG.games3D.desktop.position : { x: 3.8, y: 0.7, z: 1.5 });
     gamesObstacleMesh.position.set(initialGamesPos.x, visualShadowBaseY, initialGamesPos.z);
     sceneGroup.add(gamesObstacleMesh);
+
+    // Debug visualizer for LinkedIn bug candidate spawn positions (small green cubes)
+    bugDebugSpawnGroup = new THREE.Group();
+    bugDebugSpawnGroup.renderOrder = 20;
+
+    const desktopSpawns = (SCENE_CONFIG.linkedin3D && SCENE_CONFIG.linkedin3D.desktop && Array.isArray(SCENE_CONFIG.linkedin3D.desktop.spawnPositions)) ? SCENE_CONFIG.linkedin3D.desktop.spawnPositions : [];
+    const mobileSpawns = (SCENE_CONFIG.linkedin3D && SCENE_CONFIG.linkedin3D.mobile && Array.isArray(SCENE_CONFIG.linkedin3D.mobile.spawnPositions)) ? SCENE_CONFIG.linkedin3D.mobile.spawnPositions : [];
+
+    const spawnCubeGeo = new THREE.BoxGeometry(0.18, 0.18, 0.18);
+    const desktopSpawnMat = new THREE.MeshBasicMaterial({
+      color: 0x00ff66,
+      wireframe: false,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    const mobileSpawnMat = new THREE.MeshBasicMaterial({
+      color: 0x0099ff,
+      wireframe: false,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    desktopSpawns.forEach((pos) => {
+      const cube = new THREE.Mesh(spawnCubeGeo, desktopSpawnMat);
+      cube.position.set(pos.x, pos.y !== undefined ? pos.y : 0.63, pos.z);
+      bugDebugSpawnGroup.add(cube);
+    });
+
+    mobileSpawns.forEach((pos) => {
+      const cube = new THREE.Mesh(spawnCubeGeo, mobileSpawnMat);
+      cube.position.set(pos.x, pos.y !== undefined ? pos.y : 0.63, pos.z);
+      bugDebugSpawnGroup.add(cube);
+    });
+
+    sceneGroup.add(bugDebugSpawnGroup);
 
     // Load bug_cube.obj for 3D LinkedIn link
     const bugTexture = new THREE.TextureLoader().load('graphics/li_logo_blue.png');
@@ -6126,6 +6187,9 @@ function init() {
           );
         }
         gamesObstacleMesh.visible = !!lCfg.showDebug;
+      }
+      if (bugDebugSpawnGroup) {
+        bugDebugSpawnGroup.visible = !!lCfg.showDebug;
       }
 
       // Hardcode the bug cube's Y position to its configured base height (0.8)
