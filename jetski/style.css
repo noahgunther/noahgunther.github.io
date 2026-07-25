@@ -249,15 +249,15 @@ ul {
 
 #plaintext-link {
   position: absolute;
-  left: 32px;
-  bottom: 34px;
-  width: clamp(64px, 6vw, 90px);
+  left: clamp(20px, 2.2vw, 32px);
+  bottom: clamp(22px, 2.5vh, 34px);
+  width: clamp(68px, 4.2vw, 90px);
   aspect-ratio: 0.72;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  padding: 8px;
+  padding: clamp(5px, 0.5vw, 8px);
   z-index: 24;
   pointer-events: auto;
   cursor: pointer;
@@ -267,10 +267,20 @@ ul {
   border-radius: 6px;
   color: rgba(255, 255, 255, 0.90);
   font-family: 'Inter Tight', sans-serif;
-  font-size: clamp(10px, 0.8vw, 13px);
+  font-size: clamp(11px, 0.7vw, 13px);
   font-weight: 400;
   line-height: 1.05;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  #plaintext-link {
+    left: clamp(12px, 3.5vw, 20px);
+    bottom: clamp(14px, 3.5vh, 24px);
+    width: clamp(32px, 9vw, 46px);
+    font-size: clamp(8px, 2.2vw, 10px);
+    padding: 3px;
+  }
 }
 
 /* Logo & Icon Mask Tinting System for 2D Menu Links */
@@ -350,7 +360,7 @@ ul {
   --about-panel-border-height: calc(100% - (var(--about-panel-border-inset) * 2));
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: max(50%, calc(108px + (min(880px, 72vh) / 2)));
   width: min(720px, 85vw, calc(72vh * 0.818));
   height: min(880px, 72vh);
   transform: translate(-50%, -50%);
@@ -364,6 +374,7 @@ ul {
 
 @media (max-width: 768px) {
   .about-panel {
+    top: max(50%, calc(92px + (min(880px, 72vh) / 2)));
     width: min(440px, 88vw, calc(72vh * 0.818));
     --about-panel-border-inset: clamp(14px, 2.5vh, 22px);
   }
