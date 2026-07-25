@@ -466,6 +466,51 @@ const SCENE_CONFIG = {
     fallRotationSpeedThreshold: 2.0         // Rotation speed threshold to trigger bug fall
   },
 
+  // ==========================================
+  // 11B. BOIDS FLOCKING SIMULATION
+  // ==========================================
+  boids: {
+    enabled: true,                          // Toggle to enable/disable Boids flocking simulation
+    count: 80,                              // Total number of boid tetrahedra
+    yHeight: 0.35,                          // Hard-coded gel surface height (matches LinkedIn bug)
+    shadowY: 0.335,                         // Shadow plane height on gel surface
+    shadowOpacity: 0.45,                    // Soft contact shadow opacity
+    shadowScale: 2.0,                       // Parameter to control contact shadow scale multiplier
+    size: 0.03,                             // Base equilateral triangle radius
+    length: 0.12,                           // Forward length of elongated tetrahedron
+    maxSpeed: 0.01,                        // Maximum movement speed per frame unit
+    maxForce: 0.0005,                       // Maximum steering force per frame
+    separationRadius: 0.2,                  // Distance radius to trigger separation from other boids
+    neighborRadius: 1.0,                    // Distance radius for alignment & cohesion calculations
+    separationWeight: 1.6,                  // Weight multiplier for separation steering force
+    alignmentWeight: 0.8,                   // Weight multiplier for alignment steering force
+    cohesionWeight: 0.6,                    // Weight multiplier for cohesion steering force
+    obstacleAvoidanceWeight: 1.75,           // Steering weight to avoid scene obstacles & LinkedIn bug
+    obstacleAvoidRadius: 0.8,               // Distance radius around entities to trigger avoidance
+    mouseAvoidanceEnabled: true,            // Toggle to enable/disable mouse cursor avoidance
+    cursorAvoidanceWeight: 3.0,             // Steering weight to steer away from mouse cursor
+    cursorAvoidRadius: 1.2,                 // Distance radius around mouse cursor to trigger avoidance
+    showDebug: false,                       // Toggle debug vector guides and avoidance rings
+    desktop: {
+      count: 500,                            // Total number of boid tetrahedra on Desktop
+      walkRadiusX: 10.0,                    // Max walk bound radius X for boids (Desktop)
+      walkRadiusZ: 10.0                     // Max walk bound radius Z for boids (Desktop)
+    },
+    mobile: {
+      count: 200,                            // Total number of boid tetrahedra on Mobile
+      walkRadiusX: 4.5,                     // Max walk bound radius X for boids (Mobile)
+      walkRadiusZ: 9.0                      // Max walk bound radius Z for boids (Mobile)
+    },
+    walkRadiusX: 11.0,                      // Fallback walk bound radius X
+    walkRadiusZ: 11.0,                      // Fallback walk bound radius Z
+    colorIntensity: 0.5,                    // Color intensity multiplier factor (0.5 = 50% brightness)
+    material: {
+      color: 0xff1a2d,                      // Vibrant red matching site aesthetic
+      roughness: 0.35,
+      metalness: 0.5
+    }
+  },
+
 
 
   // ==========================================
@@ -1068,6 +1113,32 @@ function init() {
   let houdiniObstacleMesh = null;
   let webGlobeObstacleMesh = null;
   let gamesObstacleMesh = null;
+
+  // Boids Flocking simulation state variables & pre-allocated math helpers
+  let boidsInstancedMesh = null;
+  let boidsShadowInstancedMesh = null;
+  let boidsDebugGroup = null;
+  let boidsDebugBoundaryMesh = null;
+  let boidsDebugCursorMesh = null;
+  let boidsPositions = null;  // Float32Array (count * 3)
+  let boidsVelocities = null; // Float32Array (count * 3)
+  let boidsCount = 0;
+  const tmpBoidDummy = new THREE.Object3D();
+  const tmpBoidPos = new THREE.Vector3();
+  const tmpBoidShadowPos = new THREE.Vector3();
+  const tmpBoidVel = new THREE.Vector3();
+  const tmpBoidForce = new THREE.Vector3();
+  const tmpBoidSep = new THREE.Vector3();
+  const tmpBoidAlign = new THREE.Vector3();
+  const tmpBoidCoh = new THREE.Vector3();
+  const tmpBoidObs = new THREE.Vector3();
+  const tmpBoidTargetDir = new THREE.Vector3();
+  const tmpBoidQuat = new THREE.Quaternion();
+  const tmpBoidForward = new THREE.Vector3(0, 0, 1);
+  const tmpBoidColor = new THREE.Color();
+  const tmpCursorPlane = new THREE.Plane();
+  const tmpCursorWorldPos = new THREE.Vector3();
+  const tmpCursorRay = new THREE.Raycaster();
 
   // Games 3D Alien state variables
   let gamesAlienGroup = null;
@@ -2777,6 +2848,9 @@ function init() {
   plateTargetPos = new THREE.Vector3(0, -0.8, 0);
   plateTargetRot = new THREE.Vector3(0, 0, 0);
 
+  // Initialize Boids Flocking Simulation on gel plate
+  initBoids();
+
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2(-9999, -9999);
   isSpinning = false;
@@ -4386,6 +4460,504 @@ function init() {
     }
   }
 
+  // ==========================================
+  // BOIDS FLOCKING SIMULATION ENGINE
+  // ==========================================
+  function getBoidsCount() {
+    const bCfg = SCENE_CONFIG.boids;
+    if (!bCfg) return 80;
+    if (typeof isMobileInitial !== 'undefined' && isMobileInitial && bCfg.mobile) {
+      return bCfg.mobile.count !== undefined ? bCfg.mobile.count : (bCfg.count !== undefined ? bCfg.count : 35);
+    }
+    if (bCfg.desktop && bCfg.desktop.count !== undefined) {
+      return bCfg.desktop.count;
+    }
+    return bCfg.count !== undefined ? bCfg.count : 80;
+  }
+
+  function getBoidsWalkRadius() {
+    const bCfg = SCENE_CONFIG.boids;
+    if (!bCfg) return { rx: 11.0, rz: 11.0 };
+    if (typeof isMobileInitial !== 'undefined' && isMobileInitial && bCfg.mobile) {
+      const rx = bCfg.mobile.walkRadiusX !== undefined ? bCfg.mobile.walkRadiusX : (bCfg.walkRadiusX !== undefined ? bCfg.walkRadiusX : 11.0);
+      const rz = bCfg.mobile.walkRadiusZ !== undefined ? bCfg.mobile.walkRadiusZ : (bCfg.walkRadiusZ !== undefined ? bCfg.walkRadiusZ : 11.0);
+      return { rx, rz };
+    }
+    if (bCfg.desktop) {
+      const rx = bCfg.desktop.walkRadiusX !== undefined ? bCfg.desktop.walkRadiusX : (bCfg.walkRadiusX !== undefined ? bCfg.walkRadiusX : 11.0);
+      const rz = bCfg.desktop.walkRadiusZ !== undefined ? bCfg.desktop.walkRadiusZ : (bCfg.walkRadiusZ !== undefined ? bCfg.walkRadiusZ : 11.0);
+      return { rx, rz };
+    }
+    return {
+      rx: bCfg.walkRadiusX !== undefined ? bCfg.walkRadiusX : 11.0,
+      rz: bCfg.walkRadiusZ !== undefined ? bCfg.walkRadiusZ : 11.0
+    };
+  }
+
+  function createCustomBoidGeometry(baseRadius, forwardLength) {
+    const geom = new THREE.BufferGeometry();
+    const s = baseRadius;
+    const sqrt3_2 = Math.sqrt(3) / 2;
+    const zBase = -forwardLength * 0.35;
+    const zApex = forwardLength * 0.65;
+
+    // Base equilateral triangle vertices at tail (-Z)
+    const v0 = [0, s, zBase];
+    const v1 = [-s * sqrt3_2, -s * 0.5, zBase];
+    const v2 = [s * sqrt3_2, -s * 0.5, zBase];
+    // Front apex point extended forward (+Z)
+    const v3 = [0, 0, zApex];
+
+    const positions = new Float32Array([
+      // Base Face (Equilateral Triangle at tail end)
+      ...v0, ...v2, ...v1,
+      // Side Face 1 (Top to Bottom-Left to Apex)
+      ...v0, ...v1, ...v3,
+      // Side Face 2 (Bottom-Left to Bottom-Right to Apex)
+      ...v1, ...v2, ...v3,
+      // Side Face 3 (Bottom-Right to Top to Apex)
+      ...v2, ...v0, ...v3
+    ]);
+
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geom.computeVertexNormals();
+    return geom;
+  }
+
+  function initBoids() {
+    const bCfg = SCENE_CONFIG.boids;
+    if (!bCfg || bCfg.enabled === false) return;
+
+    boidsCount = getBoidsCount();
+    const size = bCfg.size || 0.12;
+    const length = bCfg.length || 0.42;
+    const yHeight = bCfg.yHeight !== undefined ? bCfg.yHeight : 0.63;
+    const shadowY = bCfg.shadowY !== undefined ? bCfg.shadowY : 0.335;
+    const shadowScale = bCfg.shadowScale !== undefined ? bCfg.shadowScale : 1.0;
+
+    // 1. Custom Elongated Tetrahedron Geometry (Equilateral triangle base at tail, Apex facing +Z)
+    const geometry = createCustomBoidGeometry(size, length);
+
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xffffff,                       // Pure white base color so per-instance RGB colors render accurately
+      roughness: (bCfg.material && bCfg.material.roughness !== undefined) ? bCfg.material.roughness : 0.35,
+      metalness: (bCfg.material && bCfg.material.metalness !== undefined) ? bCfg.material.metalness : 0.5,
+      flatShading: true
+    });
+
+    boidsInstancedMesh = new THREE.InstancedMesh(geometry, material, boidsCount);
+    boidsInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+    // 2. Instanced Contact Shadow Planes on Gel Surface (Single Draw Call)
+    const shadowGeo = new THREE.PlaneGeometry(size * 2.2 * shadowScale, length * 1.5 * shadowScale);
+    shadowGeo.rotateX(-Math.PI / 2); // lie flat on XZ plane
+
+    const shadowMap = new THREE.TextureLoader().load('graphics/shadow.png');
+    const shadowMaterial = new THREE.MeshBasicMaterial({
+      map: shadowMap,
+      transparent: true,
+      opacity: (bCfg.shadowOpacity !== undefined) ? bCfg.shadowOpacity : 0.45,
+      depthWrite: false,
+      depthTest: true,
+      side: THREE.FrontSide,
+      blending: THREE.NormalBlending
+    });
+
+    boidsShadowInstancedMesh = new THREE.InstancedMesh(shadowGeo, shadowMaterial, boidsCount);
+    boidsShadowInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    boidsShadowInstancedMesh.renderOrder = 3;
+
+    boidsPositions = new Float32Array(boidsCount * 3);
+    boidsVelocities = new Float32Array(boidsCount * 3);
+
+    const { rx: walkRx, rz: walkRz } = getBoidsWalkRadius();
+
+    for (let i = 0; i < boidsCount; i++) {
+      // Pick random initial spawn within safe gel boundary
+      const angle = Math.random() * Math.PI * 2;
+      const rad = Math.sqrt(Math.random()) * 0.75; // 75% inside gel boundary
+      const x = Math.cos(angle) * rad * walkRx;
+      const z = Math.sin(angle) * rad * walkRz;
+
+      boidsPositions[i * 3 + 0] = x;
+      boidsPositions[i * 3 + 1] = yHeight;
+      boidsPositions[i * 3 + 2] = z;
+
+      // Random initial velocity on XZ plane
+      const velAngle = Math.random() * Math.PI * 2;
+      const initialSpeed = (bCfg.maxSpeed || 0.035) * (0.6 + Math.random() * 0.4);
+      const vx = Math.cos(velAngle) * initialSpeed;
+      const vz = Math.sin(velAngle) * initialSpeed;
+
+      boidsVelocities[i * 3 + 0] = vx;
+      boidsVelocities[i * 3 + 1] = 0;
+      boidsVelocities[i * 3 + 2] = vz;
+
+      tmpBoidPos.set(x, yHeight, z);
+      tmpBoidShadowPos.set(x, shadowY, z);
+      tmpBoidTargetDir.set(vx, 0, vz).normalize();
+
+      if (tmpBoidTargetDir.lengthSq() > 0.0001) {
+        tmpBoidQuat.setFromUnitVectors(tmpBoidForward, tmpBoidTargetDir);
+      } else {
+        tmpBoidQuat.identity();
+      }
+
+      // Initial instance color matching normal map paradigm (R=Z, G=X, B=Inverted Avoidance, 0.5 intensity)
+      const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
+      tmpBoidColor.setRGB(0.5 * colorIntensity, 0.5 * colorIntensity, 1.0 * colorIntensity);
+      boidsInstancedMesh.setColorAt(i, tmpBoidColor);
+
+      // Body Matrix
+      tmpBoidDummy.position.copy(tmpBoidPos);
+      tmpBoidDummy.quaternion.copy(tmpBoidQuat);
+      tmpBoidDummy.scale.set(1, 1, 1);
+      tmpBoidDummy.updateMatrix();
+      boidsInstancedMesh.setMatrixAt(i, tmpBoidDummy.matrix);
+
+      // Shadow Matrix
+      tmpBoidDummy.position.copy(tmpBoidShadowPos);
+      tmpBoidDummy.quaternion.copy(tmpBoidQuat);
+      tmpBoidDummy.scale.set(1, 1, 1);
+      tmpBoidDummy.updateMatrix();
+      boidsShadowInstancedMesh.setMatrixAt(i, tmpBoidDummy.matrix);
+    }
+
+    boidsInstancedMesh.instanceMatrix.needsUpdate = true;
+    if (boidsInstancedMesh.instanceColor) boidsInstancedMesh.instanceColor.needsUpdate = true;
+    boidsShadowInstancedMesh.instanceMatrix.needsUpdate = true;
+
+    // 3. Debug visualizer group for Boids
+    boidsDebugGroup = new THREE.Group();
+
+    // Boids walk boundary ellipse ring
+    const boundaryCurve = new THREE.EllipseCurve(0, 0, walkRx, walkRz, 0, 2 * Math.PI, false, 0);
+    const boundaryPoints = boundaryCurve.getPoints(64);
+    const boundaryGeo = new THREE.BufferGeometry().setFromPoints(boundaryPoints);
+    const boundaryMat = new THREE.LineBasicMaterial({ color: 0x00ffcc });
+    boidsDebugBoundaryMesh = new THREE.LineLoop(boundaryGeo, boundaryMat);
+    boidsDebugBoundaryMesh.rotation.x = -Math.PI / 2;
+    boidsDebugBoundaryMesh.position.y = shadowY + 0.01;
+    boidsDebugGroup.add(boidsDebugBoundaryMesh);
+
+    // Boids cursor avoidance radius circle
+    const cursorAvoidRad = bCfg.cursorAvoidRadius !== undefined ? bCfg.cursorAvoidRadius : 2.2;
+    const cursorCurve = new THREE.EllipseCurve(0, 0, cursorAvoidRad, cursorAvoidRad, 0, 2 * Math.PI, false, 0);
+    const cursorPoints = cursorCurve.getPoints(32);
+    const cursorGeo = new THREE.BufferGeometry().setFromPoints(cursorPoints);
+    const cursorMat = new THREE.LineBasicMaterial({ color: 0xff9900 });
+    boidsDebugCursorMesh = new THREE.LineLoop(cursorGeo, cursorMat);
+    boidsDebugCursorMesh.rotation.x = -Math.PI / 2;
+    boidsDebugCursorMesh.position.y = shadowY + 0.01;
+    boidsDebugGroup.add(boidsDebugCursorMesh);
+
+    boidsDebugGroup.visible = !!bCfg.showDebug;
+
+    sceneGroup.add(boidsShadowInstancedMesh);
+    sceneGroup.add(boidsInstancedMesh);
+    sceneGroup.add(boidsDebugGroup);
+  }
+
+  function updateBoids(dt) {
+    if (!boidsInstancedMesh || !SCENE_CONFIG.boids || SCENE_CONFIG.boids.enabled === false) return;
+
+    const bCfg = SCENE_CONFIG.boids;
+    const count = boidsCount;
+    const yHeight = bCfg.yHeight !== undefined ? bCfg.yHeight : 0.63;
+    const shadowY = bCfg.shadowY !== undefined ? bCfg.shadowY : 0.335;
+    const maxSpeed = bCfg.maxSpeed !== undefined ? bCfg.maxSpeed : 0.035;
+    const maxForce = bCfg.maxForce !== undefined ? bCfg.maxForce : 0.0018;
+
+    const sepRad = bCfg.separationRadius !== undefined ? bCfg.separationRadius : 0.9;
+    const sepRadSq = sepRad * sepRad;
+
+    const neighRad = bCfg.neighborRadius !== undefined ? bCfg.neighborRadius : 2.2;
+    const neighRadSq = neighRad * neighRad;
+
+    const sepWeight = bCfg.separationWeight !== undefined ? bCfg.separationWeight : 1.6;
+    const alignWeight = bCfg.alignmentWeight !== undefined ? bCfg.alignmentWeight : 1.0;
+    const cohWeight = bCfg.cohesionWeight !== undefined ? bCfg.cohesionWeight : 1.0;
+
+    const obsWeight = bCfg.obstacleAvoidanceWeight !== undefined ? bCfg.obstacleAvoidanceWeight : 2.5;
+    const obsRad = bCfg.obstacleAvoidRadius !== undefined ? bCfg.obstacleAvoidRadius : 1.5;
+
+    const { rx: walkRx, rz: walkRz } = getBoidsWalkRadius();
+
+    // Mouse Cursor World Position Raycasting
+    let isCursorValid = false;
+    if (mouse && mouse.x > -900 && camera && raycaster) {
+      tmpCursorPlane.set(new THREE.Vector3(0, 1, 0), -yHeight);
+      tmpCursorRay.setFromCamera(mouse, camera);
+      const hitCursor = tmpCursorRay.ray.intersectPlane(tmpCursorPlane, tmpCursorWorldPos);
+      if (hitCursor) {
+        if (sceneGroup) {
+          sceneGroup.worldToLocal(tmpCursorWorldPos);
+        }
+        isCursorValid = true;
+      }
+    }
+
+    // Collect obstacle positions for avoidance (including LinkedIn bug)
+    const obstacles = [];
+    const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
+    if (qBoxPos) obstacles.push(qBoxPos);
+    if (houdiniToyGroup) obstacles.push(houdiniToyGroup.position);
+    if (webGlobeGroup) obstacles.push(webGlobeGroup.position);
+    if (gamesAlienGroup) obstacles.push(gamesAlienGroup.position);
+    if (bugCubeGroup) obstacles.push(bugCubeGroup.position); // Avoid LinkedIn bug
+
+    const dtScale = Math.min(2.0, dt * 60.0);
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      const px = boidsPositions[i3 + 0];
+      const pz = boidsPositions[i3 + 2];
+      let vx = boidsVelocities[i3 + 0];
+      let vz = boidsVelocities[i3 + 2];
+
+      tmpBoidPos.set(px, yHeight, pz);
+      tmpBoidVel.set(vx, 0, vz);
+
+      tmpBoidForce.set(0, 0, 0);
+      tmpBoidSep.set(0, 0, 0);
+      tmpBoidAlign.set(0, 0, 0);
+      tmpBoidCoh.set(0, 0, 0);
+      tmpBoidObs.set(0, 0, 0);
+
+      let sepCount = 0;
+      let alignCount = 0;
+      let cohCount = 0;
+      let cohCenterX = 0;
+      let cohCenterZ = 0;
+
+      // 1. Classic Flocking Loop over other boids
+      for (let j = 0; j < count; j++) {
+        if (i === j) continue;
+        const j3 = j * 3;
+        const dx = px - boidsPositions[j3 + 0];
+        const dz = pz - boidsPositions[j3 + 2];
+        const distSq = dx * dx + dz * dz;
+
+        // Separation
+        if (distSq > 0.00001 && distSq < sepRadSq) {
+          const dist = Math.sqrt(distSq);
+          tmpBoidSep.x += (dx / dist) / dist;
+          tmpBoidSep.z += (dz / dist) / dist;
+          sepCount++;
+        }
+
+        // Alignment & Cohesion
+        if (distSq > 0.00001 && distSq < neighRadSq) {
+          tmpBoidAlign.x += boidsVelocities[j3 + 0];
+          tmpBoidAlign.z += boidsVelocities[j3 + 2];
+          alignCount++;
+
+          cohCenterX += boidsPositions[j3 + 0];
+          cohCenterZ += boidsPositions[j3 + 2];
+          cohCount++;
+        }
+      }
+
+      // Process Separation force
+      if (sepCount > 0) {
+        tmpBoidSep.multiplyScalar(1.0 / sepCount);
+        if (tmpBoidSep.lengthSq() > 0) {
+          tmpBoidSep.normalize().multiplyScalar(maxSpeed).sub(tmpBoidVel);
+          tmpBoidSep.clampLength(0, maxForce);
+          tmpBoidForce.addScaledVector(tmpBoidSep, sepWeight);
+        }
+      }
+
+      // Process Alignment force
+      if (alignCount > 0) {
+        tmpBoidAlign.multiplyScalar(1.0 / alignCount);
+        if (tmpBoidAlign.lengthSq() > 0) {
+          tmpBoidAlign.normalize().multiplyScalar(maxSpeed).sub(tmpBoidVel);
+          tmpBoidAlign.clampLength(0, maxForce);
+          tmpBoidForce.addScaledVector(tmpBoidAlign, alignWeight);
+        }
+      }
+
+      // Process Cohesion force
+      if (cohCount > 0) {
+        cohCenterX /= cohCount;
+        cohCenterZ /= cohCount;
+        tmpBoidTargetDir.set(cohCenterX - px, 0, cohCenterZ - pz);
+        if (tmpBoidTargetDir.lengthSq() > 0) {
+          tmpBoidTargetDir.normalize().multiplyScalar(maxSpeed).sub(tmpBoidVel);
+          tmpBoidTargetDir.clampLength(0, maxForce);
+          tmpBoidForce.addScaledVector(tmpBoidTargetDir, cohWeight);
+        }
+      }
+
+      // 2. Obstacle & Entity & Mouse Cursor Avoidance Force
+      let obsCount = 0;
+      let avoidanceIntensity = 0.0;
+
+      for (let o = 0; o < obstacles.length; o++) {
+        const obs = obstacles[o];
+        const dx = px - obs.x;
+        const dz = pz - obs.z;
+        const distSq = dx * dx + dz * dz;
+        const obsRadSq = obsRad * obsRad;
+
+        if (distSq < obsRadSq) {
+          const dist = Math.max(0.001, Math.sqrt(distSq));
+          const pushFactor = (obsRad - dist) / obsRad;
+          tmpBoidObs.x += (dx / dist) * pushFactor;
+          tmpBoidObs.z += (dz / dist) * pushFactor;
+          obsCount++;
+          avoidanceIntensity = Math.max(avoidanceIntensity, pushFactor);
+        }
+      }
+
+      // Mouse Cursor Avoidance
+      const mouseAvoidEnabled = bCfg.mouseAvoidanceEnabled !== false;
+      const cursorAvoidWeight = bCfg.cursorAvoidanceWeight !== undefined ? bCfg.cursorAvoidanceWeight : 3.0;
+      const cursorAvoidRad = bCfg.cursorAvoidRadius !== undefined ? bCfg.cursorAvoidRadius : 2.2;
+      const cursorAvoidRadSq = cursorAvoidRad * cursorAvoidRad;
+
+      if (isCursorValid && mouseAvoidEnabled) {
+        const dx = px - tmpCursorWorldPos.x;
+        const dz = pz - tmpCursorWorldPos.z;
+        const distSq = dx * dx + dz * dz;
+
+        if (distSq < cursorAvoidRadSq) {
+          const dist = Math.max(0.001, Math.sqrt(distSq));
+          const pushFactor = (cursorAvoidRad - dist) / cursorAvoidRad;
+          tmpBoidObs.x += (dx / dist) * pushFactor * (cursorAvoidWeight / Math.max(0.01, obsWeight));
+          tmpBoidObs.z += (dz / dist) * pushFactor * (cursorAvoidWeight / Math.max(0.01, obsWeight));
+          obsCount++;
+          avoidanceIntensity = Math.max(avoidanceIntensity, pushFactor);
+        }
+      }
+
+      if (obsCount > 0) {
+        tmpBoidObs.multiplyScalar(1.0 / obsCount);
+        if (tmpBoidObs.lengthSq() > 0) {
+          tmpBoidObs.normalize().multiplyScalar(maxSpeed).sub(tmpBoidVel);
+          tmpBoidObs.clampLength(0, maxForce * 1.8);
+          tmpBoidForce.addScaledVector(tmpBoidObs, obsWeight);
+        }
+      }
+
+      // 3. Gel Boundary Containment Force (Ellipsoid Steering)
+      const ellipseVal = (px / walkRx) * (px / walkRx) + (pz / walkRz) * (pz / walkRz);
+      if (ellipseVal > 0.75) {
+        const centerPushX = -px;
+        const centerPushZ = -pz;
+        const pushLen = Math.sqrt(centerPushX * centerPushX + centerPushZ * centerPushZ);
+        if (pushLen > 0.001) {
+          const tBoundary = Math.max(0, Math.min(1, (ellipseVal - 0.75) / (1.0 - 0.75)));
+          const steerForceMag = maxForce * 2.0 * tBoundary;
+          tmpBoidForce.x += (centerPushX / pushLen) * steerForceMag;
+          tmpBoidForce.z += (centerPushZ / pushLen) * steerForceMag;
+        }
+      }
+
+      // Apply steering forces to velocity
+      vx += tmpBoidForce.x * dtScale;
+      vz += tmpBoidForce.z * dtScale;
+
+      // Cap speed
+      const curSpeed = Math.sqrt(vx * vx + vz * vz);
+      if (curSpeed > maxSpeed) {
+        vx = (vx / curSpeed) * maxSpeed;
+        vz = (vz / curSpeed) * maxSpeed;
+      } else if (curSpeed < maxSpeed * 0.3) {
+        // Maintain minimum cruise speed so boids don't stall
+        const minSpeed = maxSpeed * 0.3;
+        if (curSpeed > 0.00001) {
+          vx = (vx / curSpeed) * minSpeed;
+          vz = (vz / curSpeed) * minSpeed;
+        } else {
+          const randA = Math.random() * Math.PI * 2;
+          vx = Math.cos(randA) * minSpeed;
+          vz = Math.sin(randA) * minSpeed;
+        }
+      }
+
+      // Update positions
+      let nextPx = px + vx * dtScale;
+      let nextPz = pz + vz * dtScale;
+
+      // Hard containment check if outside gel ellipse boundary
+      const nextEllipseVal = (nextPx / walkRx) * (nextPx / walkRx) + (nextPz / walkRz) * (nextPz / walkRz);
+      if (nextEllipseVal > 1.0) {
+        const borderAngle = Math.atan2(nextPz, nextPx);
+        nextPx = Math.cos(borderAngle) * walkRx * 0.98;
+        nextPz = Math.sin(borderAngle) * walkRz * 0.98;
+        vx = -vx * 0.5;
+        vz = -vz * 0.5;
+      }
+
+      boidsPositions[i3 + 0] = nextPx;
+      boidsPositions[i3 + 1] = yHeight;
+      boidsPositions[i3 + 2] = nextPz;
+
+      boidsVelocities[i3 + 0] = vx;
+      boidsVelocities[i3 + 1] = 0;
+      boidsVelocities[i3 + 2] = vz;
+
+      // Color calculation based on normal map paradigm:
+      // Red = Z-axis travel direction proportion (Math.abs(vz) / speed)
+      // Green = X-axis travel direction proportion (Math.abs(vx) / speed)
+      // Blue = Inverted avoidance intensity (1.0 when not avoiding, fading toward 0.0 when avoiding)
+      const speedMag = Math.sqrt(vx * vx + vz * vz);
+      let rComp = 0.5;
+      let gComp = 0.5;
+
+      if (speedMag > 0.0001) {
+        rComp = Math.abs(vz) / speedMag;
+        gComp = Math.abs(vx) / speedMag;
+      }
+
+      // Blue is 1.0 when not avoiding, fading to 0.0 when avoiding
+      const bComp = Math.max(0.0, Math.min(1.0, 1.0 - avoidanceIntensity));
+
+      const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
+      tmpBoidColor.setRGB(rComp * colorIntensity, gComp * colorIntensity, bComp * colorIntensity);
+      boidsInstancedMesh.setColorAt(i, tmpBoidColor);
+
+      // Update instance transform matrices for body and shadow
+      tmpBoidPos.set(nextPx, yHeight, nextPz);
+      tmpBoidShadowPos.set(nextPx, shadowY, nextPz);
+      tmpBoidTargetDir.set(vx, 0, vz).normalize();
+
+      if (tmpBoidTargetDir.lengthSq() > 0.0001) {
+        tmpBoidQuat.setFromUnitVectors(tmpBoidForward, tmpBoidTargetDir);
+      }
+
+      // Body Matrix
+      tmpBoidDummy.position.copy(tmpBoidPos);
+      tmpBoidDummy.quaternion.copy(tmpBoidQuat);
+      tmpBoidDummy.scale.set(1, 1, 1);
+      tmpBoidDummy.updateMatrix();
+      boidsInstancedMesh.setMatrixAt(i, tmpBoidDummy.matrix);
+
+      // Shadow Matrix
+      tmpBoidDummy.position.copy(tmpBoidShadowPos);
+      tmpBoidDummy.quaternion.copy(tmpBoidQuat);
+      tmpBoidDummy.scale.set(1, 1, 1);
+      tmpBoidDummy.updateMatrix();
+      if (boidsShadowInstancedMesh) boidsShadowInstancedMesh.setMatrixAt(i, tmpBoidDummy.matrix);
+    }
+
+    boidsInstancedMesh.instanceMatrix.needsUpdate = true;
+    if (boidsInstancedMesh.instanceColor) boidsInstancedMesh.instanceColor.needsUpdate = true;
+    if (boidsShadowInstancedMesh) boidsShadowInstancedMesh.instanceMatrix.needsUpdate = true;
+
+    // Update Debug visualizer group visibility & cursor position
+    if (boidsDebugGroup) {
+      const showDbg = !!bCfg.showDebug;
+      boidsDebugGroup.visible = showDbg;
+      if (showDbg && boidsDebugCursorMesh) {
+        boidsDebugCursorMesh.position.set(tmpCursorWorldPos.x, shadowY + 0.01, tmpCursorWorldPos.z);
+        boidsDebugCursorMesh.visible = isCursorValid;
+      }
+    }
+  }
+
   let isTabHidden = false;
   document.addEventListener('visibilitychange', () => {
     isTabHidden = document.hidden;
@@ -5147,6 +5719,11 @@ function init() {
         bugMixer.update(dt);
       }
 
+    }
+
+    // Update Boids Flocking Simulation
+    if (loadingComplete && SCENE_CONFIG.boids && SCENE_CONFIG.boids.enabled !== false) {
+      updateBoids(dt);
     }
 
     // Update Question Box shatter particle effect
