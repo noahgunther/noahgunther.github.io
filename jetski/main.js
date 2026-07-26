@@ -479,7 +479,7 @@ const SCENE_CONFIG = {
   boids: {
     enabled: true,                          // Toggle to enable/disable Boids flocking simulation
     count: 750,                              // Total number of boid tetrahedra
-    yHeight: 0.5,                          // Hard-coded gel surface height (matches LinkedIn bug)
+    yHeight: 0.37,                          // Hard-coded gel surface height (matches LinkedIn bug)
     shadowY: 0.335,                         // Shadow plane height on gel surface
     shadowOpacity: 0.45,                    // Soft contact shadow opacity
     shadowScale: 2.0,                       // Parameter to control contact shadow scale multiplier
@@ -494,6 +494,7 @@ const SCENE_CONFIG = {
     cohesionWeight: 0.6,                    // Weight multiplier for cohesion steering force
     obstacleAvoidanceWeight: 1.75,           // Steering weight to avoid scene obstacles & LinkedIn bug
     obstacleAvoidRadius: 0.8,               // Distance radius around entities to trigger avoidance
+    obstacleLookAhead: 1.5,                 // Predictive look-ahead distance for early gradual obstacle avoidance
     mouseAvoidanceEnabled: true,            // Toggle to enable/disable mouse cursor avoidance
     cursorAvoidanceWeight: 3.0,             // Steering weight to steer away from mouse cursor
     cursorAvoidRadius: 1.2,                 // Distance radius around mouse cursor to trigger avoidance
@@ -4583,6 +4584,7 @@ function init() {
 
     boidsInstancedMesh = new THREE.InstancedMesh(geometry, material, boidsCount);
     boidsInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    boidsInstancedMesh.renderOrder = 4;
 
     // 2. Instanced Contact Shadow Planes on Gel Surface (Single Draw Call)
     const shadowGeo = new THREE.PlaneGeometry(size * 2.2 * shadowScale, length * 1.5 * shadowScale);
@@ -4611,9 +4613,9 @@ function init() {
     const { rx: walkRx, rz: walkRz } = getBoidsWalkRadius();
 
     for (let i = 0; i < boidsCount; i++) {
-      // Pick random initial spawn within safe gel boundary
+      // Pick random initial spawn across the full gel walk radius
       const angle = Math.random() * Math.PI * 2;
-      const rad = Math.sqrt(Math.random()) * 0.75; // 75% inside gel boundary
+      const rad = Math.sqrt(Math.random()) * 0.87; // Spawn across full gel walk area (up to 96% radius)
       const x = Math.cos(angle) * rad * walkRx;
       const z = Math.sin(angle) * rad * walkRz;
 
@@ -4765,6 +4767,7 @@ function init() {
       const pz = boidsPositions[i3 + 2];
       let vx = boidsVelocities[i3 + 0];
       let vz = boidsVelocities[i3 + 2];
+      const initialSpeedMag = Math.sqrt(vx * vx + vz * vz);
 
       tmpBoidPos.set(px, yHeight, pz);
       tmpBoidVel.set(vx, 0, vz);
@@ -4841,43 +4844,64 @@ function init() {
         }
       }
 
-      // 2. Obstacle & Entity & Mouse Cursor Avoidance Force
+      // 2. Obstacle & Entity & Mouse Cursor Avoidance Force (Predictive Look-Ahead Steering)
       let obsCount = 0;
       let avoidanceIntensity = 0.0;
 
+      const lookAheadDist = bCfg.obstacleLookAhead !== undefined ? bCfg.obstacleLookAhead : 1.5;
+      const speedNorm = Math.max(0.0001, initialSpeedMag);
+      const fwdX = (vx / speedNorm) * lookAheadDist;
+      const fwdZ = (vz / speedNorm) * lookAheadDist;
+
       for (let o = 0; o < obstacles.length; o++) {
         const obs = obstacles[o];
-        const dx = px - obs.x;
-        const dz = pz - obs.z;
-        const distSq = dx * dx + dz * dz;
-        const obsRadSq = obsRad * obsRad;
 
-        if (distSq < obsRadSq) {
-          const dist = Math.max(0.001, Math.sqrt(distSq));
-          const pushFactor = (obsRad - dist) / obsRad;
-          tmpBoidObs.x += (dx / dist) * pushFactor;
-          tmpBoidObs.z += (dz / dist) * pushFactor;
+        // 1. Current distance to obstacle
+        const dxCurr = px - obs.x;
+        const dzCurr = pz - obs.z;
+        const distCurr = Math.sqrt(dxCurr * dxCurr + dzCurr * dzCurr);
+
+        // 2. Future projected distance along velocity vector
+        const dxFut = (px + fwdX) - obs.x;
+        const dzFut = (pz + fwdZ) - obs.z;
+        const distFut = Math.sqrt(dxFut * dxFut + dzFut * dzFut);
+
+        // Take closest distance along projected path
+        const effectiveDist = Math.min(distCurr, distFut);
+
+        if (effectiveDist < obsRad) {
+          const normDist = Math.max(0.001, distCurr);
+          // Smooth non-linear falloff curve for early gradual steering
+          const pushFactor = Math.pow((obsRad - effectiveDist) / obsRad, 1.2);
+          tmpBoidObs.x += (dxCurr / normDist) * pushFactor;
+          tmpBoidObs.z += (dzCurr / normDist) * pushFactor;
           obsCount++;
           avoidanceIntensity = Math.max(avoidanceIntensity, pushFactor);
         }
       }
 
-      // Mouse Cursor Avoidance
+      // Mouse Cursor Avoidance (Predictive Look-Ahead Steering)
       const mouseAvoidEnabled = bCfg.mouseAvoidanceEnabled !== false;
       const cursorAvoidWeight = bCfg.cursorAvoidanceWeight !== undefined ? bCfg.cursorAvoidanceWeight : 3.0;
       const cursorAvoidRad = bCfg.cursorAvoidRadius !== undefined ? bCfg.cursorAvoidRadius : 2.2;
-      const cursorAvoidRadSq = cursorAvoidRad * cursorAvoidRad;
 
       if (isCursorValid && mouseAvoidEnabled) {
-        const dx = px - tmpCursorWorldPos.x;
-        const dz = pz - tmpCursorWorldPos.z;
-        const distSq = dx * dx + dz * dz;
+        const dxCurr = px - tmpCursorWorldPos.x;
+        const dzCurr = pz - tmpCursorWorldPos.z;
+        const distCurr = Math.sqrt(dxCurr * dxCurr + dzCurr * dzCurr);
 
-        if (distSq < cursorAvoidRadSq) {
-          const dist = Math.max(0.001, Math.sqrt(distSq));
-          const pushFactor = (cursorAvoidRad - dist) / cursorAvoidRad;
-          tmpBoidObs.x += (dx / dist) * pushFactor * (cursorAvoidWeight / Math.max(0.01, obsWeight));
-          tmpBoidObs.z += (dz / dist) * pushFactor * (cursorAvoidWeight / Math.max(0.01, obsWeight));
+        const dxFut = (px + fwdX) - tmpCursorWorldPos.x;
+        const dzFut = (pz + fwdZ) - tmpCursorWorldPos.z;
+        const distFut = Math.sqrt(dxFut * dxFut + dzFut * dzFut);
+
+        const effectiveDist = Math.min(distCurr, distFut);
+
+        if (effectiveDist < cursorAvoidRad) {
+          const normDist = Math.max(0.001, distCurr);
+          const pushFactor = Math.pow((cursorAvoidRad - effectiveDist) / cursorAvoidRad, 1.2);
+          const cWeightRatio = cursorAvoidWeight / Math.max(0.01, obsWeight);
+          tmpBoidObs.x += (dxCurr / normDist) * pushFactor * cWeightRatio;
+          tmpBoidObs.z += (dzCurr / normDist) * pushFactor * cWeightRatio;
           obsCount++;
           avoidanceIntensity = Math.max(avoidanceIntensity, pushFactor);
         }
@@ -4954,14 +4978,14 @@ function init() {
       // Z-axis movement creates warm, rich Orange-Red (R: 1.0, G: 0.28, B: 0.08)
       // X-axis movement creates cool Electric Teal (R: 0.08, G: 0.85, B: 0.95)
       // Avoidance shifts color towards bright Red alert (R: 1.0, G: 0.0, B: 0.0)
-      const speedMag = Math.sqrt(vx * vx + vz * vz);
+      const finalSpeedMag = Math.sqrt(vx * vx + vz * vz);
       let rTarget = 0.5;
       let gTarget = 0.3;
       let bTarget = 0.3;
 
-      if (speedMag > 0.0001) {
-        const tz = Math.abs(vz) / speedMag; // Z-axis proportion
-        const tx = Math.abs(vx) / speedMag; // X-axis proportion
+      if (finalSpeedMag > 0.0001) {
+        const tz = Math.abs(vz) / finalSpeedMag; // Z-axis proportion
+        const tx = Math.abs(vx) / finalSpeedMag; // X-axis proportion
 
         rTarget = tz * 1.0 + tx * 0.08;
         gTarget = tz * 0.28 + tx * 0.85;
