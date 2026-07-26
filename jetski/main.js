@@ -571,6 +571,7 @@ const SCENE_CONFIG = {
       soundSrc: '',                  // Sound file path for this mode (e.g. 'sound/rm_default.ogg')
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
       shadowBoost: 2.0,              // Shadow opacity boost multiplier for this mode (e.g. 1.45 for darker shadows)
+      hideBoidShadows: false,        // Toggle to hide boid shadows in this render mode (true/false)
     },
 
     multiBit: {
@@ -581,7 +582,8 @@ const SCENE_CONFIG = {
       hoverColor: '#aaaaff',         // Retro vibrant pink/magenta hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_multibit.ogg')
       soundVolume: 0.8,               // Transition sound volume (0.0 to 1.0)
-      shadowBoost: 1.2
+      shadowBoost: 1.2,
+      hideBoidShadows: false,        // Toggle to hide boid shadows in this render mode
     },
 
     oneBit: {
@@ -593,6 +595,7 @@ const SCENE_CONFIG = {
       hoverColor: '#ffffff',         // Pure white hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_onebit.ogg')
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
+      hideBoidShadows: true,        // Toggle to hide boid shadows in this render mode
 
       // Mode-specific gel material override
       gelMaterialOverride: {
@@ -613,6 +616,7 @@ const SCENE_CONFIG = {
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_pixelated.ogg')
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
       shadowBoost: 0.6,
+      hideBoidShadows: true,        // Toggle to hide boid shadows in this render mode
 
       // Mode-specific gel material override
       gelMaterialOverride: {
@@ -637,6 +641,13 @@ const SCENE_CONFIG = {
       soundSrc: 'sound/rm_gameboy.ogg', // Sound file path for Game Boy mode
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
       shadowBoost: 0.4,
+      hideBoidShadows: true,        // Toggle to hide boid shadows in this render mode
+
+      // Mode-specific boid color override
+      boidColorOverride: {
+        override: true,            // Enable boid color override for Game Boy mode
+        color: '#d7d7d7'           // Matches Game Boy c2 light olive green (#8bac0f)
+      },
 
       // Mode-specific dish material override
       dishMaterialOverride: {
@@ -674,7 +685,8 @@ const SCENE_CONFIG = {
       hoverColor: '#badaff',         // Bright cyan CAD wireframe line hover color
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_blueprint.ogg')
       soundVolume: 0.8,               // Transition sound volume (0.0 to 1.0)
-      shadowBoost: 2.0
+      shadowBoost: 2.0,
+      hideBoidShadows: true,        // Toggle to hide boid shadows in this render mode
     },
 
     ascii: {
@@ -694,6 +706,7 @@ const SCENE_CONFIG = {
       soundSrc: '',                  // Sound file path (e.g. 'sound/rm_ascii.ogg')
       soundVolume: 0.8,              // Transition sound volume (0.0 to 1.0)
       shadowBoost: 0.8,
+      hideBoidShadows: true,        // Toggle to hide boid shadows in this render mode
 
       // Mode-specific gel material override
       gelMaterialOverride: {
@@ -1152,6 +1165,7 @@ function init() {
   const tmpBoidCurQuat = new THREE.Quaternion();
   const tmpBoidForward = new THREE.Vector3(0, 0, 1);
   const tmpBoidColor = new THREE.Color();
+  const tmpOverrideColor = new THREE.Color();
   const tmpCursorPlane = new THREE.Plane();
   const tmpCursorWorldPos = new THREE.Vector3();
   const tmpCursorRay = new THREE.Raycaster();
@@ -4538,12 +4552,16 @@ function init() {
     const zBase = -forwardLength * 0.35;
     const zApex = forwardLength * 0.65;
 
-    // Base equilateral triangle vertices at tail (-Z)
-    const v0 = [0, s, zBase];
-    const v1 = [-s * sqrt3_2, -s * 0.5, zBase];
-    const v2 = [s * sqrt3_2, -s * 0.5, zBase];
+    // Base equilateral triangle vertices at tail (-Z), aligned so Y_min = 0 (no surface penetration)
+    const yBottom = 0;
+    const yTop = s * 1.5;
+    const yApex = s * 0.5;
+
+    const v0 = [0, yTop, zBase];
+    const v1 = [-s * sqrt3_2, yBottom, zBase];
+    const v2 = [s * sqrt3_2, yBottom, zBase];
     // Front apex point extended forward (+Z)
-    const v3 = [0, 0, zApex];
+    const v3 = [0, yApex, zApex];
 
     const positions = new Float32Array([
       // Base Face (Equilateral Triangle at tail end)
@@ -4713,6 +4731,16 @@ function init() {
 
   function updateBoids(dt) {
     if (!boidsInstancedMesh || !SCENE_CONFIG.boids || SCENE_CONFIG.boids.enabled === false) return;
+
+    const activeModesList = (SCENE_CONFIG.renderStyles && Array.isArray(SCENE_CONFIG.renderStyles.activeModes)) ? SCENE_CONFIG.renderStyles.activeModes : ['default'];
+    const activeIdx = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles.currentModeIndex !== undefined) ? SCENE_CONFIG.renderStyles.currentModeIndex : 0;
+    const curModeName = activeModesList[activeIdx % activeModesList.length] || 'default';
+    const curModeCfg = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles[curModeName]) || {};
+    const shouldHideBoidShadows = (curModeCfg.hideBoidShadows === true || curModeCfg.boidShadows === false || curModeCfg.hideShadows === true || curModeCfg.shadows === false);
+
+    if (boidsShadowInstancedMesh) {
+      boidsShadowInstancedMesh.visible = !shouldHideBoidShadows;
+    }
 
     const bCfg = SCENE_CONFIG.boids;
     const count = boidsCount;
@@ -4974,29 +5002,45 @@ function init() {
       boidsVelocities[i3 + 1] = 0;
       boidsVelocities[i3 + 2] = vz;
 
-      // Target Color calculation based on directional movement and avoidance:
+      // Target Color calculation based on per-mode override or directional movement & avoidance:
       // Z-axis movement creates warm, rich Orange-Red (R: 1.0, G: 0.28, B: 0.08)
       // X-axis movement creates cool Electric Teal (R: 0.08, G: 0.85, B: 0.95)
       // Avoidance shifts color towards bright Red alert (R: 1.0, G: 0.0, B: 0.0)
-      const finalSpeedMag = Math.sqrt(vx * vx + vz * vz);
+      const boidColorOv = curModeCfg.boidColorOverride || curModeCfg.boidsColorOverride;
+      const boidColorSimple = curModeCfg.boidColor || curModeCfg.boidsColor;
+
       let rTarget = 0.5;
       let gTarget = 0.3;
       let bTarget = 0.3;
 
-      if (finalSpeedMag > 0.0001) {
-        const tz = Math.abs(vz) / finalSpeedMag; // Z-axis proportion
-        const tx = Math.abs(vx) / finalSpeedMag; // X-axis proportion
+      if (boidColorOv && boidColorOv.override && boidColorOv.color) {
+        tmpOverrideColor.set(boidColorOv.color);
+        rTarget = tmpOverrideColor.r;
+        gTarget = tmpOverrideColor.g;
+        bTarget = tmpOverrideColor.b;
+      } else if (boidColorSimple) {
+        tmpOverrideColor.set(boidColorSimple);
+        rTarget = tmpOverrideColor.r;
+        gTarget = tmpOverrideColor.g;
+        bTarget = tmpOverrideColor.b;
+      } else {
+        const finalSpeedMag = Math.sqrt(vx * vx + vz * vz);
 
-        rTarget = tz * 1.0 + tx * 0.08;
-        gTarget = tz * 0.28 + tx * 0.85;
-        bTarget = tz * 0.08 + tx * 0.95;
+        if (finalSpeedMag > 0.0001) {
+          const tz = Math.abs(vz) / finalSpeedMag; // Z-axis proportion
+          const tx = Math.abs(vx) / finalSpeedMag; // X-axis proportion
+
+          rTarget = tz * 1.0 + tx * 0.08;
+          gTarget = tz * 0.28 + tx * 0.85;
+          bTarget = tz * 0.08 + tx * 0.95;
+        }
+
+        // Avoidance blending: as avoidanceIntensity increases (0 to 1), shift towards pure Red alert
+        const avoid = Math.max(0.0, Math.min(1.0, avoidanceIntensity));
+        rTarget = rTarget * (1.0 - avoid) + 1.0 * avoid;
+        gTarget = gTarget * (1.0 - avoid) + 0.0 * avoid;
+        bTarget = bTarget * (1.0 - avoid) + 0.0 * avoid;
       }
-
-      // Avoidance blending: as avoidanceIntensity increases (0 to 1), shift towards pure Red alert
-      const avoid = Math.max(0.0, Math.min(1.0, avoidanceIntensity));
-      rTarget = rTarget * (1.0 - avoid) + 1.0 * avoid;
-      gTarget = gTarget * (1.0 - avoid) + 0.0 * avoid;
-      bTarget = bTarget * (1.0 - avoid) + 0.0 * avoid;
 
       const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
       rTarget *= colorIntensity;
@@ -7031,6 +7075,11 @@ function init() {
 
     if (linkedinShadowMesh) {
       linkedinShadowMesh.visible = !shouldHideShadows;
+    }
+
+    const shouldHideBoidShadows = (curModeCfg.hideBoidShadows === true || curModeCfg.boidShadows === false || shouldHideShadows);
+    if (boidsShadowInstancedMesh) {
+      boidsShadowInstancedMesh.visible = !shouldHideBoidShadows;
     }
 
     // Update vignette pass uniforms dynamically (checking per-style disableVignette & backgroundColor toggles)
