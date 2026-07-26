@@ -4597,12 +4597,16 @@ function init() {
       color: 0xffffff,                       // Pure white base color so per-instance RGB colors render accurately
       roughness: (bCfg.material && bCfg.material.roughness !== undefined) ? bCfg.material.roughness : 0.35,
       metalness: (bCfg.material && bCfg.material.metalness !== undefined) ? bCfg.material.metalness : 0.5,
-      flatShading: true
+      flatShading: true,
+      polygonOffset: true,                   // Depth bias to resolve Metal WebGL z-fighting on coplanar surfaces
+      polygonOffsetFactor: -1.0,
+      polygonOffsetUnits: -1.0
     });
 
     boidsInstancedMesh = new THREE.InstancedMesh(geometry, material, boidsCount);
     boidsInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     boidsInstancedMesh.renderOrder = 4;
+    boidsInstancedMesh.frustumCulled = false;
 
     // 2. Instanced Contact Shadow Planes on Gel Surface (Single Draw Call)
     const shadowGeo = new THREE.PlaneGeometry(size * 2.2 * shadowScale, length * 1.5 * shadowScale);
@@ -4616,12 +4620,16 @@ function init() {
       depthWrite: false,
       depthTest: true,
       side: THREE.FrontSide,
-      blending: THREE.NormalBlending
+      blending: THREE.NormalBlending,
+      polygonOffset: true,                   // Push shadow depth slightly behind boid geometry
+      polygonOffsetFactor: 1.0,
+      polygonOffsetUnits: 1.0
     });
 
     boidsShadowInstancedMesh = new THREE.InstancedMesh(shadowGeo, shadowMaterial, boidsCount);
     boidsShadowInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     boidsShadowInstancedMesh.renderOrder = 3;
+    boidsShadowInstancedMesh.frustumCulled = false;
 
     boidsPositions = new Float32Array(boidsCount * 3);
     boidsVelocities = new Float32Array(boidsCount * 3);
