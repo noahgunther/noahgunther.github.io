@@ -463,7 +463,14 @@ const SCENE_CONFIG = {
     showDebug: false,                       // Toggle red debug vector guides
     shadowY: 0.335,                         // Shadow plane height
     shadowOpacity: 0.66,                    // Shadow opacity factor
-    fallRotationSpeedThreshold: 2.0         // Rotation speed threshold to trigger bug fall
+    fallRotationSpeedThreshold: 2.0,        // Rotation speed threshold to trigger bug fall
+    soundEnabled: true,                     // Toggle to enable/disable bug sound effects
+    fallVolume: 0.8,                        // Fall sound volume (0.0 to 1.0)
+    fallSoundSrc: 'sound/bugFall.ogg',      // Sound file played when bug falls
+    riseVolume: 0.8,                        // Rise sound volume (0.0 to 1.0)
+    riseSoundSrc: 'sound/bugRise.ogg',      // Sound file played when bug gets back up
+    hoverVolume: 0.6,                       // Hover sound volume (0.0 to 1.0)
+    hoverSoundSrc: 'sound/bugHover.ogg'     // Sound file played when hovering over bug
   },
 
   // ==========================================
@@ -471,16 +478,16 @@ const SCENE_CONFIG = {
   // ==========================================
   boids: {
     enabled: true,                          // Toggle to enable/disable Boids flocking simulation
-    count: 80,                              // Total number of boid tetrahedra
+    count: 750,                              // Total number of boid tetrahedra
     yHeight: 0.35,                          // Hard-coded gel surface height (matches LinkedIn bug)
     shadowY: 0.335,                         // Shadow plane height on gel surface
     shadowOpacity: 0.45,                    // Soft contact shadow opacity
     shadowScale: 2.0,                       // Parameter to control contact shadow scale multiplier
-    size: 0.03,                             // Base equilateral triangle radius
-    length: 0.12,                           // Forward length of elongated tetrahedron
+    size: 0.04,                             // Base equilateral triangle radius
+    length: 0.16,                           // Forward length of elongated tetrahedron
     maxSpeed: 0.01,                        // Maximum movement speed per frame unit
     maxForce: 0.0005,                       // Maximum steering force per frame
-    separationRadius: 0.2,                  // Distance radius to trigger separation from other boids
+    separationRadius: 0.25,                  // Distance radius to trigger separation from other boids
     neighborRadius: 1.0,                    // Distance radius for alignment & cohesion calculations
     separationWeight: 1.6,                  // Weight multiplier for separation steering force
     alignmentWeight: 0.8,                   // Weight multiplier for alignment steering force
@@ -492,18 +499,20 @@ const SCENE_CONFIG = {
     cursorAvoidRadius: 1.2,                 // Distance radius around mouse cursor to trigger avoidance
     showDebug: false,                       // Toggle debug vector guides and avoidance rings
     desktop: {
-      count: 500,                            // Total number of boid tetrahedra on Desktop
+      count: 750,                            // Total number of boid tetrahedra on Desktop
       walkRadiusX: 10.0,                    // Max walk bound radius X for boids (Desktop)
       walkRadiusZ: 10.0                     // Max walk bound radius Z for boids (Desktop)
     },
     mobile: {
-      count: 200,                            // Total number of boid tetrahedra on Mobile
+      count: 300,                            // Total number of boid tetrahedra on Mobile
       walkRadiusX: 4.5,                     // Max walk bound radius X for boids (Mobile)
       walkRadiusZ: 9.0                      // Max walk bound radius Z for boids (Mobile)
     },
     walkRadiusX: 11.0,                      // Fallback walk bound radius X
     walkRadiusZ: 11.0,                      // Fallback walk bound radius Z
     colorIntensity: 0.5,                    // Color intensity multiplier factor (0.5 = 50% brightness)
+    rotationSmoothing: 0.15,                // Rotation SLERP smoothing factor (0.15 = smooth glide, 1.0 = instant)
+    colorSmoothing: 0.1,                    // Color LERP smoothing factor (0.1 = smooth gradient transition, 1.0 = instant)
     material: {
       color: 0xff1a2d,                      // Vibrant red matching site aesthetic
       roughness: 0.35,
@@ -756,7 +765,7 @@ const mainNavLinksContents = '<div id="houdini" class="link" style="pointer-even
 document.getElementById("mainnavlinks").innerHTML = mainNavLinksContents;
 
 // Mobile nav links
-const mobileNavLinksContents = '<div class="mobilemenuwrapper"><div class="mobilelinkwrapper"><div id="aboutmobile" class="mobilelink">About</div></div> <div class="mobilelinkwrapper"><div id="armobile" class="mobilelink">AR</div></div> <div class="mobilelinkwrapper"><div id="gamesmobile" class="mobilelink">Games</div></div> <div class="mobilelinkwrapper"><div id="webmobile" class="mobilelink">Web</div></div> <div class="mobilelinkwrapper"><div id="houdinimobile" class="mobilelink">Houdini</div></div> <div class="mobilelinkwrapper" style="margin-top: 50px;"><a id="linkedin-mobile" href="https://www.linkedin.com/in/noah-gunther-3128bb185/" target="_blank" class="mobilelink" style="display: block; width: 32px; height: 32px; padding: 0; border: none; margin: 0 auto;"><div id="linkedin-mobile-icon" class="logo-tint-mask" style="-webkit-mask-image: url(\'graphics/li_logo_white.png\'); mask-image: url(\'graphics/li_logo_white.png\'); width: 100%; height: 100%;"></div></a></div></div>';
+const mobileNavLinksContents = '<div class="mobilemenuwrapper"><div class="mobilelinkwrapper"><div id="aboutmobile" class="mobilelink">About</div></div> <div class="mobilelinkwrapper"><div id="armobile" class="mobilelink">AR</div></div> <div class="mobilelinkwrapper"><div id="gamesmobile" class="mobilelink">Games</div></div> <div class="mobilelinkwrapper"><div id="webmobile" class="mobilelink">Web</div></div> <div class="mobilelinkwrapper"><div id="houdinimobile" class="mobilelink">Houdini</div></div></div><div id="linkedin-mobile-wrapper"><a id="linkedin-mobile" href="https://www.linkedin.com/in/noah-gunther-3128bb185/" target="_blank"><div id="linkedin-mobile-icon" class="logo-tint-mask" style="-webkit-mask-image: url(\'graphics/li_logo_white.png\'); mask-image: url(\'graphics/li_logo_white.png\'); width: 100%; height: 100%;"></div></a></div>';
 document.getElementById("mobilenavlinks").innerHTML = mobileNavLinksContents;
 
 // Plain text icon
@@ -1078,6 +1087,8 @@ function init() {
   let houdiniReachedFullHoverScale = false;
   let webGlobeReachedFullHoverScale = false;
   let lastWebGlobeHoveredState = false;
+  let lastBugCubeHoveredState = false;
+  let bugCubeReachedFullHoverScale = false;
   let isQBoxRegrowingSoundPlayed = false;
   let isHoudiniRegrowingSoundPlayed = false;
   let isWebRespawnSoundPlayed = false;
@@ -1120,8 +1131,10 @@ function init() {
   let boidsDebugGroup = null;
   let boidsDebugBoundaryMesh = null;
   let boidsDebugCursorMesh = null;
-  let boidsPositions = null;  // Float32Array (count * 3)
-  let boidsVelocities = null; // Float32Array (count * 3)
+  let boidsPositions = null;   // Float32Array (count * 3)
+  let boidsVelocities = null;  // Float32Array (count * 3)
+  let boidsQuaternions = null; // Float32Array (count * 4) for smooth SLERP rotations
+  let boidsColors = null;      // Float32Array (count * 3) for smooth LERP color transitions
   let boidsCount = 0;
   const tmpBoidDummy = new THREE.Object3D();
   const tmpBoidPos = new THREE.Vector3();
@@ -1134,6 +1147,8 @@ function init() {
   const tmpBoidObs = new THREE.Vector3();
   const tmpBoidTargetDir = new THREE.Vector3();
   const tmpBoidQuat = new THREE.Quaternion();
+  const tmpBoidTargetQuat = new THREE.Quaternion();
+  const tmpBoidCurQuat = new THREE.Quaternion();
   const tmpBoidForward = new THREE.Vector3(0, 0, 1);
   const tmpBoidColor = new THREE.Color();
   const tmpCursorPlane = new THREE.Plane();
@@ -3183,15 +3198,22 @@ function init() {
 
   function updateMainNavLinksLayout() {
     const linkedinDesktop = document.getElementById("linkedin-desktop-wrapper");
-    if (window.innerWidth > window.innerHeight) {
+    const plainTextLink = document.getElementById("plaintext-link");
+    const isMobileAspect = window.innerWidth <= window.innerHeight;
+
+    if (!isMobileAspect) {
       if (mobileNavMenuVisible) showMobileNavMenu();
       mainNavLinks.style.visibility = 'visible';
       if (linkedinDesktop) linkedinDesktop.style.visibility = 'visible';
       mobileNavLinksButton.style.visibility = 'hidden';
+      if (plainTextLink) plainTextLink.style.display = 'flex';
     } else {
       mainNavLinks.style.visibility = 'hidden';
       if (linkedinDesktop) linkedinDesktop.style.visibility = 'hidden';
       mobileNavLinksButton.style.visibility = 'visible';
+      if (plainTextLink) {
+        plainTextLink.style.display = mobileNavMenuVisible ? 'flex' : 'none';
+      }
     }
   }
 
@@ -3312,12 +3334,19 @@ function init() {
   }
 
   function showMobileNavMenu() {
+    const plainTextLink = document.getElementById("plaintext-link");
+    const isMobileAspect = window.innerWidth <= window.innerHeight;
+
     if (mobileNavMenuVisible) {
       mobileNavMenu.classList.remove('is-active');
       mobileNavLinksButtonTop.style.setProperty('animation', 'mobileNavButtonTopOut 0.2s forwards');
       mobileNavLinksButtonMiddle.style.setProperty('animation', 'mobileNavButtonMiddleOut 0.2s forwards');
       mobileNavLinksButtonBottom.style.setProperty('animation', 'mobileNavButtonBottomOut 0.2s forwards');
       mobileNavMenuVisible = false;
+
+      if (isMobileAspect && plainTextLink) {
+        plainTextLink.style.display = 'none';
+      }
 
       requestTimeout(() => {
         mobileNavMenu.style.visibility = 'hidden';
@@ -3344,6 +3373,11 @@ function init() {
       mobileNavLinksButtonMiddle.style.setProperty('animation', 'mobileNavButtonMiddleIn 0.3s forwards');
       mobileNavLinksButtonBottom.style.setProperty('animation', 'mobileNavButtonBottomIn 0.3s forwards');
       mobileNavMenuVisible = true;
+
+      if (isMobileAspect && plainTextLink) {
+        plainTextLink.style.display = 'flex';
+      }
+
       requestTimeout(() => {
         if (!isAboutOverlayActive()) {
           canInteract = true;
@@ -4276,11 +4310,13 @@ function init() {
   function triggerBugFall() {
     bugBehaviorState = 'falling';
     switchBugAnimation('fall');
+    playBugFallSound();
   }
 
   function triggerBugStand() {
     bugBehaviorState = 'standing';
     switchBugAnimation('stand');
+    playBugRiseSound();
   }
 
   function triggerBugInspectPostFall() {
@@ -4569,6 +4605,8 @@ function init() {
 
     boidsPositions = new Float32Array(boidsCount * 3);
     boidsVelocities = new Float32Array(boidsCount * 3);
+    boidsQuaternions = new Float32Array(boidsCount * 4);
+    boidsColors = new Float32Array(boidsCount * 3);
 
     const { rx: walkRx, rz: walkRz } = getBoidsWalkRadius();
 
@@ -4603,9 +4641,22 @@ function init() {
         tmpBoidQuat.identity();
       }
 
-      // Initial instance color matching normal map paradigm (R=Z, G=X, B=Inverted Avoidance, 0.5 intensity)
+      boidsQuaternions[i * 4 + 0] = tmpBoidQuat.x;
+      boidsQuaternions[i * 4 + 1] = tmpBoidQuat.y;
+      boidsQuaternions[i * 4 + 2] = tmpBoidQuat.z;
+      boidsQuaternions[i * 4 + 3] = tmpBoidQuat.w;
+
+      // Initial instance color (Orange-Red for Z-axis travel, 0.5 intensity)
       const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
-      tmpBoidColor.setRGB(0.5 * colorIntensity, 0.5 * colorIntensity, 1.0 * colorIntensity);
+      const initR = 1.0 * colorIntensity;
+      const initG = 0.28 * colorIntensity;
+      const initB = 0.08 * colorIntensity;
+
+      boidsColors[i * 3 + 0] = initR;
+      boidsColors[i * 3 + 1] = initG;
+      boidsColors[i * 3 + 2] = initB;
+
+      tmpBoidColor.setRGB(initR, initG, initB);
       boidsInstancedMesh.setColorAt(i, tmpBoidColor);
 
       // Body Matrix
@@ -4899,45 +4950,87 @@ function init() {
       boidsVelocities[i3 + 1] = 0;
       boidsVelocities[i3 + 2] = vz;
 
-      // Color calculation based on normal map paradigm:
-      // Red = Z-axis travel direction proportion (Math.abs(vz) / speed)
-      // Green = X-axis travel direction proportion (Math.abs(vx) / speed)
-      // Blue = Inverted avoidance intensity (1.0 when not avoiding, fading toward 0.0 when avoiding)
+      // Target Color calculation based on directional movement and avoidance:
+      // Z-axis movement creates warm, rich Orange-Red (R: 1.0, G: 0.28, B: 0.08)
+      // X-axis movement creates cool Electric Teal (R: 0.08, G: 0.85, B: 0.95)
+      // Avoidance shifts color towards bright Red alert (R: 1.0, G: 0.0, B: 0.0)
       const speedMag = Math.sqrt(vx * vx + vz * vz);
-      let rComp = 0.5;
-      let gComp = 0.5;
+      let rTarget = 0.5;
+      let gTarget = 0.3;
+      let bTarget = 0.3;
 
       if (speedMag > 0.0001) {
-        rComp = Math.abs(vz) / speedMag;
-        gComp = Math.abs(vx) / speedMag;
+        const tz = Math.abs(vz) / speedMag; // Z-axis proportion
+        const tx = Math.abs(vx) / speedMag; // X-axis proportion
+
+        rTarget = tz * 1.0 + tx * 0.08;
+        gTarget = tz * 0.28 + tx * 0.85;
+        bTarget = tz * 0.08 + tx * 0.95;
       }
 
-      // Blue is 1.0 when not avoiding, fading to 0.0 when avoiding
-      const bComp = Math.max(0.0, Math.min(1.0, 1.0 - avoidanceIntensity));
+      // Avoidance blending: as avoidanceIntensity increases (0 to 1), shift towards pure Red alert
+      const avoid = Math.max(0.0, Math.min(1.0, avoidanceIntensity));
+      rTarget = rTarget * (1.0 - avoid) + 1.0 * avoid;
+      gTarget = gTarget * (1.0 - avoid) + 0.0 * avoid;
+      bTarget = bTarget * (1.0 - avoid) + 0.0 * avoid;
 
       const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
-      tmpBoidColor.setRGB(rComp * colorIntensity, gComp * colorIntensity, bComp * colorIntensity);
+      rTarget *= colorIntensity;
+      gTarget *= colorIntensity;
+      const bFinalTarget = bTarget * colorIntensity;
+
+      // Smooth color LERP interpolation to filter out color flickering
+      const colorLerpFactor = Math.min(1.0, (bCfg.colorSmoothing !== undefined ? bCfg.colorSmoothing : 0.1) * 60.0 * dt);
+      let curR = boidsColors[i3 + 0];
+      let curG = boidsColors[i3 + 1];
+      let curB = boidsColors[i3 + 2];
+
+      curR += (rTarget - curR) * colorLerpFactor;
+      curG += (gTarget - curG) * colorLerpFactor;
+      curB += (bFinalTarget - curB) * colorLerpFactor;
+
+      boidsColors[i3 + 0] = curR;
+      boidsColors[i3 + 1] = curG;
+      boidsColors[i3 + 2] = curB;
+
+      tmpBoidColor.setRGB(curR, curG, curB);
       boidsInstancedMesh.setColorAt(i, tmpBoidColor);
 
-      // Update instance transform matrices for body and shadow
+      // Update instance transform matrices for body and shadow with smooth SLERP rotation
       tmpBoidPos.set(nextPx, yHeight, nextPz);
       tmpBoidShadowPos.set(nextPx, shadowY, nextPz);
       tmpBoidTargetDir.set(vx, 0, vz).normalize();
 
       if (tmpBoidTargetDir.lengthSq() > 0.0001) {
-        tmpBoidQuat.setFromUnitVectors(tmpBoidForward, tmpBoidTargetDir);
+        tmpBoidTargetQuat.setFromUnitVectors(tmpBoidForward, tmpBoidTargetDir);
       }
+
+      const i4 = i * 4;
+      tmpBoidCurQuat.set(
+        boidsQuaternions[i4 + 0],
+        boidsQuaternions[i4 + 1],
+        boidsQuaternions[i4 + 2],
+        boidsQuaternions[i4 + 3]
+      );
+
+      const rotSlerpFactor = Math.min(1.0, (bCfg.rotationSmoothing !== undefined ? bCfg.rotationSmoothing : 0.15) * 60.0 * dt);
+      tmpBoidCurQuat.slerp(tmpBoidTargetQuat, rotSlerpFactor);
+
+      boidsQuaternions[i4 + 0] = tmpBoidCurQuat.x;
+      boidsQuaternions[i4 + 1] = tmpBoidCurQuat.y;
+      boidsQuaternions[i4 + 2] = tmpBoidCurQuat.z;
+      boidsQuaternions[i4 + 3] = tmpBoidCurQuat.w;
 
       // Body Matrix
       tmpBoidDummy.position.copy(tmpBoidPos);
-      tmpBoidDummy.quaternion.copy(tmpBoidQuat);
+      tmpBoidDummy.quaternion.copy(tmpBoidCurQuat);
       tmpBoidDummy.scale.set(1, 1, 1);
       tmpBoidDummy.updateMatrix();
       boidsInstancedMesh.setMatrixAt(i, tmpBoidDummy.matrix);
 
       // Shadow Matrix
       tmpBoidDummy.position.copy(tmpBoidShadowPos);
-      tmpBoidDummy.quaternion.copy(tmpBoidQuat);
+      tmpBoidDummy.quaternion.copy(tmpBoidCurQuat);
       tmpBoidDummy.scale.set(1, 1, 1);
       tmpBoidDummy.updateMatrix();
       if (boidsShadowInstancedMesh) boidsShadowInstancedMesh.setMatrixAt(i, tmpBoidDummy.matrix);
@@ -5236,6 +5329,20 @@ function init() {
         gamesAlienReachedFullHoverScale = false;
       }
       lastGamesAlienHoveredState = isGamesAlienHovered;
+    }
+
+    if (isBugCubeHovered !== lastBugCubeHoveredState) {
+      if (bugBehaviorState !== 'falling') {
+        if (isBugCubeHovered) {
+          bugCubeReachedFullHoverScale = false;
+          playBugHoverSound();
+        } else {
+          bugCubeReachedFullHoverScale = false;
+        }
+      } else {
+        bugCubeReachedFullHoverScale = false;
+      }
+      lastBugCubeHoveredState = isBugCubeHovered;
     }
 
     // Sync 3D hover state back to text menu links (only if hover wasn't initiated by the text links themselves)
@@ -7312,7 +7419,7 @@ function init() {
       });
   }
 
-  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/rm_gameboy.ogg', 'sound/lazer.ogg', 'sound/8bitExplode.ogg', 'sound/alienGrow.ogg', 'sound/gamesHover.ogg', 'sound/gamesOut.ogg'].forEach(loadSoundBuffer);
+  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/rm_gameboy.ogg', 'sound/lazer.ogg', 'sound/8bitExplode.ogg', 'sound/alienGrow.ogg', 'sound/gamesHover.ogg', 'sound/gamesOut.ogg', 'sound/bugFall.ogg', 'sound/bugRise.ogg', 'sound/bugHover.ogg'].forEach(loadSoundBuffer);
 
   // Global user gesture listener to un-suspend AudioContext on the first interaction anywhere on the page
   function unlockAudioContext() {
@@ -7359,6 +7466,30 @@ function init() {
     if (!pCfg || pCfg.soundEnabled === false) return;
     const vol = pCfg.volume !== undefined ? pCfg.volume : 0.8;
     playWebAudioSound('sound/pop.ogg', vol);
+  }
+
+  function playBugFallSound() {
+    const lCfg = SCENE_CONFIG.linkedin3D;
+    if (!lCfg || lCfg.soundEnabled === false) return;
+    const vol = lCfg.fallVolume !== undefined ? lCfg.fallVolume : (lCfg.volume !== undefined ? lCfg.volume : 0.8);
+    const src = lCfg.fallSoundSrc || 'sound/bugFall.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playBugRiseSound() {
+    const lCfg = SCENE_CONFIG.linkedin3D;
+    if (!lCfg || lCfg.soundEnabled === false) return;
+    const vol = lCfg.riseVolume !== undefined ? lCfg.riseVolume : (lCfg.volume !== undefined ? lCfg.volume : 0.8);
+    const src = lCfg.riseSoundSrc || 'sound/bugRise.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playBugHoverSound() {
+    const lCfg = SCENE_CONFIG.linkedin3D;
+    if (!lCfg || lCfg.soundEnabled === false) return;
+    const vol = lCfg.hoverVolume !== undefined ? lCfg.hoverVolume : (lCfg.volume !== undefined ? lCfg.volume : 0.8);
+    const src = lCfg.hoverSoundSrc || 'sound/bugHover.ogg';
+    playWebAudioSound(src, vol);
   }
 
   function playAboutGrowSound() {
