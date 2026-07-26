@@ -9,6 +9,9 @@ import { OBJLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.128.0/examples/jsm/utils/BufferGeometryUtils.js';
 import { FBXLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/FBXLoader.js';
 
+// Global Three.js LoadingManager to track all 3D geometries, textures, HDR maps, and preloaded images
+const loadingManager = new THREE.LoadingManager();
+
 /* ==========================================
    WebGL & Layout Customization Config (`SCENE_CONFIG`)
    ========================================== */
@@ -688,6 +691,13 @@ const SCENE_CONFIG = {
       soundVolume: 0.8,               // Transition sound volume (0.0 to 1.0)
       shadowBoost: 2.0,
       hideBoidShadows: true,        // Toggle to hide boid shadows in this render mode
+
+      // Mode-specific boid color & material override
+      boidColorOverride: {
+        override: true,            // Enable boid color override for blueprint mode
+        type: 'unlit',             // Material type: 'unlit' (MeshBasicMaterial) or 'lit' (MeshStandardMaterial)
+        color: '#3a4139'           // Boid color for blueprint mode
+      }
     },
 
     ascii: {
@@ -750,20 +760,33 @@ function applyMaskToElement(el, src) {
 const logoEl = document.getElementById("logolink");
 applyMaskToElement(logoEl, noahLogoSrc);
 
+// Preload image helper to register non-Three.js DOM images with LoadingManager
+function preloadImage(src) {
+  if (!src) return;
+  loadingManager.itemStart(src);
+  const img = new Image();
+  img.onload = () => loadingManager.itemEnd(src);
+  img.onerror = () => loadingManager.itemError(src);
+  img.src = src;
+}
+
 // Preload all render mode NG logo images into browser memory cache so mode transitions are instant with zero flicker
 const preloadedLogoImages = {};
 function preloadLogoImages() {
   if (SCENE_CONFIG && SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles.logoImages) {
     Object.values(SCENE_CONFIG.renderStyles.logoImages).forEach((src) => {
       if (src && !preloadedLogoImages[src]) {
-        const img = new Image();
-        img.src = src;
-        preloadedLogoImages[src] = img;
+        preloadImage(src);
+        preloadedLogoImages[src] = new Image();
+        preloadedLogoImages[src].src = src;
       }
     });
   }
 }
 preloadLogoImages();
+preloadImage('./graphics/portrait.png');
+preloadImage('./graphics/phoneback.png');
+preloadImage('./graphics/phonewidgeticons.png');
 
 document.getElementById("title").innerHTML = 'Noah Gunther | Portfolio';
 
@@ -1135,6 +1158,8 @@ function init() {
   // Boids Flocking simulation state variables & pre-allocated math helpers
   let boidsInstancedMesh = null;
   let boidsShadowInstancedMesh = null;
+  let boidsStandardMaterial = null;
+  let boidsBasicMaterial = null;
   let boidsDebugGroup = null;
   let boidsDebugBoundaryMesh = null;
   let boidsDebugCursorMesh = null;
@@ -1356,7 +1381,7 @@ function init() {
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   pmremGenerator.compileEquirectangularShader();
 
-  new RGBELoader()
+  new RGBELoader(loadingManager)
     .setDataType(THREE.UnsignedByteType)
     .load('graphics/sky.hdr', (texture) => {
       // Enable wrapping and shift horizontal offset to rotate reflections around the Y axis
@@ -2044,7 +2069,7 @@ function init() {
   };
 
   // Load dish.obj mesh to use as the plate
-  const objLoader = new OBJLoader();
+  const objLoader = new OBJLoader(loadingManager);
 
   if (SCENE_CONFIG.plate.enabled !== false) {
     objLoader.load('geometry/dish.obj', (object) => {
@@ -2317,7 +2342,7 @@ function init() {
     sceneGroup.add(bugDebugSpawnGroup);
 
     // Load bug_cube.obj for 3D LinkedIn link
-    const bugTexture = new THREE.TextureLoader().load('graphics/li_logo_blue.png');
+    const bugTexture = new THREE.TextureLoader(loadingManager).load('graphics/li_logo_blue.png');
     bugTexture.encoding = THREE.sRGBEncoding;
 
     const bugMaterial = new THREE.MeshStandardMaterial({
@@ -2329,7 +2354,7 @@ function init() {
     bugCubeGroup = new THREE.Group();
     bugCubeGroup.renderOrder = 10;
 
-    const bugFbxLoader = new FBXLoader();
+    const bugFbxLoader = new FBXLoader(loadingManager);
     bugFbxLoader.load('geometry/bug_cube.fbx', (object) => {
       object.traverse((child) => {
         if (child.isMesh) {
@@ -2408,7 +2433,7 @@ function init() {
       // Create shadow under the LinkedIn block
       const lOpacity = SCENE_CONFIG.linkedin3D.shadowOpacity !== undefined ? SCENE_CONFIG.linkedin3D.shadowOpacity : 0.85;
       linkedinShadowMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load('graphics/shadow.png'),
+        map: new THREE.TextureLoader(loadingManager).load('graphics/shadow.png'),
         transparent: true,
         opacity: lOpacity,
         depthWrite: false,
@@ -2441,8 +2466,8 @@ function init() {
   }
 
   // Load question_box.fbx
-  const fbxLoader = new FBXLoader();
-  const textureLoader = new THREE.TextureLoader();
+  const fbxLoader = new FBXLoader(loadingManager);
+  const textureLoader = new THREE.TextureLoader(loadingManager);
   const questionTexture = textureLoader.load('graphics/question.png');
   const dotsNormalMap = textureLoader.load('graphics/dots_normals.png');
 
@@ -3817,9 +3842,16 @@ function init() {
 
   // (Loading animation runs via CSS — no JS frame loop needed)
 
-  // Simulated Asset Load timeout
-  setTimeout(function() {
+  function dismissLoadingScreen() {
+    if (loadingComplete) return;
     loadingComplete = true;
+
+    // Pre-compile WebGL shaders & upload textures/geometries to GPU before fading out loading screen
+    try {
+      renderer.compile(scene, camera);
+    } catch (e) {
+      console.warn("Renderer compilation notice:", e);
+    }
 
     // Stop dot animation and fade out loading screen
     if (dotInterval) { clearInterval(dotInterval); dotInterval = null; }
@@ -3839,7 +3871,28 @@ function init() {
 
     // Enable interaction
     canInteract = true;
-  }, 1000);
+  }
+
+  // Trigger loading screen fade out only when all 3D assets, textures, and fonts finish loading
+  loadingManager.onLoad = () => {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(dismissLoadingScreen).catch(dismissLoadingScreen);
+    } else {
+      dismissLoadingScreen();
+    }
+  };
+
+  loadingManager.onError = (url) => {
+    console.error("[LoadingManager] Error loading asset:", url);
+  };
+
+  // Safety fallback timeout (10 seconds) in case of network drops
+  setTimeout(() => {
+    if (!loadingComplete) {
+      console.warn("[LoadingManager] Safety timeout reached, dismissing loading screen.");
+      dismissLoadingScreen();
+    }
+  }, 10000);
 
   // ==========================================
   // 6. Bind Event Listeners
@@ -4592,7 +4645,7 @@ function init() {
     // 1. Custom Elongated Tetrahedron Geometry (Equilateral triangle base at tail, Apex facing +Z)
     const geometry = createCustomBoidGeometry(size, length);
 
-    const material = new THREE.MeshStandardMaterial({
+    boidsStandardMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff,                       // Pure white base color so per-instance RGB colors render accurately
       roughness: (bCfg.material && bCfg.material.roughness !== undefined) ? bCfg.material.roughness : 0.35,
       metalness: (bCfg.material && bCfg.material.metalness !== undefined) ? bCfg.material.metalness : 0.5,
@@ -4602,7 +4655,14 @@ function init() {
       polygonOffsetUnits: -1.0
     });
 
-    boidsInstancedMesh = new THREE.InstancedMesh(geometry, material, boidsCount);
+    boidsBasicMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,                       // Pure white base color so per-instance RGB colors render accurately
+      polygonOffset: true,                   // Depth bias to resolve Metal WebGL z-fighting on coplanar surfaces
+      polygonOffsetFactor: -1.0,
+      polygonOffsetUnits: -1.0
+    });
+
+    boidsInstancedMesh = new THREE.InstancedMesh(geometry, boidsStandardMaterial, boidsCount);
     boidsInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     boidsInstancedMesh.renderOrder = 4;
     boidsInstancedMesh.frustumCulled = false;
@@ -4611,7 +4671,7 @@ function init() {
     const shadowGeo = new THREE.PlaneGeometry(size * 2.2 * shadowScale, length * 1.5 * shadowScale);
     shadowGeo.rotateX(-Math.PI / 2); // lie flat on XZ plane
 
-    const shadowMap = new THREE.TextureLoader().load('graphics/shadow.png');
+    const shadowMap = new THREE.TextureLoader(loadingManager).load('graphics/shadow.png');
     const shadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowMap,
       transparent: true,
@@ -5013,8 +5073,20 @@ function init() {
       // Z-axis movement creates warm, rich Orange-Red (R: 1.0, G: 0.28, B: 0.08)
       // X-axis movement creates cool Electric Teal (R: 0.08, G: 0.85, B: 0.95)
       // Avoidance shifts color towards bright Red alert (R: 1.0, G: 0.0, B: 0.0)
+      const boidMatOv = curModeCfg.boidMaterialOverride;
       const boidColorOv = curModeCfg.boidColorOverride || curModeCfg.boidsColorOverride;
       const boidColorSimple = curModeCfg.boidColor || curModeCfg.boidsColor;
+
+      const isBoidUnlit = (boidMatOv && boidMatOv.override && boidMatOv.type === 'unlit') ||
+                          (boidColorOv && boidColorOv.override && (boidColorOv.type === 'unlit' || boidColorOv.unlit === true)) ||
+                          (curModeCfg.boidUnlit === true || curModeCfg.boidsUnlit === true);
+
+      if (boidsInstancedMesh && boidsStandardMaterial && boidsBasicMaterial) {
+        const targetBoidMat = isBoidUnlit ? boidsBasicMaterial : boidsStandardMaterial;
+        if (boidsInstancedMesh.material !== targetBoidMat) {
+          boidsInstancedMesh.material = targetBoidMat;
+        }
+      }
 
       let rTarget = 0.5;
       let gTarget = 0.3;
