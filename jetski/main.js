@@ -8,7 +8,6 @@ import { RGBELoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders
 import { OBJLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/OBJLoader.js';
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.128.0/examples/jsm/utils/BufferGeometryUtils.js';
 import { FBXLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/FBXLoader.js';
-import Stats from 'https://unpkg.com/three@0.128.0/examples/jsm/libs/stats.module.js';
 
 /* ==========================================
    WebGL & Layout Customization Config (`SCENE_CONFIG`)
@@ -33,7 +32,7 @@ const SCENE_CONFIG = {
     far: 100,                               // Far clipping plane
     desktop: {
       position: { x: 0, y: 16.0, z: -22.0 },
-      lookAt: { x: 0, y: 0, z: -2.25 }
+      lookAt: { x: 0, y: 0, z: -1.9 }
     },
     mobile: {
       position: { x: 0, y: 16.0, z: -22.0 },
@@ -140,7 +139,7 @@ const SCENE_CONFIG = {
       position: { x: 0.0, y: 1.3, z: 0.0 } // Desktop 3D position
     },
     mobile: {
-      position: { x: 0.0, y: 1.3, z: -2.0 } // Mobile 3D position (closer, slightly lower)
+      position: { x: 0.0, y: 1.3, z: -3.2 } // Mobile 3D position (closer, slightly lower)
     },
     position: { x: 0.0, y: 1.3, z: 0.0 },   // Fallback 3D position
     scale: 0.005,                           // Model scale factor
@@ -244,7 +243,7 @@ const SCENE_CONFIG = {
       }
     },
     desktop: {
-      position: { x: 3.5, y: 0.6, z: -4.5 }  // Desktop 3D position
+      position: { x: 4.3, y: 0.6, z: -2  }  // Desktop 3D position
     },
     mobile: {
       position: { x: 1.3, y: 0.6, z: -6.0 }  // Mobile 3D position
@@ -296,10 +295,10 @@ const SCENE_CONFIG = {
       billboardRotationZ: 0                  // Optional rotation offset Z (deg)
     },
     desktop: {
-      position: { x: -4.0, y: 1.2, z: 1.5 } // Desktop 3D position
+      position: { x: -4.3, y: 1.2, z: 2 } // Desktop 3D position
     },
     mobile: {
-      position: { x: -2.0, y: 1.2, z: 2.0 } // Mobile 3D position
+      position: { x: -1.8, y: 1.2, z: 0.0 } // Mobile 3D position
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.4,                       // Shadow plane scale factor
@@ -378,10 +377,10 @@ const SCENE_CONFIG = {
     hoverScale: 1.15,                       // Scale multiplier when hovered
     hoverYOffset: 0.0,                     // Vertical lift offset when hovered
     desktop: {
-      position: { x: 3.9, y: 1.3, z: 2.0 }  // Desktop 3D position
+      position: { x: 2, y: 1.3, z: 4.3 }  // Desktop 3D position
     },
     mobile: {
-      position: { x: 2.0, y: 1.3, z: 2.0 }  // Mobile 3D position
+      position: { x: 1.6, y: 1.3, z: 2.2 }  // Mobile 3D position
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 2.0,                       // Shadow plane scale factor
@@ -432,26 +431,28 @@ const SCENE_CONFIG = {
     avoidanceEnabled: true,                 // Enable obstacle & boundary avoidance
     desktop: {
       spawnPositions: [
-        { x: -3.6, y: 0.63, z: -4.6 },         // 1. Back-Left Quadrant
-        { x: -5.2, y: 0.63, z: -2.2 },          // 2. Front-Left Quadrant
-        { x: 1.0, y: 0.63, z: 4.6 },           // 3. Front-Right Quadrant
-        { x: 6.0, y: 0.63, z: -1.2 },          // 4. Back-Right Quadrant
+        { x: -5.6, y: 0.63, z: -4.6 },         // 1. Back-Left Quadrant
+        { x: -7.2, y: 0.63, z: -2.2 },          // 2. Front-Left Quadrant
+        { x: 5.0, y: 0.63, z: 4.6 },           // 3. Front-Right Quadrant
+        { x: 7.0, y: 0.63, z: -1.2 },          // 4. Back-Right Quadrant
         { x: 0.5, y: 0.63, z: -5.8 },          // 5. Far-Back Center
         { x: -2.8, y: 0.63, z: 4.8 }           // 6. Far-Front Center
       ],
       position: { x: -3.6, y: 0.63, z: -4.6 }, // Default starting 3D position on gel (Desktop)
       walkRadiusX: 9.0,                      // Max walk bound radius X (Desktop)
-      walkRadiusZ: 9.0                       // Max walk bound radius Z (Desktop)
+      walkRadiusZ: 9.0,                      // Max walk bound radius Z (Desktop)
+      minObstacleDist: 1.0                   // Minimum avoidance distance from obstacles (Desktop)
     },
     mobile: {
       spawnPositions: [
-        { x: -2.0, y: 0.63, z: -6.0 },         // 1. Back-Left Mobile
+        { x: -2.0, y: 0.63, z: -3.0 },         // 1. Back-Left Mobile
         { x: 2.2, y: 0.63, z: -2.2 },          // 2. Back-Right Mobile
         { x: -0.2, y: 0.63, z: 3.5 }           // 3. Front-Left Mobile
       ],
       position: { x: -2.0, y: 0.63, z: -6.0 }, // Default starting 3D position on gel (Mobile)
-      walkRadiusX: 3.6,                      // Max walk bound radius X (Mobile)
-      walkRadiusZ: 9.0                       // Max walk bound radius Z (Mobile)
+      walkRadiusX: 3.0,                      // Max walk bound radius X (Mobile)
+      walkRadiusZ: 9.0,                      // Max walk bound radius Z (Mobile)
+      minObstacleDist: 0.75                   // Minimum avoidance distance from obstacles (Mobile)
     },
     position: { x: -3.6, y: 0.63, z: -4.6 },   // Fallback starting position
     scale: 0.00166,                         // Model scale
@@ -500,14 +501,14 @@ const SCENE_CONFIG = {
     cursorAvoidRadius: 1.2,                 // Distance radius around mouse cursor to trigger avoidance
     showDebug: false,                       // Toggle debug vector guides and avoidance rings
     desktop: {
-      count: 750,                            // Total number of boid tetrahedra on Desktop
+      count: 800,                            // Total number of boid tetrahedra on Desktop
       walkRadiusX: 10.0,                    // Max walk bound radius X for boids (Desktop)
       walkRadiusZ: 10.0                     // Max walk bound radius Z for boids (Desktop)
     },
     mobile: {
-      count: 300,                            // Total number of boid tetrahedra on Mobile
-      walkRadiusX: 4.5,                     // Max walk bound radius X for boids (Mobile)
-      walkRadiusZ: 9.0                      // Max walk bound radius Z for boids (Mobile)
+      count: 400,                            // Total number of boid tetrahedra on Mobile
+      walkRadiusX: 5.0,                     // Max walk bound radius X for boids (Mobile)
+      walkRadiusZ: 10.0                      // Max walk bound radius Z for boids (Mobile)
     },
     walkRadiusX: 11.0,                      // Fallback walk bound radius X
     walkRadiusZ: 11.0,                      // Fallback walk bound radius Z
@@ -724,14 +725,6 @@ const SCENE_CONFIG = {
         metalness: 0.0
       }
     }
-  },
-
-  // ==========================================
-  // 13. THREE.JS FPS PERFORMANCE COUNTER (TEMPORARY)
-  // ==========================================
-  fpsCounter: {
-    enabled: true,                          // Toggle FPS counter display (set to false to hide)
-    panel: 0                                // 0: FPS, 1: MS frame time, 2: MB memory
   }
 };
 
@@ -1276,6 +1269,18 @@ function init() {
     };
   }
 
+  function getLinkedInBugMinObstacleDist() {
+    const lCfg = SCENE_CONFIG.linkedin3D;
+    if (!lCfg) return 1.0;
+    if (typeof isMobileInitial !== 'undefined' && isMobileInitial && lCfg.mobile) {
+      return lCfg.mobile.minObstacleDist !== undefined ? lCfg.mobile.minObstacleDist : (lCfg.minObstacleDist !== undefined ? lCfg.minObstacleDist : 1.0);
+    }
+    if (lCfg.desktop) {
+      return lCfg.desktop.minObstacleDist !== undefined ? lCfg.desktop.minObstacleDist : (lCfg.minObstacleDist !== undefined ? lCfg.minObstacleDist : 1.0);
+    }
+    return lCfg.minObstacleDist !== undefined ? lCfg.minObstacleDist : 1.0;
+  }
+
   const tmpCubeTargetPos = new THREE.Vector3();
   const tmpCubeScale = new THREE.Vector3();
   const tmpObjectScale = new THREE.Vector3();
@@ -1344,19 +1349,6 @@ function init() {
     }
   );
   renderTarget.samples = 4;
-
-  // Three.js FPS Performance Counter
-  let stats = null;
-  if (SCENE_CONFIG.fpsCounter && SCENE_CONFIG.fpsCounter.enabled !== false) {
-    stats = new Stats();
-    stats.showPanel(SCENE_CONFIG.fpsCounter.panel || 0);
-    stats.dom.id = 'fps-stats';
-    stats.dom.style.position = 'fixed';
-    stats.dom.style.zIndex = '100000';
-    stats.dom.style.top = '10px';
-    stats.dom.style.left = '10px';
-    document.body.appendChild(stats.dom);
-  }
 
   // ==========================================
   // HDR Environment Map Loading
@@ -2160,7 +2152,7 @@ function init() {
     // Helper to pick a new safe random wander target for the LinkedIn cube
     pickNewBugTarget = () => {
       const { rx: walkRx, rz: walkRz } = getLinkedInBugWalkRadius();
-      const minObs = SCENE_CONFIG.linkedin3D.minObstacleDist || 0.9;
+      const minObs = getLinkedInBugMinObstacleDist();
       const bugPos = getLinkedInBugInitialPos();
 
       let attempts = 0;
@@ -2236,7 +2228,7 @@ function init() {
     bugBoundaryMesh = boundaryMesh; // Store reference for dynamic visibility toggling
 
     // Temporary question box collision boundary visualizer sphere
-    const qBoxMinObs = SCENE_CONFIG.linkedin3D.minObstacleDist !== undefined ? SCENE_CONFIG.linkedin3D.minObstacleDist : 1.0;
+    const qBoxMinObs = getLinkedInBugMinObstacleDist();
     const qBoxBoundaryGeo = new THREE.SphereGeometry(qBoxMinObs, 32, 16);
     const qBoxBoundaryMat = new THREE.MeshBasicMaterial({
       color: 0xff0000,
@@ -2251,7 +2243,7 @@ function init() {
     bugObstacleMesh = qBoxBoundaryMesh; // Store reference for dynamic visibility toggling
 
     // Temporary Houdini toy collision boundary visualizer sphere
-    const houdiniMinObs = SCENE_CONFIG.linkedin3D.minObstacleDist !== undefined ? SCENE_CONFIG.linkedin3D.minObstacleDist : 1.0;
+    const houdiniMinObs = getLinkedInBugMinObstacleDist();
     const houdiniBoundaryGeo = new THREE.SphereGeometry(houdiniMinObs, 32, 16);
     const houdiniBoundaryMat = new THREE.MeshBasicMaterial({
       color: 0xff0000,
@@ -2263,7 +2255,7 @@ function init() {
     sceneGroup.add(houdiniObstacleMesh);
 
     // Temporary Web Globe collision boundary visualizer sphere
-    const webMinObs = SCENE_CONFIG.linkedin3D.minObstacleDist !== undefined ? SCENE_CONFIG.linkedin3D.minObstacleDist : 1.0;
+    const webMinObs = getLinkedInBugMinObstacleDist();
     const webBoundaryGeo = new THREE.SphereGeometry(webMinObs, 32, 16);
     const webBoundaryMat = new THREE.MeshBasicMaterial({
       color: 0xff0000,
@@ -2275,7 +2267,7 @@ function init() {
     sceneGroup.add(webGlobeObstacleMesh);
 
     // Temporary Games Alien collision boundary visualizer sphere
-    const gamesMinObs = SCENE_CONFIG.linkedin3D.minObstacleDist !== undefined ? SCENE_CONFIG.linkedin3D.minObstacleDist : 1.0;
+    const gamesMinObs = getLinkedInBugMinObstacleDist();
     const gamesBoundaryGeo = new THREE.SphereGeometry(gamesMinObs, 32, 16);
     const gamesBoundaryMat = new THREE.MeshBasicMaterial({
       color: 0xff0000,
@@ -3430,7 +3422,12 @@ function init() {
   }
 
   function playMenuSelect(...els) {
-    els.forEach((el) => playElementAnimation(el, 'menuSelect 0.42s forwards'));
+    els.forEach((el) => {
+      if (!el) return;
+      el._hoverActive = false;
+      el.classList.add('is-panel-open');
+      playElementAnimation(el, 'menuSelect 0.42s forwards');
+    });
   }
 
   function playLogoPress() {
@@ -4158,6 +4155,7 @@ function init() {
 
     el.onmouseenter = () => {
       el._isMouseInside = true;
+      if (el.classList.contains('is-panel-open')) return;
       if (!canUseHover()) return;
 
       el._hoverActive = true;
@@ -4177,6 +4175,7 @@ function init() {
 
     el.onmouseleave = () => {
       el._isMouseInside = false;
+      if (el.classList.contains('is-panel-open')) return;
       if (!el._hoverActive) return;
       el._hoverActive = false;
 
@@ -5153,8 +5152,6 @@ function init() {
       lastMobileRenderTime = nowFrame - (elapsed % mobileFrameInterval);
     }
 
-    if (stats) stats.update();
-
     const dt = Math.min(0.1, (nowFrame - lastFrameTime) * 0.001);
     lastFrameTime = nowFrame;
 
@@ -5446,27 +5443,27 @@ function init() {
     }
 
     if (active3DHoveredName !== last3DHoveredName) {
-      // Shrink previously 3D-hovered text link (unless it is currently being hovered directly in 2D)
+      // Shrink previously 3D-hovered text link (unless it is currently being hovered directly in 2D or selected)
       if (last3DHoveredName && !is2DLinkHovered(last3DHoveredName)) {
         const els = linkElementsMap[last3DHoveredName];
         if (els) {
-          if (els.desktop && currentTarget !== last3DHoveredName) {
+          if (els.desktop && currentTarget !== last3DHoveredName && !els.desktop.classList.contains('is-panel-open')) {
             els.desktop.style.setProperty('animation', 'shrink 0.25s forwards');
           }
-          if (els.mobile && currentTarget !== last3DHoveredName) {
+          if (els.mobile && currentTarget !== last3DHoveredName && !els.mobile.classList.contains('is-panel-open')) {
             els.mobile.style.setProperty('animation', 'shrink 0.25s forwards');
           }
         }
       }
 
-      // Grow newly 3D-hovered text link (unless it is already being hovered directly in 2D)
+      // Grow newly 3D-hovered text link (unless it is already being hovered directly in 2D or selected)
       if (active3DHoveredName && !is2DLinkHovered(active3DHoveredName)) {
         const els = linkElementsMap[active3DHoveredName];
         if (els) {
-          if (els.desktop && currentTarget !== active3DHoveredName) {
+          if (els.desktop && currentTarget !== active3DHoveredName && !els.desktop.classList.contains('is-panel-open')) {
             els.desktop.style.setProperty('animation', 'grow 0.25s forwards');
           }
-          if (els.mobile && currentTarget !== active3DHoveredName) {
+          if (els.mobile && currentTarget !== active3DHoveredName && !els.mobile.classList.contains('is-panel-open')) {
             els.mobile.style.setProperty('animation', 'grow 0.25s forwards');
           }
         }
@@ -5647,7 +5644,7 @@ function init() {
     if (bugCubeGroup && isBugModelLoaded && SCENE_CONFIG.linkedin3D && SCENE_CONFIG.linkedin3D.enabled !== false) {
       const lCfg = SCENE_CONFIG.linkedin3D;
       const now = performance.now();
-      const minObs = lCfg.minObstacleDist !== undefined ? lCfg.minObstacleDist : 0.9;
+      const minObs = getLinkedInBugMinObstacleDist();
       const walkRx = lCfg.walkRadiusX !== undefined ? lCfg.walkRadiusX : 2.2;
       const walkRz = lCfg.walkRadiusZ !== undefined ? lCfg.walkRadiusZ : 1.1;
 
@@ -5661,7 +5658,7 @@ function init() {
 
         const currentPos = bugCubeGroup.position;
         const { rx: walkRx, rz: walkRz } = getLinkedInBugWalkRadius();
-        const minObs = lCfg.minObstacleDist !== undefined ? lCfg.minObstacleDist : 1.0;
+        const minObs = getLinkedInBugMinObstacleDist();
         const avoidRadius = minObs * 1.5;
 
         // Schedule first pause if not set
