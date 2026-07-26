@@ -479,7 +479,7 @@ const SCENE_CONFIG = {
   boids: {
     enabled: true,                          // Toggle to enable/disable Boids flocking simulation
     count: 750,                              // Total number of boid tetrahedra
-    yHeight: 0.35,                          // Hard-coded gel surface height (matches LinkedIn bug)
+    yHeight: 0.5,                          // Hard-coded gel surface height (matches LinkedIn bug)
     shadowY: 0.335,                         // Shadow plane height on gel surface
     shadowOpacity: 0.45,                    // Soft contact shadow opacity
     shadowScale: 2.0,                       // Parameter to control contact shadow scale multiplier
