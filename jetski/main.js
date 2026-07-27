@@ -785,8 +785,8 @@ function preloadLogoImages() {
 }
 preloadLogoImages();
 preloadImage('./graphics/portrait.png');
-preloadImage('./graphics/phoneback.png');
-preloadImage('./graphics/phonewidgeticons.png');
+// preloadImage('./graphics/phoneback.png');
+// preloadImage('./graphics/phonewidgeticons.png');
 
 document.getElementById("title").innerHTML = 'Noah Gunther | Portfolio';
 
@@ -3861,14 +3861,37 @@ function init() {
 
   // (Loading animation runs via CSS — no JS frame loop needed)
 
-  function dismissLoadingScreen() {
+  const loadStartTime = performance.now();
+  console.log(`[AssetLoader] Tracking asset loading sequence...`);
+
+  loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+    console.log(`[AssetLoader] Starting (${itemsLoaded}/${itemsTotal}): ${url}`);
+  };
+
+  loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    const elapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.log(`[AssetLoader] Loaded (${itemsLoaded}/${itemsTotal}): ${url} [${elapsed}ms]`);
+  };
+
+  loadingManager.onError = (url) => {
+    const elapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.warn(`[AssetLoader] Failed asset load: ${url} [${elapsed}ms]`);
+  };
+
+  function dismissLoadingScreen(triggerSource = 'onLoad') {
     if (loadingComplete) return;
     loadingComplete = true;
+    const totalElapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.log(`[AssetLoader] Dismissing loading screen via [${triggerSource}] at ${totalElapsed}ms total`);
 
     // Pre-compile WebGL shaders & upload textures/geometries to GPU before fading out loading screen
+    const compileStart = performance.now();
     try {
       renderer.compile(scene, camera);
+      const compileTime = (performance.now() - compileStart).toFixed(0);
+      console.log(`[AssetLoader] WebGL shader compilation finished in ${compileTime}ms`);
     } catch (e) {
+      console.warn(`[AssetLoader] WebGL shader compilation notice:`, e);
     }
 
     // Stop dot animation and fade out loading screen
@@ -3877,6 +3900,7 @@ function init() {
     loadingDiv.style.opacity = 0;
     setTimeout(() => {
       loadingDiv.style.visibility = 'hidden';
+      console.log(`[AssetLoader] Loading screen hidden completely at ${(performance.now() - loadStartTime).toFixed(0)}ms`);
     }, 900);
 
     // Show 2D UI & Homepage Navigation Squares
@@ -3893,20 +3917,28 @@ function init() {
 
   // Trigger loading screen fade out only when all 3D assets, textures, and fonts finish loading
   loadingManager.onLoad = () => {
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(dismissLoadingScreen).catch(dismissLoadingScreen);
-    } else {
-      dismissLoadingScreen();
-    }
-  };
+    const assetElapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.log(`[AssetLoader] All 3D assets & textures finished downloading in ${assetElapsed}ms`);
 
-  loadingManager.onError = (url) => {
+    if (document.fonts && document.fonts.ready) {
+      const fontStart = performance.now();
+      document.fonts.ready.then(() => {
+        console.log(`[AssetLoader] Web fonts ready in ${(performance.now() - fontStart).toFixed(0)}ms`);
+        dismissLoadingScreen('onLoad + fonts');
+      }).catch((e) => {
+        console.warn(`[AssetLoader] Web fonts load notice:`, e);
+        dismissLoadingScreen('onLoad (fonts failed)');
+      });
+    } else {
+      dismissLoadingScreen('onLoad');
+    }
   };
 
   // Safety fallback timeout (10 seconds) in case of network drops
   setTimeout(() => {
     if (!loadingComplete) {
-      dismissLoadingScreen();
+      console.warn(`[AssetLoader] 10s safety fallback timeout reached! Forcing loading screen dismiss.`);
+      dismissLoadingScreen('safetyTimeout');
     }
   }, 10000);
 
