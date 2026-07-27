@@ -442,7 +442,7 @@ const SCENE_CONFIG = {
   ar3D: {
     enabled: true,                          // Toggle to enable/disable 3D AR Phone
     unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
-    scale: 0.0042,                           // Model scale factor
+    scale: 0.0044,                           // Model scale factor
     rotation: { x: 0, y: 90, z: 0 },        // Initial base rotation in degrees
     floatFrequency: 0.002,                  // Bobbing float frequency
     floatAmplitude: 0.08,                   // Bobbing float amplitude
