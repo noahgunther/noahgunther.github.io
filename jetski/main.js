@@ -27,14 +27,6 @@ const SCENE_CONFIG = {
   },
 
   // ==========================================
-  // TEXTURE LOADING OVERRIDES
-  // ==========================================
-  textures: {
-    disabled: false,                        // Set true to skip loading all base color map textures (simulates unloaded state)
-    unloadedColor: '#888888'                // Fallback flat color displayed on meshes whose base color map is not yet loaded
-  },
-
-  // ==========================================
   // 2. CAMERA CONFIGURATION
   // ==========================================
   camera: {
@@ -146,7 +138,6 @@ const SCENE_CONFIG = {
   // ==========================================
   questionBox: {
     enabled: true,                          // Toggle to enable/disable Question Box
-    unloadedColor: 0xd7c7f5,                    // Per-entity fallback color when texture not loaded (null = use global textures.unloadedColor)
     desktop: {
       position: { x: 0.0, y: 1.3, z: 0.0 } // Desktop 3D position
     },
@@ -215,7 +206,6 @@ const SCENE_CONFIG = {
   // ==========================================
   houdini3D: {
     enabled: true,                          // Toggle to enable/disable Houdini Toy
-    unloadedColor: 0x131d34,                    // Per-entity fallback color when texture not loaded (null = use global textures.unloadedColor)
     scale: 1.0,                             // Scale factor
     rotation: { x: 0, y: 226, z: 0 },       // Initial rotation in degrees
     shadowY: 0.335,                         // Shadow plane height
@@ -284,7 +274,6 @@ const SCENE_CONFIG = {
   // ==========================================
   web3D: {
     enabled: true,                          // Toggle to enable/disable Web 3D Globe
-    unloadedColor: 0x2c427e,                    // Per-entity fallback color when texture not loaded (null = use global textures.unloadedColor)
     scale: 0.0062,                             // Model scale factor
     rotation: { x: 0, y: 0, z: 0 },        // Initial base rotation in degrees
     rotationAxis: 'z',                     // Globe rotation axis: 'x' | 'y' | 'z' or vector object { x: 0, y: 1, z: 0 }
@@ -437,67 +426,10 @@ const SCENE_CONFIG = {
   },
 
   // ==========================================
-  // 11. 3D AR PHONE LINK
-  // ==========================================
-  ar3D: {
-    enabled: true,                          // Toggle to enable/disable 3D AR Phone
-    unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
-    scale: 0.0042,                           // Model scale factor
-    rotation: { x: 0, y: 96, z: 0 },        // Initial base rotation in degrees
-    floatFrequency: 0.002,                  // Bobbing float frequency
-    floatAmplitude: 0.08,                   // Bobbing float amplitude
-    hoverScale: 1.1,                       // Scale multiplier when hovered
-    hoverYOffset: 0.0,                      // Vertical lift offset when hovered
-    desktop: {
-      position: { x: -2.0, y: 0.3, z: -4.3 } // Desktop 3D position
-    },
-    mobile: {
-      position: { x: -1.2, y: 0.3, z: -8.0 } // Mobile 3D position
-    },
-    shadowY: 0.335,                         // Shadow plane height
-    shadowScale: 1.0,                       // Shadow plane scale factor
-    shadowOpacity: 0.5,                    // Shadow opacity factor
-    materials: {
-      phone: {
-        color: 0x39404d,                    // Phone body metal tint
-        roughness: 0.3,
-        metalness: 0.8
-      },
-      screen: {
-        color: 0x000000,                    // Glass screen dark tint
-        emissive: 0xddddff,                 // Emissive display glow tint
-        emissiveIntensity: 1.0,
-        emissiveMap: 'graphics/emojiface.png', // Emissive screen graphic texture path
-        roughness: 0.1,
-        metalness: 0.0
-      },
-      camera: {
-        color: 0x242933,                    // Camera lens tint
-        roughness: 0.1,
-        metalness: 0.8
-      },
-      cameraHouse: {
-        color: 0x39404d,                    // Camera bump housing tint
-        roughness: 0.3,
-        metalness: 0.8
-      }
-    },
-    hover: {
-      soundEnabled: true,                   // Enable hover audio effects
-      hoverInVolume: 0.15,
-      hoverOutVolume: 0.15,
-      hoverInSoundSrc: 'sound/arHover.ogg',
-      hoverOutSoundSrc: 'sound/arOut.ogg',
-      hysteresisRadius: 1.25                // 3D ray-to-center radius (world units) to hold hover state
-    }
-  },
-
-  // ==========================================
-  // 11B. CRAWLING LINKEDIN 3D BUG
+  // 11. CRAWLING LINKEDIN 3D BUG
   // ==========================================
   linkedin3D: {
     enabled: true,                          // Toggle to enable/disable LinkedIn Bug
-    unloadedColor: 0x091531,                    // Per-entity fallback color when texture not loaded (null = use global textures.unloadedColor)
     inspectEnabled: true,                   // Enable pause-and-inspect stance animations
     avoidanceEnabled: true,                 // Enable obstacle & boundary avoidance
     desktop: {
@@ -805,25 +737,6 @@ const SCENE_CONFIG = {
     }
   }
 };
-
-// Texture loading helper: respects SCENE_CONFIG.textures.disabled and per-entity unloadedColor
-// When textures.disabled = true: returns null (no texture) and sets specified material color property ('color' or 'emissive') to unloadedColor
-// When textures.disabled = false: loads the texture normally without tinting material color
-function loadColorMap(loader, path, material, entityColor, colorProperty = 'color') {
-  const tCfg = SCENE_CONFIG.textures || {};
-  const unloadedColor = entityColor || tCfg.unloadedColor || '#888888';
-
-  if (tCfg.disabled) {
-    // Textures globally disabled — apply unloaded color to target color property ('color' or 'emissive'), skip texture load entirely
-    if (material && material[colorProperty] && unloadedColor !== null && unloadedColor !== undefined) {
-      material[colorProperty].set(unloadedColor);
-    }
-    return null;
-  }
-
-  // Textures enabled — load texture normally without mutating material color
-  return loader.load(path);
-}
 
 /* Initial settings */
 
@@ -1315,20 +1228,6 @@ function init() {
   let lastGamesAlienHoveredState = false;
   let gamesAlienReachedFullHoverScale = false;
 
-  // 3D AR Phone state variables
-  let arPhoneGroup = null;
-  let arPhoneMesh = null;
-  let arScreenMesh = null;
-  let arCamerasMesh = null;
-  let arCameraHouseMesh = null;
-  let arShadowMesh = null;
-  let arShadowMaterial = null;
-  let isArPhoneHovered = false;
-  let linkHoveredAR = false;
-  let lastArPhoneHoveredState = false;
-  let arPhoneReachedFullHoverScale = false;
-  let arPhoneObstacleMesh = null;
-
   // Games popping & respawn state
   let isGamesPopping = false;
   let gamesPopStartTime = 0;
@@ -1450,7 +1349,6 @@ function init() {
   const tmpHoudiniToyIntersects = [];
   const tmpCubeIntersects = [];
   const tmpGamesIntersects = [];
-  const tmpArPhoneIntersects = [];
 
   let isSpinning = false;
   let introScale = 0.0;    // computed from elapsed time on load
@@ -2433,20 +2331,6 @@ function init() {
     gamesObstacleMesh.position.set(initialGamesPos.x, visualShadowBaseY, initialGamesPos.z);
     sceneGroup.add(gamesObstacleMesh);
 
-    // Temporary 3D AR Phone collision boundary visualizer sphere
-    const arMinObs = getLinkedInBugMinObstacleDist();
-    const arBoundaryGeo = new THREE.SphereGeometry(arMinObs, 32, 16);
-    const arBoundaryMat = new THREE.MeshBasicMaterial({
-      color: 0xff0000,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.15
-    });
-    arPhoneObstacleMesh = new THREE.Mesh(arBoundaryGeo, arBoundaryMat);
-    const initialArPos = isMobileInitial && SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.mobile ? SCENE_CONFIG.ar3D.mobile.position : (SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.desktop ? SCENE_CONFIG.ar3D.desktop.position : { x: -2.0, y: 1.3, z: 4.3 });
-    arPhoneObstacleMesh.position.set(initialArPos.x, visualShadowBaseY, initialArPos.z);
-    sceneGroup.add(arPhoneObstacleMesh);
-
     // Debug visualizer for LinkedIn bug candidate spawn positions (small green cubes)
     bugDebugSpawnGroup = new THREE.Group();
     bugDebugSpawnGroup.renderOrder = 20;
@@ -2484,13 +2368,14 @@ function init() {
     sceneGroup.add(bugDebugSpawnGroup);
 
     // Load bug_cube.obj for 3D LinkedIn link
+    const bugTexture = new THREE.TextureLoader(loadingManager).load('graphics/li_logo_blue.png');
+    bugTexture.encoding = THREE.sRGBEncoding;
+
     const bugMaterial = new THREE.MeshStandardMaterial({
+      map: bugTexture,
       roughness: 1.0,
       metalness: 0.0
     });
-    const bugTexture = loadColorMap(new THREE.TextureLoader(loadingManager), 'graphics/li_logo_blue.png', bugMaterial, SCENE_CONFIG.linkedin3D.unloadedColor);
-    if (bugTexture) bugTexture.encoding = THREE.sRGBEncoding;
-    bugMaterial.map = bugTexture;
 
     bugCubeGroup = new THREE.Group();
     bugCubeGroup.renderOrder = 10;
@@ -2611,6 +2496,7 @@ function init() {
   const fbxLoader = new FBXLoader(loadingManager);
   fbxLoader.setResourcePath('graphics/');
   const textureLoader = new THREE.TextureLoader(loadingManager);
+  const questionTexture = textureLoader.load('graphics/question.png');
   const dotsNormalMap = textureLoader.load('graphics/dots_normals.png');
 
   // Set texture wrap and filtering for normal map
@@ -2668,11 +2554,11 @@ function init() {
     }
 
     const fbxPlaneMaterial = new THREE.MeshBasicMaterial({
+      map: questionTexture,
       transparent: true,
       opacity: 1.0,
       side: THREE.DoubleSide
     });
-    fbxPlaneMaterial.map = loadColorMap(textureLoader, 'graphics/question.png', fbxPlaneMaterial, SCENE_CONFIG.questionBox.unloadedColor);
 
     fbxLoader.load('geometry/question_box.fbx', (fbx) => {
       fbx.traverse((child) => {
@@ -2723,20 +2609,20 @@ function init() {
 
   // Load rubbertoy textures and FBX
   if (SCENE_CONFIG.houdini3D && SCENE_CONFIG.houdini3D.enabled !== false) {
+    const toyBaseColorMap = textureLoader.load('graphics/toylowres.png');
     const toySpecularMap = textureLoader.load('graphics/toyspeclowres.png');
+    toyBaseColorMap.encoding = THREE.sRGBEncoding;
 
     const matCfg = SCENE_CONFIG.houdini3D.material || {};
     toyMaterial = new THREE.MeshPhongMaterial({
       color: new THREE.Color(matCfg.color !== undefined ? matCfg.color : 0xffffff),
+      map: toyBaseColorMap,
       specularMap: toySpecularMap,
       shininess: matCfg.shininess !== undefined ? matCfg.shininess : 30,
       specular: new THREE.Color(matCfg.specular !== undefined ? matCfg.specular : 0x222222),
       morphTargets: true,
       skinning: true
     });
-    const toyBaseColorMap = loadColorMap(textureLoader, 'graphics/toylowres.png', toyMaterial, SCENE_CONFIG.houdini3D.unloadedColor);
-    if (toyBaseColorMap) toyBaseColorMap.encoding = THREE.sRGBEncoding;
-    toyMaterial.map = toyBaseColorMap;
 
     // Create shadow plane for the rubber toy
     const shadowTexture = textureLoader.load('graphics/shadow.png');
@@ -2806,16 +2692,17 @@ function init() {
     const wCfg = SCENE_CONFIG.web3D;
     const mCfg = wCfg.materials || {};
 
+    const gridTexture = textureLoader.load((mCfg.grid && mCfg.grid.emissiveMap) || 'graphics/grid.png');
+
     const gMatCfg = mCfg.grid || {};
     webGridMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(gMatCfg.color !== undefined ? gMatCfg.color : 0xffffff),
       emissive: new THREE.Color(gMatCfg.emissive !== undefined ? gMatCfg.emissive : 0xffffff),
+      emissiveMap: gridTexture,
       emissiveIntensity: gMatCfg.emissiveIntensity !== undefined ? gMatCfg.emissiveIntensity : 1.0,
       roughness: gMatCfg.roughness !== undefined ? gMatCfg.roughness : 0.2,
       metalness: gMatCfg.metalness !== undefined ? gMatCfg.metalness : 0.1
     });
-    const gridTexture = loadColorMap(textureLoader, (mCfg.grid && mCfg.grid.emissiveMap) || 'graphics/grid.png', webGridMaterial, SCENE_CONFIG.web3D.unloadedColor, 'emissive');
-    webGridMaterial.emissiveMap = gridTexture;
 
     const aMatCfg = mCfg.antenna || {};
     webAntennaMaterial = new THREE.MeshStandardMaterial({
@@ -3016,126 +2903,6 @@ function init() {
       const box3 = new THREE.Box3().setFromObject(fbx);
       const sizeVec = new THREE.Vector3();
       box3.getSize(sizeVec);
-
-      sceneGroup.add(fbx);
-    }, undefined, (error) => {
-    });
-  }
-
-  // Load 3D AR Phone textures, FBX, and contact shadow
-  if (SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.enabled !== false) {
-    const aCfg = SCENE_CONFIG.ar3D;
-    const mCfg = aCfg.materials || {};
-
-    const pMatCfg = mCfg.phone || {};
-    const arPhoneMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(pMatCfg.color !== undefined ? pMatCfg.color : 0x1f242d),
-      roughness: pMatCfg.roughness !== undefined ? pMatCfg.roughness : 0.25,
-      metalness: pMatCfg.metalness !== undefined ? pMatCfg.metalness : 0.75
-    });
-
-    const sMatCfg = mCfg.screen || {};
-    const arScreenMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(sMatCfg.color !== undefined ? sMatCfg.color : 0x070b14),
-      emissive: new THREE.Color(sMatCfg.emissive !== undefined ? sMatCfg.emissive : 0xffffff),
-      emissiveIntensity: sMatCfg.emissiveIntensity !== undefined ? sMatCfg.emissiveIntensity : 1.0,
-      roughness: sMatCfg.roughness !== undefined ? sMatCfg.roughness : 0.1,
-      metalness: sMatCfg.metalness !== undefined ? sMatCfg.metalness : 0.9
-    });
-    const screenEmissiveTexture = loadColorMap(
-      textureLoader,
-      (sMatCfg && sMatCfg.emissiveMap) || 'graphics/emojiface.png',
-      arScreenMaterial,
-      SCENE_CONFIG.ar3D.unloadedColor,
-      'emissive'
-    );
-    if (screenEmissiveTexture) {
-      screenEmissiveTexture.encoding = THREE.sRGBEncoding;
-    }
-    arScreenMaterial.emissiveMap = screenEmissiveTexture;
-
-    const cMatCfg = mCfg.camera || {};
-    const arCameraMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(cMatCfg.color !== undefined ? cMatCfg.color : 0x111111),
-      roughness: cMatCfg.roughness !== undefined ? cMatCfg.roughness : 0.1,
-      metalness: cMatCfg.metalness !== undefined ? cMatCfg.metalness : 0.9
-    });
-
-    const chMatCfg = mCfg.cameraHouse || {};
-    const arCameraHouseMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(chMatCfg.color !== undefined ? chMatCfg.color : 0x1a1e26),
-      roughness: chMatCfg.roughness !== undefined ? chMatCfg.roughness : 0.3,
-      metalness: chMatCfg.metalness !== undefined ? chMatCfg.metalness : 0.7
-    });
-
-    // Contact shadow plane for the 3D AR Phone
-    const shadowTexture = textureLoader.load('graphics/shadow.png');
-    const aOpacity = aCfg.shadowOpacity !== undefined ? aCfg.shadowOpacity : 0.66;
-    arShadowMaterial = new THREE.MeshBasicMaterial({
-      map: shadowTexture,
-      transparent: true,
-      opacity: aOpacity,
-      depthWrite: false,
-      depthTest: true,
-      side: THREE.FrontSide,
-      blending: THREE.NormalBlending
-    });
-    const shadowGeo = new THREE.PlaneGeometry(1.5, 1.5);
-    arShadowMesh = new THREE.Mesh(shadowGeo, arShadowMaterial);
-    arShadowMesh.rotation.x = -Math.PI / 2;
-    const initialPos = isMobileInitial ? (aCfg.mobile ? aCfg.mobile.position : aCfg.desktop.position) : aCfg.desktop.position;
-    const shadowBaseY = aCfg.shadowY !== undefined ? aCfg.shadowY : 0.335;
-    arShadowMesh.position.set(initialPos.x, shadowBaseY, initialPos.z);
-    arShadowMesh.renderOrder = 3;
-    sceneGroup.add(arShadowMesh);
-
-    fbxLoader.load('geometry/phone.fbx', (fbx) => {
-      fbx.traverse((child) => {
-        if (child.isMesh) {
-          child.renderOrder = 10;
-          const cName = (child.name || "").toLowerCase();
-          if (Array.isArray(child.material)) {
-            // Multi-material mesh (e.g. Phone mesh with Phone body and Screen materials)
-            child.material = child.material.map(m => {
-              const mName = (m.name || "").toLowerCase();
-              if (mName.includes('screen')) return arScreenMaterial;
-              return arPhoneMaterial;
-            });
-          } else if (cName.includes('camera') && !cName.includes('house')) {
-            child.material = arCameraMaterial;
-            arCamerasMesh = child;
-          } else if (cName.includes('camerahouse') || cName.includes('house')) {
-            child.material = arCameraHouseMaterial;
-            arCameraHouseMesh = child;
-          } else if (cName.includes('screen')) {
-            child.material = arScreenMaterial;
-            arScreenMesh = child;
-          } else {
-            child.material = arPhoneMaterial;
-            arPhoneMesh = child;
-          }
-        }
-      });
-
-      arPhoneGroup = fbx;
-      arPhoneGroup.renderOrder = 10;
-
-      fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
-      fbx.userData.baseX = initialPos.x;
-      fbx.userData.baseY = initialPos.y;
-      fbx.userData.baseZ = initialPos.z;
-      fbx.userData.currentHoverY = 0;
-
-      const s = aCfg.scale !== undefined ? aCfg.scale : 0.005;
-      fbx.scale.set(s, s, s);
-
-      if (aCfg.rotation) {
-        fbx.rotation.set(
-          (aCfg.rotation.x || 0) * Math.PI / 180,
-          (aCfg.rotation.y || 0) * Math.PI / 180,
-          (aCfg.rotation.z || 0) * Math.PI / 180
-        );
-      }
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
@@ -4094,14 +3861,37 @@ function init() {
 
   // (Loading animation runs via CSS — no JS frame loop needed)
 
-  function dismissLoadingScreen() {
+  const loadStartTime = performance.now();
+  console.log(`[AssetLoader] Tracking asset loading sequence...`);
+
+  loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+    console.log(`[AssetLoader] Starting (${itemsLoaded}/${itemsTotal}): ${url}`);
+  };
+
+  loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    const elapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.log(`[AssetLoader] Loaded (${itemsLoaded}/${itemsTotal}): ${url} [${elapsed}ms]`);
+  };
+
+  loadingManager.onError = (url) => {
+    const elapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.warn(`[AssetLoader] Failed asset load: ${url} [${elapsed}ms]`);
+  };
+
+  function dismissLoadingScreen(triggerSource = 'onLoad') {
     if (loadingComplete) return;
     loadingComplete = true;
+    const totalElapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.log(`[AssetLoader] Dismissing loading screen via [${triggerSource}] at ${totalElapsed}ms total`);
 
     // Pre-compile WebGL shaders & upload textures/geometries to GPU before fading out loading screen
+    const compileStart = performance.now();
     try {
       renderer.compile(scene, camera);
+      const compileTime = (performance.now() - compileStart).toFixed(0);
+      console.log(`[AssetLoader] WebGL shader compilation finished in ${compileTime}ms`);
     } catch (e) {
+      console.warn(`[AssetLoader] WebGL shader compilation notice:`, e);
     }
 
     // Stop dot animation and fade out loading screen
@@ -4110,6 +3900,7 @@ function init() {
     loadingDiv.style.opacity = 0;
     setTimeout(() => {
       loadingDiv.style.visibility = 'hidden';
+      console.log(`[AssetLoader] Loading screen hidden completely at ${(performance.now() - loadStartTime).toFixed(0)}ms`);
     }, 900);
 
     // Show 2D UI & Homepage Navigation Squares
@@ -4126,20 +3917,28 @@ function init() {
 
   // Trigger loading screen fade out only when all 3D assets, textures, and fonts finish loading
   loadingManager.onLoad = () => {
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(dismissLoadingScreen).catch(dismissLoadingScreen);
-    } else {
-      dismissLoadingScreen();
-    }
-  };
+    const assetElapsed = (performance.now() - loadStartTime).toFixed(0);
+    console.log(`[AssetLoader] All 3D assets & textures finished downloading in ${assetElapsed}ms`);
 
-  loadingManager.onError = (url) => {
+    if (document.fonts && document.fonts.ready) {
+      const fontStart = performance.now();
+      document.fonts.ready.then(() => {
+        console.log(`[AssetLoader] Web fonts ready in ${(performance.now() - fontStart).toFixed(0)}ms`);
+        dismissLoadingScreen('onLoad + fonts');
+      }).catch((e) => {
+        console.warn(`[AssetLoader] Web fonts load notice:`, e);
+        dismissLoadingScreen('onLoad (fonts failed)');
+      });
+    } else {
+      dismissLoadingScreen('onLoad');
+    }
   };
 
   // Safety fallback timeout (10 seconds) in case of network drops
   setTimeout(() => {
     if (!loadingComplete) {
-      dismissLoadingScreen();
+      console.warn(`[AssetLoader] 10s safety fallback timeout reached! Forcing loading screen dismiss.`);
+      dismissLoadingScreen('safetyTimeout');
     }
   }, 10000);
 
@@ -4466,8 +4265,6 @@ function init() {
 
       if (cfg.hoverType === 'about') {
         linkHoveredAbout = true;
-      } else if (cfg.hoverType === 'ar') {
-        linkHoveredAR = true;
       } else if (cfg.hoverType === 'houdini') {
         linkHoveredHoudini = true;
       } else if (cfg.hoverType === 'web') {
@@ -4488,9 +4285,6 @@ function init() {
 
       if (cfg.hoverType === 'about') {
         linkHoveredAbout = false;
-        clearOutlines();
-      } else if (cfg.hoverType === 'ar') {
-        linkHoveredAR = false;
         clearOutlines();
       } else if (cfg.hoverType === 'houdini') {
         linkHoveredHoudini = false;
@@ -4513,7 +4307,7 @@ function init() {
 
   const navConfigsList = [
     { elements: [aboutLink, aboutLinkMobile], name: 'about', currentTarget: 'about', hoverType: 'about', onClick: aboutLinkClicked },
-    { elements: [arLink, arLinkMobile], name: 'ar', currentTarget: 'ar', hoverType: 'ar', onClick: arLinkClicked },
+    { elements: [arLink, arLinkMobile], name: 'ar', currentTarget: 'ar', hoverType: 'none', onClick: arLinkClicked },
     { elements: [gamesLink, gamesLinkMobile], name: 'games', hoverType: 'games', onClick: gamesLinkClicked },
     { elements: [webLink, webLinkMobile], name: 'web', hoverType: 'web', onClick: webLinkClicked },
     { elements: [houdiniLink, houdiniLinkMobile], name: 'houdini', hoverType: 'houdini', onClick: houdiniLinkClicked }
@@ -4587,8 +4381,6 @@ function init() {
       selectRegularOutline(webGlobeGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
     } else if (targetType === 'gamesAlien') {
       selectRegularOutline(gamesAlienGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
-    } else if (targetType === 'arPhone') {
-      selectRegularOutline(arPhoneGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
     } else if (targetType === 'bug') {
       selectDeformerOutline(
         bugCubeGroup,
@@ -5108,7 +4900,6 @@ function init() {
     if (houdiniToyGroup) obstacles.push(houdiniToyGroup.position);
     if (webGlobeGroup) obstacles.push(webGlobeGroup.position);
     if (gamesAlienGroup) obstacles.push(gamesAlienGroup.position);
-    if (arPhoneGroup) obstacles.push(arPhoneGroup.position);
     if (bugCubeGroup) obstacles.push(bugCubeGroup.position); // Avoid LinkedIn bug
 
     const dtScale = Math.min(2.0, dt * 60.0);
@@ -5566,8 +5357,6 @@ function init() {
 
       if (linkHoveredAbout && questionBoxGroup && respawnStartTime === 0) {
         hoverTargetType = 'questionBox';
-      } else if (linkHoveredAR && arPhoneGroup) {
-        hoverTargetType = 'arPhone';
       } else if (linkHoveredHoudini && houdiniToyGroup && !isHoudiniPopping && houdiniRespawnStartTime === 0) {
         hoverTargetType = 'houdiniToy';
       } else if (linkHoveredWeb && webGlobeGroup) {
@@ -5585,16 +5374,12 @@ function init() {
         tmpHoudiniToyIntersects.length = 0;
         tmpCubeIntersects.length = 0;
         tmpGamesIntersects.length = 0;
-        tmpArPhoneIntersects.length = 0;
 
         if (bugCubeGroup) {
           raycaster.intersectObject(bugCubeGroup, true, tmpBugIntersects);
         }
         if (questionBoxGroup && respawnStartTime === 0) {
           raycaster.intersectObject(questionBoxGroup, true, tmpQBoxIntersects);
-        }
-        if (arPhoneGroup) {
-          raycaster.intersectObject(arPhoneGroup, true, tmpArPhoneIntersects);
         }
         if (houdiniToyGroup && !isHoudiniPopping && houdiniRespawnStartTime === 0) {
           raycaster.intersectObject(houdiniToyGroup, true, tmpHoudiniToyIntersects);
@@ -5610,8 +5395,6 @@ function init() {
           hoverTargetType = 'bug';
         } else if (tmpQBoxIntersects.length > 0) {
           hoverTargetType = 'questionBox';
-        } else if (tmpArPhoneIntersects.length > 0) {
-          hoverTargetType = 'arPhone';
         } else if (tmpHoudiniToyIntersects.length > 0) {
           hoverTargetType = 'houdiniToy';
         } else if (webGlobeGroup && tmpCubeIntersects.length > 0) {
@@ -5627,10 +5410,6 @@ function init() {
           if (activeHoverHysteresisTarget === 'questionBox') {
             checkGroup = questionBoxGroup;
             const hCfg = SCENE_CONFIG.questionBox ? SCENE_CONFIG.questionBox.hover : null;
-            maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.55;
-          } else if (activeHoverHysteresisTarget === 'arPhone') {
-            checkGroup = arPhoneGroup;
-            const hCfg = SCENE_CONFIG.ar3D ? SCENE_CONFIG.ar3D.hover : null;
             maxRadius = (hCfg && hCfg.hysteresisRadius !== undefined) ? hCfg.hysteresisRadius : 0.55;
           } else if (activeHoverHysteresisTarget === 'houdiniToy') {
             checkGroup = houdiniToyGroup;
@@ -5662,7 +5441,6 @@ function init() {
       }
 
       isQBoxHovered = hoverTargetType === 'questionBox';
-      isArPhoneHovered = hoverTargetType === 'arPhone';
       isHoudiniToyHovered = hoverTargetType === 'houdiniToy';
       isWebGlobeHovered = hoverTargetType === 'webGlobe';
       isGamesAlienHovered = hoverTargetType === 'gamesAlien';
@@ -5670,7 +5448,6 @@ function init() {
       applyHoverTarget(hoverTargetType, hoverTargetObject);
     } else {
       isQBoxHovered = false;
-      isArPhoneHovered = false;
       isHoudiniToyHovered = false;
       isWebGlobeHovered = false;
       isGamesAlienHovered = false;
@@ -5765,8 +5542,6 @@ function init() {
     let active3DHoveredName = null;
     if (isQBoxHovered) {
       active3DHoveredName = 'about';
-    } else if (isArPhoneHovered) {
-      active3DHoveredName = 'ar';
     } else if (isHoudiniToyHovered) {
       active3DHoveredName = 'houdini';
     } else if (isWebGlobeHovered) {
@@ -5780,7 +5555,6 @@ function init() {
     // Helper to check if a specific link is currently hovered directly via 2D mouse event
     function is2DLinkHovered(name) {
       if (name === 'about') return linkHoveredAbout;
-      if (name === 'ar') return linkHoveredAR;
       if (name === 'houdini') return linkHoveredHoudini;
       if (name === 'web') return linkHoveredWeb;
       if (name === 'games') return linkHoveredGames;
@@ -6151,33 +5925,6 @@ function init() {
                 walkDir.lerp(steerVec, steerFactor).normalize();
               }
             }
-
-            // Avoid 3D AR Phone
-            if (arPhoneGroup) {
-              const toInsectAr = tmpToInsectCube.subVectors(currentPos, arPhoneGroup.position);
-              toInsectAr.y = 0;
-              const distAr = toInsectAr.length();
-              if (distAr < avoidRadius) {
-                const tAr = Math.max(0, Math.min(1, (distAr - minObs) / (avoidRadius - minObs)));
-
-                const avoidVec = distAr < 0.001
-                  ? tmpAvoidVec.set(1, 0, 0)
-                  : tmpAvoidVec.copy(toInsectAr).normalize();
-
-                let crossAr = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-                if (Math.abs(crossAr) < 0.05) {
-                  crossAr = 1.0;
-                }
-
-                const perpAr = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-                if (crossAr < 0) perpAr.negate();
-
-                const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpAr, 0.3).normalize();
-
-                const steerFactor = Math.min(1.0, (1.0 - tAr) * 0.9 * 60.0 * dt);
-                walkDir.lerp(steerVec, steerFactor).normalize();
-              }
-            }
           }
 
           // Re-normalize final direction vector and project back onto internal wander angle
@@ -6245,22 +5992,6 @@ function init() {
                   pushVec = tmpPushVec.set(dx, 0, dz).normalize();
                 }
                 bugCubeGroup.position.copy(gamesAlienGroup.position).addScaledVector(pushVec, minObs + 0.02);
-              }
-            }
-
-            if (arPhoneGroup) {
-              const dx = bugCubeGroup.position.x - arPhoneGroup.position.x;
-              const dz = bugCubeGroup.position.z - arPhoneGroup.position.z;
-              const d = Math.sqrt(dx * dx + dz * dz);
-              if (d < minObs) {
-                let pushVec;
-                if (d < 0.001) {
-                  const randomAngle = Math.random() * Math.PI * 2;
-                  pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
-                } else {
-                  pushVec = tmpPushVec.set(dx, 0, dz).normalize();
-                }
-                bugCubeGroup.position.copy(arPhoneGroup.position).addScaledVector(pushVec, minObs + 0.02);
               }
             }
           }
@@ -7178,45 +6909,6 @@ function init() {
       }
     }
 
-    // 3D AR Phone float, hover scaling, and animation updates
-    if (arPhoneGroup && SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.enabled !== false) {
-      const aCfg = SCENE_CONFIG.ar3D;
-      const isHovered = isArPhoneHovered || linkHoveredAR;
-
-      if (isHovered && !lastArPhoneHoveredState) {
-        lastArPhoneHoveredState = true;
-        if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
-          playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
-        }
-      } else if (!isHovered && lastArPhoneHoveredState) {
-        lastArPhoneHoveredState = false;
-        if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
-          playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
-        }
-      }
-
-      const baseScale = aCfg.scale !== undefined ? aCfg.scale : 0.005;
-      const hoverScaleMult = aCfg.hoverScale !== undefined ? aCfg.hoverScale : 1.18;
-      const arActiveScale = isHovered ? hoverScaleMult : 1.0;
-      const arTargetScale = baseScale * arActiveScale * targetScale;
-
-      const currentArScale = arPhoneGroup.scale.x;
-      const nextArScale = THREE.MathUtils.lerp(currentArScale, arTargetScale, 0.1);
-      arPhoneGroup.scale.set(nextArScale, nextArScale, nextArScale);
-
-      const hoverYTarget = isHovered ? (aCfg.hoverYOffset !== undefined ? aCfg.hoverYOffset : 0.1) : 0.0;
-      const currentHoverY = arPhoneGroup.userData.currentHoverY !== undefined ? arPhoneGroup.userData.currentHoverY : 0.0;
-      const nextHoverY = THREE.MathUtils.lerp(currentHoverY, hoverYTarget, 0.1);
-      arPhoneGroup.userData.currentHoverY = nextHoverY;
-
-      const freq = aCfg.floatFrequency !== undefined ? aCfg.floatFrequency : 0.002;
-      const amp = aCfg.floatAmplitude !== undefined ? aCfg.floatAmplitude : 0.08;
-      const floatOffset = Math.sin(performance.now() * freq) * amp;
-
-      const baseY = (arPhoneGroup.userData.baseY !== undefined) ? arPhoneGroup.userData.baseY : (aCfg.desktop ? aCfg.desktop.position.y : 1.3);
-      arPhoneGroup.position.y = baseY + nextHoverY + floatOffset;
-    }
-
     // Update Web Globe click animation (emissive flash & god rays)
     if (isWebGlobeClickAnimating && SCENE_CONFIG.web3D) {
       const wCfg = SCENE_CONFIG.web3D;
@@ -7387,17 +7079,6 @@ function init() {
         }
         gamesObstacleMesh.visible = !!lCfg.showDebug;
       }
-      if (arPhoneObstacleMesh) {
-        if (arPhoneGroup) {
-          const visualShadowBaseY = SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.shadowY !== undefined ? SCENE_CONFIG.ar3D.shadowY : 0.22;
-          arPhoneObstacleMesh.position.set(
-            arPhoneGroup.position.x,
-            visualShadowBaseY,
-            arPhoneGroup.position.z
-          );
-        }
-        arPhoneObstacleMesh.visible = !!lCfg.showDebug;
-      }
       if (bugDebugSpawnGroup) {
         bugDebugSpawnGroup.visible = !!lCfg.showDebug;
       }
@@ -7458,24 +7139,6 @@ function init() {
           const gShadowOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
           gamesShadowMaterial.opacity = Math.max(0.0, (1.0 - h * 0.45) * gShadowOpacity) * defaultModeShadowMult;
         }
-      }
-    }
-
-    // Contact shadow updates for 3D AR Phone
-    if (arShadowMesh && arShadowMaterial && arPhoneGroup && SCENE_CONFIG.ar3D) {
-      arShadowMesh.visible = !shouldHideShadows;
-      if (!shouldHideShadows) {
-        const aCfg = SCENE_CONFIG.ar3D;
-        const shadowBaseY = aCfg.shadowY !== undefined ? aCfg.shadowY : 0.335;
-        arShadowMesh.position.x = arPhoneGroup.position.x;
-        arShadowMesh.position.z = arPhoneGroup.position.z;
-        arShadowMesh.position.y = shadowBaseY;
-        const baseShadowScale = aCfg.shadowScale !== undefined ? aCfg.shadowScale : 1.5;
-        const h = arPhoneGroup.position.y - shadowBaseY;
-        const sFactor = Math.max(0.3, 1.0 - h * 0.2) * baseShadowScale * targetScale;
-        arShadowMesh.scale.set(sFactor, sFactor, 1.0);
-        const aShadowOpacity = aCfg.shadowOpacity !== undefined ? aCfg.shadowOpacity : 0.66;
-        arShadowMaterial.opacity = Math.max(0.0, (1.0 - h * 0.45) * aShadowOpacity) * defaultModeShadowMult;
       }
     }
 
@@ -7762,11 +7425,6 @@ function init() {
     if (gamesAlienGroup) {
       const gamesIntersects = raycaster.intersectObject(gamesAlienGroup, true);
       if (gamesIntersects.length > 0) return { type: 'gamesAlien' };
-    }
-
-    if (arPhoneGroup) {
-      const arIntersects = raycaster.intersectObject(arPhoneGroup, true);
-      if (arIntersects.length > 0) return { type: 'arPhone' };
     }
 
 
@@ -8691,8 +8349,6 @@ function init() {
       } else {
         gamesLinkClicked();
       }
-    } else if (target.type === 'arPhone') {
-      arLinkClicked();
     } else if (target.type === 'bug') {
       window.open('https://www.linkedin.com/in/noah-gunther-3128bb185/', '_blank');
     }
