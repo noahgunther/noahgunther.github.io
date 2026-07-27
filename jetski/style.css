@@ -469,6 +469,64 @@ ul {
   background: transparent;
 }
 
+/* Bottom Fade Mask */
+.about-panel__scroll-fade {
+  position: absolute;
+  bottom: calc(var(--about-panel-border-inset) + 2px);
+  left: calc(var(--about-panel-border-inset) + 2px);
+  right: calc(var(--about-panel-border-inset) + 2px);
+  height: 48px;
+  background: linear-gradient(to bottom, rgba(10, 14, 18, 0) 0%, rgba(10, 14, 18, 0.96) 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  border-bottom-left-radius: max(0px, calc(var(--about-panel-radius) - 6px));
+  border-bottom-right-radius: max(0px, calc(var(--about-panel-radius) - 6px));
+  overflow: hidden;
+  z-index: 5;
+}
+
+/* Bouncing Arrow Indicator (No Glow) */
+.about-panel__scroll-arrow {
+  position: absolute;
+  bottom: calc(var(--about-panel-border-inset) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--hover-color, #91bfff);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  z-index: 6;
+}
+
+.about-panel.is-opening .about-panel__scroll-fade,
+.about-panel.is-opening .about-panel__scroll-arrow {
+  transition: opacity 180ms ease 160ms;
+}
+
+.about-panel.is-closing .about-panel__scroll-fade,
+.about-panel.is-closing .about-panel__scroll-arrow {
+  transition: opacity 120ms ease;
+}
+
+.about-panel.is-drawn .about-panel__scroll-fade.is-visible {
+  opacity: 1;
+}
+
+.about-panel.is-drawn .about-panel__scroll-arrow.is-visible {
+  opacity: 0.9;
+  animation: scrollBounce 1.8s infinite ease-in-out;
+}
+
+@keyframes scrollBounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 4px);
+  }
+}
+
 .about-panel.is-opening .about-panel__content {
   transition: opacity 180ms ease 160ms, transform 180ms ease 160ms;
 }

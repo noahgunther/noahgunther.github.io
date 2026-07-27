@@ -801,9 +801,9 @@ document.getElementById("mobilenavlinks").innerHTML = mobileNavLinksContents;
 // Plain text icon
 const plainTextIconSrc = './graphics/plaintexticon.png';
 
-// Phone UI background videos
-const alienAttackPreviewUrl = './meta_ar_captures/AlienAttack.mp4';
-const friendsSpacewalkPreviewUrl = './meta_ar_captures/FriendsSpacewalk.mp4';
+// Phone UI background videos (disabled for current build)
+// const alienAttackPreviewUrl = './meta_ar_captures/AlienAttack.mp4';
+// const friendsSpacewalkPreviewUrl = './meta_ar_captures/FriendsSpacewalk.mp4';
 
 /* Get browser and os */
 var browserId = 'unknown';
@@ -1055,11 +1055,34 @@ function init() {
     ].join(' '));
   }
 
+  const aboutScrollFade = document.createElement('div');
+  const aboutScrollArrow = document.createElement('div');
+  aboutScrollFade.className = 'about-panel__scroll-fade';
+  aboutScrollArrow.className = 'about-panel__scroll-arrow';
+  aboutScrollArrow.setAttribute('aria-hidden', 'true');
+  aboutScrollArrow.innerHTML = `
+    <svg width="18" height="10" viewBox="0 0 18 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 2L9 8L16 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+
+  function updateAboutPanelScrollIndicators() {
+    if (!aboutPanelContent) return;
+    const { scrollTop, scrollHeight, clientHeight } = aboutPanelContent;
+    const hasMoreContent = scrollHeight > clientHeight + 4 && (scrollHeight - clientHeight - scrollTop > 8);
+
+    aboutScrollFade.classList.toggle('is-visible', hasMoreContent);
+    aboutScrollArrow.classList.toggle('is-visible', hasMoreContent);
+  }
+
+  aboutPanelContent.addEventListener('scroll', updateAboutPanelScrollIndicators, { passive: true });
+
   // Recalculate border paths dynamically when aboutPanel resizes
   if (window.ResizeObserver && aboutPanel) {
     const aboutResizeObserver = new ResizeObserver(() => {
       if (aboutOverlayVisible || aboutOverlayAnimating) {
         updateBorderPaths();
+        updateAboutPanelScrollIndicators();
       }
     });
     aboutResizeObserver.observe(aboutPanel);
@@ -1088,6 +1111,8 @@ function init() {
   aboutPanel.appendChild(aboutBorderSvg);
   aboutPanel.appendChild(aboutCloseButton);
   aboutPanel.appendChild(aboutPanelContent);
+  aboutPanel.appendChild(aboutScrollFade);
+  aboutPanel.appendChild(aboutScrollArrow);
   aboutOverlay.appendChild(aboutBlur);
   aboutOverlay.appendChild(aboutPanel);
   document.body.appendChild(aboutOverlay);
@@ -2070,6 +2095,7 @@ function init() {
 
   // Load dish.obj mesh to use as the plate
   const objLoader = new OBJLoader(loadingManager);
+  objLoader.setResourcePath('graphics/');
 
   if (SCENE_CONFIG.plate.enabled !== false) {
     objLoader.load('geometry/dish.obj', (object) => {
@@ -2355,6 +2381,7 @@ function init() {
     bugCubeGroup.renderOrder = 10;
 
     const bugFbxLoader = new FBXLoader(loadingManager);
+    bugFbxLoader.setResourcePath('graphics/');
     bugFbxLoader.load('geometry/bug_cube.fbx', (object) => {
       object.traverse((child) => {
         if (child.isMesh) {
@@ -2467,6 +2494,7 @@ function init() {
 
   // Load question_box.fbx
   const fbxLoader = new FBXLoader(loadingManager);
+  fbxLoader.setResourcePath('graphics/');
   const textureLoader = new THREE.TextureLoader(loadingManager);
   const questionTexture = textureLoader.load('graphics/question.png');
   const dotsNormalMap = textureLoader.load('graphics/dots_normals.png');
@@ -2550,7 +2578,6 @@ function init() {
             // Safeguard fallback: assign glass material to prevent null material crashes in Three.js renderer
             child.material = fbxExteriorMaterial;
             child.userData.isQuestionBoxExterior = true;
-            console.warn("Unexpected mesh/parent name in question_box FBX, fallbacked:", child.name, "Parent:", child.parent ? child.parent.name : "null");
           }
         }
       });
@@ -2577,7 +2604,6 @@ function init() {
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
-      console.error("Error loading FBX question box:", error);
     });
   }
 
@@ -2628,9 +2654,6 @@ function init() {
           mat.morphTargets = true;
           mat.skinning = child.isSkinnedMesh === true;
           child.material = mat;
-          if (child.morphTargetDictionary) {
-            console.log("[Houdini Toy] Mesh:", child.name, "| Morph Target Dictionary:", child.morphTargetDictionary);
-          }
           if (typeof child.updateMorphTargets === 'function') {
             child.updateMorphTargets();
           }
@@ -2661,7 +2684,6 @@ function init() {
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
-      console.error("Error loading FBX rubbertoy:", error);
     });
   }
 
@@ -2781,11 +2803,9 @@ function init() {
       const box3 = new THREE.Box3().setFromObject(fbx);
       const sizeVec = new THREE.Vector3();
       box3.getSize(sizeVec);
-      console.log("[Web Globe 3D] Loaded! Size:", sizeVec, `Signal meshes: Inner=${!!webSignalInnerMesh}, Middle=${!!webSignalMiddleMesh}, Outer=${!!webSignalOuterMesh}`);
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
-      console.error("Error loading FBX globe:", error);
     });
   }
 
@@ -2883,11 +2903,9 @@ function init() {
       const box3 = new THREE.Box3().setFromObject(fbx);
       const sizeVec = new THREE.Vector3();
       box3.getSize(sizeVec);
-      console.log("[Games 3D Alien] Loaded! Size:", sizeVec);
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
-      console.error("Error loading FBX alien:", error);
     });
   }
 
@@ -3071,11 +3089,11 @@ function init() {
   `;
   phoneScreenScrollWrapper.innerHTML = phoneScreenContents;
 
-  const arGamesDivBackground = document.getElementById("argamesdivback");
-  arGamesDivBackground.innerHTML = '<video autoplay loop muted playsinline preload="metadata" disablePictureInPicture> <source type="video/mp4" src="' + alienAttackPreviewUrl + '#t=0.1"> </video>';
+  // const arGamesDivBackground = document.getElementById("argamesdivback");
+  // if (arGamesDivBackground && typeof alienAttackPreviewUrl !== 'undefined') arGamesDivBackground.innerHTML = '<video autoplay loop muted playsinline preload="metadata" disablePictureInPicture> <source type="video/mp4" src="' + alienAttackPreviewUrl + '#t=0.1"> </video>';
 
-  const socialArDivBackground = document.getElementById("socialardivback");
-  socialArDivBackground.innerHTML = '<video autoplay loop muted playsinline preload="metadata" disablePictureInPicture> <source type="video/mp4" src="' + friendsSpacewalkPreviewUrl + '#t=0.1"> </video>';
+  // const socialArDivBackground = document.getElementById("socialardivback");
+  // if (socialArDivBackground && typeof friendsSpacewalkPreviewUrl !== 'undefined') socialArDivBackground.innerHTML = '<video autoplay loop muted playsinline preload="metadata" disablePictureInPicture> <source type="video/mp4" src="' + friendsSpacewalkPreviewUrl + '#t=0.1"> </video>';
 
   arGamesButton = document.getElementById('viewargamesbutton');
   socialArButton = document.getElementById('viewsocialarbutton');
@@ -3495,8 +3513,11 @@ function init() {
 
     requestAnimationFrame(() => {
       updateBorderPaths();
+      updateAboutPanelScrollIndicators();
       aboutOverlay.classList.add('is-active');
       setAboutPanelDrawn(true);
+      setTimeout(updateAboutPanelScrollIndicators, 120);
+      setTimeout(updateAboutPanelScrollIndicators, 320);
     });
 
     requestTimeout(() => {
@@ -3592,8 +3613,6 @@ function init() {
     updateLogoImageForRenderMode(nextModeName);
 
     playSoundForRenderMode(nextModeName);
-
-    console.log(`[RenderStyle] Switched to mode [${cfg.currentModeIndex}]: ${nextModeName}`);
   }
 
   function homeLinkClicked() {
@@ -3850,7 +3869,6 @@ function init() {
     try {
       renderer.compile(scene, camera);
     } catch (e) {
-      console.warn("Renderer compilation notice:", e);
     }
 
     // Stop dot animation and fade out loading screen
@@ -3883,13 +3901,11 @@ function init() {
   };
 
   loadingManager.onError = (url) => {
-    console.error("[LoadingManager] Error loading asset:", url);
   };
 
   // Safety fallback timeout (10 seconds) in case of network drops
   setTimeout(() => {
     if (!loadingComplete) {
-      console.warn("[LoadingManager] Safety timeout reached, dismissing loading screen.");
       dismissLoadingScreen();
     }
   }, 10000);
@@ -7565,7 +7581,6 @@ function init() {
         soundBuffers[url] = decodedBuffer;
       })
       .catch(err => {
-        console.warn(`[Audio] Failed to load/decode ${url}:`, err);
       });
   }
 
@@ -7607,7 +7622,6 @@ function init() {
         source.start(0);
       }
     } catch (e) {
-      console.warn(`[Audio] Playback error for ${url}:`, e);
     }
   }
 

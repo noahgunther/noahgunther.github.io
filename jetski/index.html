@@ -9,39 +9,12 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap">
   <!-- Fonts used by the loading screen cycling animation -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital@1&family=Space+Mono&family=Oswald:wght@300&family=Merriweather:ital@1&family=Josefin+Sans:wght@300&family=Raleway:wght@300&family=Lora:ital@1&family=Inconsolata&family=Orbitron&family=Press+Start+2P&family=Special+Elite&family=Abril+Fatface&family=Courier+Prime:ital@1&family=Righteous&family=Permanent+Marker&family=Caveat&family=Pacifico&family=VT323&family=Syne:wght@300&display=swap">
-    <!-- Synchronously extract and apply background color from main.js config before rendering to prevent color flashes -->
-    <script>
-      (function() {
-        try {
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', 'main.js', false);
-          xhr.send(null);
-          if (xhr.status === 200) {
-            var matchTop = xhr.responseText.match(/backgroundColorTop\s*:\s*['"]([^'"]+)['"]/);
-            var matchBottom = xhr.responseText.match(/backgroundColorBottom\s*:\s*['"]([^'"]+)['"]/);
-            var matchText = xhr.responseText.match(/hoverColorText\s*:\s*['"]([^'"]+)['"]/);
-            var hoverStyleText = '';
-            if (matchText && matchText[1]) {
-              hoverStyleText = ':root { --hover-color: ' + matchText[1] + '; }';
-            }
-            if (matchTop && matchBottom) {
-              var grad = 'linear-gradient(to bottom, ' + matchTop[1] + ', ' + matchBottom[1] + ')';
-              var style = document.createElement('style');
-              style.innerHTML = '#bg { background: ' + grad + ' !important; } body { background: transparent !important; } ' + hoverStyleText;
-              document.head.appendChild(style);
-            } else {
-              var match = xhr.responseText.match(/backgroundColor\s*:\s*['"]([^'"]+)['"]/);
-              if (match && match[1]) {
-                document.documentElement.style.backgroundColor = match[1];
-                var style = document.createElement('style');
-                style.innerHTML = 'body, #loading { background-color: ' + match[1] + ' !important; }';
-                document.head.appendChild(style);
-              }
-            }
-          }
-        } catch(e) {}
-      })();
-    </script>
+    <!-- Initial background gradient and accent hover color styles applied before render to prevent color flashes -->
+    <style>
+      :root { --hover-color: #91bfff; }
+      #bg { background: linear-gradient(to bottom, #414d4f, #394034) !important; }
+      body { background: transparent !important; }
+    </style>
 
     <!--Google fonts-->
     <meta charset="UTF-8" />
@@ -155,6 +128,7 @@
         </div>
       </div>
 
+<!-- Meta AR Captures Videos (disabled for current build)
       <video id="abstractlove" loop muted playsinline disablePictureInPicture preload="none">
         <source type='video/mp4' src="./meta_ar_captures/AbstractLove.mp4#t=0.1">
       </video>
@@ -230,6 +204,7 @@
       <video id="wintercoaster" loop muted playsinline disablePictureInPicture style="display:none" preload="none">
         <source type='video/mp4' src="./meta_ar_captures/WinterCoaster.mp4#t=0.1">
       </video>
+-->
 
     </div>
 
@@ -239,6 +214,7 @@
       <div id="arinfopanelwrapper">
         <div class="arinfopanelicon">
           <div id="arinfopanelicon">
+<!-- AR Thumbnails (disabled for current build)
             <img id="abstractlovethumb" src="./graphics/arthumbs/abstractlove.png" style="visibility: hidden;">
             <img id="alienattackthumb" src="./graphics/arthumbs/alienattack.png" style="visibility: hidden;">
             <img id="angelsanddemonsthumb" src="./graphics/arthumbs/angelsanddemons.png" style="visibility: hidden;">
@@ -264,6 +240,7 @@
             <img id="speedrushthumb" src="./graphics/arthumbs/speedrush.png" style="visibility: hidden;">
             <img id="triviathumb" src="./graphics/arthumbs/trivia.png" style="visibility: hidden;">
             <img id="wintercoasterthumb" src="./graphics/arthumbs/wintercoaster.png" style="visibility: hidden;">
+-->
           </div>
         </div>
         <div id="arinfopaneltextwrapper" class="arinfopaneltextwrapper">
