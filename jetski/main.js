@@ -452,7 +452,7 @@ const SCENE_CONFIG = {
       position: { x: -2.0, y: 0.3, z: -4.3 } // Desktop 3D position
     },
     mobile: {
-      position: { x: -1.2, y: 0.3, z: -8.0 } // Mobile 3D position
+      position: { x: -1.4, y: 0.3, z: -8.0 } // Mobile 3D position
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.0,                       // Shadow plane scale factor

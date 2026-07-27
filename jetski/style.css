@@ -186,8 +186,8 @@ ul {
 
 #mobilenavlinksbutton {
   position: absolute;
-  top: 36px;
-  right: 36px;
+  top: calc(clamp(16px, 2.5vh, 20px) + 6px);
+  right: clamp(20px, 3.5vw, 32px);
   width: 35px;
   height: 35px;
   z-index: 28 !important;
@@ -305,10 +305,14 @@ ul {
 
 @media (max-width: 768px) {
   .logolink {
-    margin-top: clamp(16px, 3.5vh, 24px);
-    margin-left: clamp(16px, 3.5vw, 24px);
+    margin-top: clamp(16px, 2.5vh, 20px);
+    margin-left: clamp(16px, 2.5vh, 20px);
     width: clamp(56px, 14vw, 72px);
     height: clamp(56px, 14vw, 72px);
+  }
+  #mobilenavlinksbutton {
+    top: calc(clamp(16px, 2.5vh, 20px) + 6px);
+    right: clamp(20px, 3.5vw, 32px);
   }
   #plaintext-link {
     left: clamp(20px, 3.5vw, 32px);
