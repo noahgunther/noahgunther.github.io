@@ -443,7 +443,7 @@ const SCENE_CONFIG = {
     enabled: true,                          // Toggle to enable/disable 3D AR Phone
     unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
     scale: 0.0042,                           // Model scale factor
-    rotation: { x: 0, y: 96, z: 0 },        // Initial base rotation in degrees
+    rotation: { x: 0, y: 90, z: 0 },        // Initial base rotation in degrees
     floatFrequency: 0.002,                  // Bobbing float frequency
     floatAmplitude: 0.08,                   // Bobbing float amplitude
     hoverScale: 1.1,                       // Scale multiplier when hovered
@@ -459,7 +459,7 @@ const SCENE_CONFIG = {
     shadowOpacity: 0.5,                    // Shadow opacity factor
     materials: {
       phone: {
-        color: 0x39404d,                    // Phone body metal tint
+        color: 0x49505d,                    // Phone body metal tint
         roughness: 0.3,
         metalness: 0.8
       },
@@ -467,17 +467,17 @@ const SCENE_CONFIG = {
         color: 0x000000,                    // Glass screen dark tint
         emissive: 0xddddff,                 // Emissive display glow tint
         emissiveIntensity: 1.0,
-        emissiveMap: 'graphics/emojiface.png', // Emissive screen graphic texture path
+        emissiveMap: 'graphics/emojihuh.png', // Emissive screen graphic texture path
         roughness: 0.1,
         metalness: 0.0
       },
       camera: {
-        color: 0x242933,                    // Camera lens tint
+        color: 0x343943,                    // Camera lens tint
         roughness: 0.1,
         metalness: 0.8
       },
       cameraHouse: {
-        color: 0x39404d,                    // Camera bump housing tint
+        color: 0x49505d,                    // Camera bump housing tint
         roughness: 0.3,
         metalness: 0.8
       }
@@ -488,7 +488,7 @@ const SCENE_CONFIG = {
       hoverOutVolume: 0.15,
       hoverInSoundSrc: 'sound/arHover.ogg',
       hoverOutSoundSrc: 'sound/arOut.ogg',
-      hysteresisRadius: 1.25                // 3D ray-to-center radius (world units) to hold hover state
+      hysteresisRadius: 0.25                // 3D ray-to-center radius (world units) to hold hover state
     }
   },
 
