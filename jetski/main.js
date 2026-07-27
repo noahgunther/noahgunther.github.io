@@ -39,8 +39,8 @@ const SCENE_CONFIG = {
   // ==========================================
   camera: {
     fov: 24,                                // Field of view in degrees
-    near: 0.1,                              // Near clipping plane
-    far: 100,                               // Far clipping plane
+    near: 1.0,                              // Near clipping plane
+    far: 50,                               // Far clipping plane
     desktop: {
       position: { x: 0, y: 16.0, z: -22.0 },
       lookAt: { x: 0, y: 0, z: -1.9 }
@@ -467,7 +467,7 @@ const SCENE_CONFIG = {
         color: 0x000000,                    // Glass screen dark tint
         emissive: 0xddddff,                 // Emissive display glow tint
         emissiveIntensity: 1.0,
-        emissiveMap: 'graphics/emojihuh.png', // Emissive screen graphic texture path
+        emissiveMap: 'graphics/emojiface.png', // Emissive screen graphic texture path
         roughness: 0.1,
         metalness: 0.0
       },
