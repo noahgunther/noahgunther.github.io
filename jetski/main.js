@@ -444,19 +444,19 @@ const SCENE_CONFIG = {
     unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
     scale: 0.0044,                           // Model scale factor
     rotation: { x: 0, y: 90, z: 0 },        // Initial base rotation in degrees
-    floatFrequency: 0.002,                  // Bobbing float frequency
-    floatAmplitude: 0.08,                   // Bobbing float amplitude
-    hoverScale: 1.1,                       // Scale multiplier when hovered
-    hoverYOffset: 0.0,                      // Vertical lift offset when hovered
+    floatFrequency: 0.0,                  // Bobbing float frequency
+    floatAmplitude: 0.0,                   // Bobbing float amplitude
+    hoverScale: 1.075,                       // Scale multiplier when hovered
+    hoverYOffset: 0.09,                      // Vertical lift offset when hovered
     desktop: {
-      position: { x: -2.0, y: 0.3, z: -4.3 } // Desktop 3D position
+      position: { x: -2.0, y: 1.54, z: -4.3 } // Desktop 3D position
     },
     mobile: {
-      position: { x: -1.4, y: 0.3, z: -8.0 } // Mobile 3D position
+      position: { x: -1.4, y: 1.3, z: -8.0 } // Mobile 3D position
     },
     shadowY: 0.335,                         // Shadow plane height
-    shadowScale: 1.0,                       // Shadow plane scale factor
-    shadowOpacity: 0.5,                    // Shadow opacity factor
+    shadowScale: 1.4,                       // Shadow plane scale factor
+    shadowOpacity: 1.2,                    // Shadow opacity factor
     materials: {
       phone: {
         color: 0x49505d,                    // Phone body metal tint
@@ -468,6 +468,8 @@ const SCENE_CONFIG = {
         emissive: 0xddddff,                 // Emissive display glow tint
         emissiveIntensity: 1.0,
         emissiveMap: 'graphics/emojiface.png', // Emissive screen graphic texture path
+        hoverEmissiveMap: 'graphics/emojieyes.png', // Emissive screen hover graphic texture path
+        clickEmissiveMap: 'graphics/emojihuh.png', // Emissive screen click graphic texture path
         roughness: 0.1,
         metalness: 0.0
       },
@@ -480,7 +482,22 @@ const SCENE_CONFIG = {
         color: 0x49505d,                    // Camera bump housing tint
         roughness: 0.3,
         metalness: 0.8
+      },
+      shoes: {
+        color: 0x070c24,                    // Shoe material tint
+        roughness: 0.6,
+        metalness: 0.2
+      },
+      socks: {
+        color: 0x333344,                    // Sock material tint
+        roughness: 0.8,
+        metalness: 0.0
       }
+    },
+    clickAnimation: {
+      enabled: true,                         // Enable click animation sequence
+      duration: 1200,                        // Duration of click animation sequence in ms
+      scaleMultiplier: 1.35                  // Peak scale multiplier during click animation
     },
     hover: {
       soundEnabled: true,                   // Enable hover audio effects
@@ -488,7 +505,7 @@ const SCENE_CONFIG = {
       hoverOutVolume: 0.15,
       hoverInSoundSrc: 'sound/arHover.ogg',
       hoverOutSoundSrc: 'sound/arOut.ogg',
-      hysteresisRadius: 0.25                // 3D ray-to-center radius (world units) to hold hover state
+      hysteresisRadius: 1.4                // 3D ray-to-center radius (world units) to hold hover state
     }
   },
 
@@ -560,7 +577,7 @@ const SCENE_CONFIG = {
     maxSpeed: 0.01,                        // Maximum movement speed per frame unit
     maxForce: 0.0005,                       // Maximum steering force per frame
     separationRadius: 0.25,                  // Distance radius to trigger separation from other boids
-    neighborRadius: 1.0,                    // Distance radius for alignment & cohesion calculations
+    neighborRadius: 0.5,                    // Distance radius for alignment & cohesion calculations
     separationWeight: 1.6,                  // Weight multiplier for separation steering force
     alignmentWeight: 0.8,                   // Weight multiplier for alignment steering force
     cohesionWeight: 0.6,                    // Weight multiplier for cohesion steering force
@@ -1319,8 +1336,19 @@ function init() {
   let arPhoneGroup = null;
   let arPhoneMesh = null;
   let arScreenMesh = null;
+  let arScreenMaterial = null;
+  let screenEmissiveTexture = null;
+  let screenHoverEmissiveTexture = null;
+  let screenClickEmissiveTexture = null;
+  let isArPhoneClickAnimating = false;
+  let arPhoneClickStartTime = 0;
+  let arRespawnStartTime = 0;
+  let isArRespawnSoundPlayed = false;
   let arCamerasMesh = null;
   let arCameraHouseMesh = null;
+  let arLegMesh = null;
+  let arShoesMesh = null;
+  let arSocksMesh = null;
   let arShadowMesh = null;
   let arShadowMaterial = null;
   let isArPhoneHovered = false;
@@ -1376,6 +1404,7 @@ function init() {
   let bugStandAction = null;
   let bugCurrentAnimState = null; // 'walk' | 'inspect' | 'fall' | 'stand' | null
   let bugBehaviorState = 'idle'; // 'idle' | 'walking' | 'hoverPaused' | 'inspecting' | 'falling' | 'standing'
+  let bugCurrentSpeedFactor = 0; // Smooth acceleration/deceleration factor (0.0 to 1.0)
   let bugSkinnedMeshes = []; // Collected at load time for OutlinePass
 
   function getLinkedInBugInitialPos() {
@@ -3035,14 +3064,14 @@ function init() {
     });
 
     const sMatCfg = mCfg.screen || {};
-    const arScreenMaterial = new THREE.MeshStandardMaterial({
+    arScreenMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(sMatCfg.color !== undefined ? sMatCfg.color : 0x070b14),
       emissive: new THREE.Color(sMatCfg.emissive !== undefined ? sMatCfg.emissive : 0xffffff),
       emissiveIntensity: sMatCfg.emissiveIntensity !== undefined ? sMatCfg.emissiveIntensity : 1.0,
       roughness: sMatCfg.roughness !== undefined ? sMatCfg.roughness : 0.1,
       metalness: sMatCfg.metalness !== undefined ? sMatCfg.metalness : 0.9
     });
-    const screenEmissiveTexture = loadColorMap(
+    screenEmissiveTexture = loadColorMap(
       textureLoader,
       (sMatCfg && sMatCfg.emissiveMap) || 'graphics/emojiface.png',
       arScreenMaterial,
@@ -3051,6 +3080,26 @@ function init() {
     );
     if (screenEmissiveTexture) {
       screenEmissiveTexture.encoding = THREE.sRGBEncoding;
+    }
+    screenHoverEmissiveTexture = loadColorMap(
+      textureLoader,
+      (sMatCfg && sMatCfg.hoverEmissiveMap) || 'graphics/emojieyes.png',
+      arScreenMaterial,
+      SCENE_CONFIG.ar3D.unloadedColor,
+      'emissive'
+    );
+    if (screenHoverEmissiveTexture) {
+      screenHoverEmissiveTexture.encoding = THREE.sRGBEncoding;
+    }
+    screenClickEmissiveTexture = loadColorMap(
+      textureLoader,
+      (sMatCfg && sMatCfg.clickEmissiveMap) || 'graphics/emojihuh.png',
+      arScreenMaterial,
+      SCENE_CONFIG.ar3D.unloadedColor,
+      'emissive'
+    );
+    if (screenClickEmissiveTexture) {
+      screenClickEmissiveTexture.encoding = THREE.sRGBEncoding;
     }
     arScreenMaterial.emissiveMap = screenEmissiveTexture;
 
@@ -3066,6 +3115,20 @@ function init() {
       color: new THREE.Color(chMatCfg.color !== undefined ? chMatCfg.color : 0x1a1e26),
       roughness: chMatCfg.roughness !== undefined ? chMatCfg.roughness : 0.3,
       metalness: chMatCfg.metalness !== undefined ? chMatCfg.metalness : 0.7
+    });
+
+    const shMatCfg = mCfg.shoes || {};
+    const arShoesMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(shMatCfg.color !== undefined ? shMatCfg.color : 0x222222),
+      roughness: shMatCfg.roughness !== undefined ? shMatCfg.roughness : 0.6,
+      metalness: shMatCfg.metalness !== undefined ? shMatCfg.metalness : 0.2
+    });
+
+    const skMatCfg = mCfg.socks || {};
+    const arSocksMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(skMatCfg.color !== undefined ? skMatCfg.color : 0xeeeeee),
+      roughness: skMatCfg.roughness !== undefined ? skMatCfg.roughness : 0.8,
+      metalness: skMatCfg.metalness !== undefined ? skMatCfg.metalness : 0.0
     });
 
     // Contact shadow plane for the 3D AR Phone
@@ -3093,26 +3156,47 @@ function init() {
       fbx.traverse((child) => {
         if (child.isMesh) {
           child.renderOrder = 10;
-          const cName = (child.name || "").toLowerCase();
+          const matNames = Array.isArray(child.material)
+            ? child.material.map(m => (m && m.name) || "").join(" ")
+            : ((child.material && child.material.name) || "");
+          const fullName = (
+            (child.name || "") + " " +
+            (child.parent ? child.parent.name || "" : "") + " " +
+            matNames
+          ).toLowerCase();
+
           if (Array.isArray(child.material)) {
             // Multi-material mesh (e.g. Phone mesh with Phone body and Screen materials)
             child.material = child.material.map(m => {
-              const mName = (m.name || "").toLowerCase();
+              const mName = (m && m.name || "").toLowerCase();
               if (mName.includes('screen')) return arScreenMaterial;
+              if (mName.includes('camera') && !mName.includes('house')) return arCameraMaterial;
+              if (mName.includes('camerahouse') || mName.includes('house')) return arCameraHouseMaterial;
+              if (mName.includes('shoe')) return arShoesMaterial;
+              if (mName.includes('sock')) return arSocksMaterial;
               return arPhoneMaterial;
             });
-          } else if (cName.includes('camera') && !cName.includes('house')) {
+          } else if (fullName.includes('shoe')) {
+            child.material = arShoesMaterial;
+            if (!arShoesMesh) arShoesMesh = child;
+          } else if (fullName.includes('sock')) {
+            child.material = arSocksMaterial;
+            if (!arSocksMesh) arSocksMesh = child;
+          } else if (fullName.includes('camera') && !fullName.includes('house')) {
             child.material = arCameraMaterial;
             arCamerasMesh = child;
-          } else if (cName.includes('camerahouse') || cName.includes('house')) {
+          } else if (fullName.includes('camerahouse') || fullName.includes('house')) {
             child.material = arCameraHouseMaterial;
             arCameraHouseMesh = child;
-          } else if (cName.includes('screen')) {
+          } else if (fullName.includes('screen')) {
             child.material = arScreenMaterial;
             arScreenMesh = child;
+          } else if (fullName.includes('leg')) {
+            child.material = arPhoneMaterial;
+            arLegMesh = child;
           } else {
             child.material = arPhoneMaterial;
-            arPhoneMesh = child;
+            if (!arPhoneMesh) arPhoneMesh = child;
           }
         }
       });
@@ -3915,11 +3999,16 @@ function init() {
     playMenuSelect(arLink, arLinkMobile);
     body.style.setProperty('cursor', 'default');
 
-    canInteract = false;
-    currentTarget = "ar";
-    showPhoneUI();
-    leftArrow.style.visibility = 'visible';
-    canInteract = true;
+    const cCfg = SCENE_CONFIG.ar3D ? SCENE_CONFIG.ar3D.clickAnimation : null;
+    if (cCfg && cCfg.enabled !== false) {
+      triggerArPhoneClickAnimation();
+    } else {
+      canInteract = false;
+      currentTarget = "ar";
+      showPhoneUI();
+      leftArrow.style.visibility = 'visible';
+      canInteract = true;
+    }
   }
 
   function gamesLinkClicked() {
@@ -5566,7 +5655,7 @@ function init() {
 
       if (linkHoveredAbout && questionBoxGroup && respawnStartTime === 0) {
         hoverTargetType = 'questionBox';
-      } else if (linkHoveredAR && arPhoneGroup) {
+      } else if (linkHoveredAR && arPhoneGroup && !isArPhoneClickAnimating && arRespawnStartTime === 0) {
         hoverTargetType = 'arPhone';
       } else if (linkHoveredHoudini && houdiniToyGroup && !isHoudiniPopping && houdiniRespawnStartTime === 0) {
         hoverTargetType = 'houdiniToy';
@@ -5593,7 +5682,7 @@ function init() {
         if (questionBoxGroup && respawnStartTime === 0) {
           raycaster.intersectObject(questionBoxGroup, true, tmpQBoxIntersects);
         }
-        if (arPhoneGroup) {
+        if (arPhoneGroup && !isArPhoneClickAnimating && arRespawnStartTime === 0) {
           raycaster.intersectObject(arPhoneGroup, true, tmpArPhoneIntersects);
         }
         if (houdiniToyGroup && !isHoudiniPopping && houdiniRespawnStartTime === 0) {
@@ -5995,17 +6084,14 @@ function init() {
       const walkRz = lCfg.walkRadiusZ !== undefined ? lCfg.walkRadiusZ : 1.1;
 
       const isInspecting = (lCfg.inspectEnabled !== false) && (now < bugPauseEndTime);
+      const isWalkTargetActive = (currentTarget === 'main' && loadingComplete && !isInspecting && bugBehaviorState !== 'falling' && bugBehaviorState !== 'standing');
 
-      // Move towards target if active
-      if (currentTarget === 'main' && loadingComplete && !isInspecting && bugBehaviorState !== 'falling' && bugBehaviorState !== 'standing') {
-        bugBehaviorState = 'walking';
-        isBugInspecting = false;
-        switchBugAnimation('walk');
-
-        const currentPos = bugCubeGroup.position;
-        const { rx: walkRx, rz: walkRz } = getLinkedInBugWalkRadius();
-        const minObs = getLinkedInBugMinObstacleDist();
-        const avoidRadius = minObs * 1.5;
+      if (isWalkTargetActive) {
+        if (bugBehaviorState !== 'walking') {
+          bugBehaviorState = 'walking';
+          isBugInspecting = false;
+          switchBugAnimation('walk');
+        }
 
         // Schedule first pause if not set
         if (bugNextPauseTime === 0) {
@@ -6018,260 +6104,271 @@ function init() {
             startBugInspect(now, lCfg);
           }
         }
+      }
 
-        if (bugBehaviorState !== 'inspecting') {
-          // 1. Update internal wander angle with tiny noise delta (smooth curved pathing)
-          const turnNoise = (Math.random() - 0.5) * 0.15 * 60.0 * dt;
-          bugWanderAngle += turnNoise;
+      // Smoothly ramp speed factor up when starting to walk (accelerate), down when stopping/inspecting (decelerate)
+      const targetSpeedFactor = (isWalkTargetActive && bugBehaviorState !== 'inspecting') ? 1.0 : 0.0;
+      const speedLerpRate = Math.min(1.0, 7.0 * dt); // ~0.2s smooth acceleration/deceleration curve matching animation crossfade
+      bugCurrentSpeedFactor += (targetSpeedFactor - bugCurrentSpeedFactor) * speedLerpRate;
+      if (bugCurrentSpeedFactor < 0.001) bugCurrentSpeedFactor = 0;
 
-          // Convert angle to movement vector
-          const walkDir = tmpWalkDir.set(Math.sin(bugWanderAngle), 0, Math.cos(bugWanderAngle)).normalize();
+      if (bugCurrentSpeedFactor > 0) {
+        const currentPos = bugCubeGroup.position;
+        const { rx: walkRx, rz: walkRz } = getLinkedInBugWalkRadius();
+        const minObs = getLinkedInBugMinObstacleDist();
+        const avoidRadius = minObs * 1.5;
 
-          // 2. Ellipsoid Boundary Avoidance (smoothly steer back towards center)
-          const ellipseVal = (currentPos.x / walkRx) * (currentPos.x / walkRx) + (currentPos.z / walkRz) * (currentPos.z / walkRz);
-          if (ellipseVal > 0.8) {
-            const centerPush = tmpCenterPush.set(-currentPos.x, 0, -currentPos.z).normalize();
-            // The closer it is to the edge (0.8 -> 1.0), the stronger the steering force
-            const tBoundary = Math.max(0, Math.min(1, (ellipseVal - 0.8) / (1.0 - 0.8)));
-            const steerFactor = Math.min(1.0, tBoundary * 0.8 * 60.0 * dt);
-            walkDir.lerp(centerPush, steerFactor).normalize();
+        // 1. Update internal wander angle with tiny noise delta (smooth curved pathing)
+        const turnNoise = (Math.random() - 0.5) * 0.15 * 60.0 * dt;
+        bugWanderAngle += turnNoise;
+
+        // Convert angle to movement vector
+        const walkDir = tmpWalkDir.set(Math.sin(bugWanderAngle), 0, Math.cos(bugWanderAngle)).normalize();
+
+        // 2. Ellipsoid Boundary Avoidance (smoothly steer back towards center)
+        const ellipseVal = (currentPos.x / walkRx) * (currentPos.x / walkRx) + (currentPos.z / walkRz) * (currentPos.z / walkRz);
+        if (ellipseVal > 0.8) {
+          const centerPush = tmpCenterPush.set(-currentPos.x, 0, -currentPos.z).normalize();
+          // The closer it is to the edge (0.8 -> 1.0), the stronger the steering force
+          const tBoundary = Math.max(0, Math.min(1, (ellipseVal - 0.8) / (1.0 - 0.8)));
+          const steerFactor = Math.min(1.0, tBoundary * 0.8 * 60.0 * dt);
+          walkDir.lerp(centerPush, steerFactor).normalize();
+        }
+
+        // 3. Obstacle Avoidance (Question Box & Cubes)
+        if (lCfg.avoidanceEnabled !== false) {
+          // Avoid Question Box
+          const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
+          const toInsectQ = tmpToInsectQ.set(currentPos.x - qBoxPos.x, 0, currentPos.z - qBoxPos.z);
+          const distQ = toInsectQ.length();
+          if (distQ < avoidRadius) {
+            const tQ = Math.max(0, Math.min(1, (distQ - minObs) / (avoidRadius - minObs)));
+
+            // Radial outward push direction
+            const avoidVec = distQ < 0.001
+              ? tmpAvoidVec.set(1, 0, 0)
+              : tmpAvoidVec.copy(toInsectQ).normalize();
+
+            // Locked-side cross-product calculation to prevent vibration/switching flips
+            let crossQ = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+            if (Math.abs(crossQ) < 0.05) {
+              crossQ = 1.0; // Force a consistent right-hand turn if straight on
+            }
+
+            // Perpendicular glide direction to steer around sides
+            const perpQ = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+            if (crossQ < 0) perpQ.negate();
+
+            // Combine radial outward push (0.7) and perpendicular glide (0.3)
+            const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpQ, 0.3).normalize();
+
+            // Smoothly blend the walk direction towards steerVec
+            const steerFactor = Math.min(1.0, (1.0 - tQ) * 0.9 * 60.0 * dt);
+            walkDir.lerp(steerVec, steerFactor).normalize();
           }
 
-          // 3. Obstacle Avoidance (Question Box & Cubes)
-          if (lCfg.avoidanceEnabled !== false) {
-            // Avoid Question Box
-            const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
-            const toInsectQ = tmpToInsectQ.set(currentPos.x - qBoxPos.x, 0, currentPos.z - qBoxPos.z);
-            const distQ = toInsectQ.length();
-            if (distQ < avoidRadius) {
-              const tQ = Math.max(0, Math.min(1, (distQ - minObs) / (avoidRadius - minObs)));
 
-              // Radial outward push direction
-              const avoidVec = distQ < 0.001
+
+          // Avoid Houdini Toy
+          if (houdiniToyGroup) {
+            const toInsectH = tmpToInsectCube.subVectors(currentPos, houdiniToyGroup.position);
+            toInsectH.y = 0;
+            const distH = toInsectH.length();
+            if (distH < avoidRadius) {
+              const tH = Math.max(0, Math.min(1, (distH - minObs) / (avoidRadius - minObs)));
+
+              const avoidVec = distH < 0.001
                 ? tmpAvoidVec.set(1, 0, 0)
-                : tmpAvoidVec.copy(toInsectQ).normalize();
+                : tmpAvoidVec.copy(toInsectH).normalize();
 
-              // Locked-side cross-product calculation to prevent vibration/switching flips
-              let crossQ = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-              if (Math.abs(crossQ) < 0.05) {
-                crossQ = 1.0; // Force a consistent right-hand turn if straight on
+              let crossH = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+              if (Math.abs(crossH) < 0.05) {
+                crossH = 1.0;
               }
 
-              // Perpendicular glide direction to steer around sides
-              const perpQ = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-              if (crossQ < 0) perpQ.negate();
+              const perpH = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+              if (crossH < 0) perpH.negate();
 
-              // Combine radial outward push (0.7) and perpendicular glide (0.3)
-              const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpQ, 0.3).normalize();
+              const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpH, 0.3).normalize();
 
-              // Smoothly blend the walk direction towards steerVec
-              const steerFactor = Math.min(1.0, (1.0 - tQ) * 0.9 * 60.0 * dt);
+              const steerFactor = Math.min(1.0, (1.0 - tH) * 0.9 * 60.0 * dt);
               walkDir.lerp(steerVec, steerFactor).normalize();
             }
+          }
 
+          // Avoid Web Globe
+          if (webGlobeGroup) {
+            const toInsectW = tmpToInsectCube.subVectors(currentPos, webGlobeGroup.position);
+            toInsectW.y = 0;
+            const distW = toInsectW.length();
+            if (distW < avoidRadius) {
+              const tW = Math.max(0, Math.min(1, (distW - minObs) / (avoidRadius - minObs)));
 
+              const avoidVec = distW < 0.001
+                ? tmpAvoidVec.set(1, 0, 0)
+                : tmpAvoidVec.copy(toInsectW).normalize();
 
-            // Avoid Houdini Toy
-            if (houdiniToyGroup) {
-              const toInsectH = tmpToInsectCube.subVectors(currentPos, houdiniToyGroup.position);
-              toInsectH.y = 0;
-              const distH = toInsectH.length();
-              if (distH < avoidRadius) {
-                const tH = Math.max(0, Math.min(1, (distH - minObs) / (avoidRadius - minObs)));
-
-                const avoidVec = distH < 0.001
-                  ? tmpAvoidVec.set(1, 0, 0)
-                  : tmpAvoidVec.copy(toInsectH).normalize();
-
-                let crossH = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-                if (Math.abs(crossH) < 0.05) {
-                  crossH = 1.0;
-                }
-
-                const perpH = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-                if (crossH < 0) perpH.negate();
-
-                const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpH, 0.3).normalize();
-
-                const steerFactor = Math.min(1.0, (1.0 - tH) * 0.9 * 60.0 * dt);
-                walkDir.lerp(steerVec, steerFactor).normalize();
+              let crossW = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+              if (Math.abs(crossW) < 0.05) {
+                crossW = 1.0;
               }
-            }
 
-            // Avoid Web Globe
-            if (webGlobeGroup) {
-              const toInsectW = tmpToInsectCube.subVectors(currentPos, webGlobeGroup.position);
-              toInsectW.y = 0;
-              const distW = toInsectW.length();
-              if (distW < avoidRadius) {
-                const tW = Math.max(0, Math.min(1, (distW - minObs) / (avoidRadius - minObs)));
+              const perpW = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+              if (crossW < 0) perpW.negate();
 
-                const avoidVec = distW < 0.001
-                  ? tmpAvoidVec.set(1, 0, 0)
-                  : tmpAvoidVec.copy(toInsectW).normalize();
+              const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpW, 0.3).normalize();
 
-                let crossW = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-                if (Math.abs(crossW) < 0.05) {
-                  crossW = 1.0;
-                }
-
-                const perpW = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-                if (crossW < 0) perpW.negate();
-
-                const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpW, 0.3).normalize();
-
-                const steerFactor = Math.min(1.0, (1.0 - tW) * 0.9 * 60.0 * dt);
-                walkDir.lerp(steerVec, steerFactor).normalize();
-              }
-            }
-
-            // Avoid Games Alien
-            if (gamesAlienGroup) {
-              const toInsectG = tmpToInsectCube.subVectors(currentPos, gamesAlienGroup.position);
-              toInsectG.y = 0;
-              const distG = toInsectG.length();
-              if (distG < avoidRadius) {
-                const tG = Math.max(0, Math.min(1, (distG - minObs) / (avoidRadius - minObs)));
-
-                const avoidVec = distG < 0.001
-                  ? tmpAvoidVec.set(1, 0, 0)
-                  : tmpAvoidVec.copy(toInsectG).normalize();
-
-                let crossG = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-                if (Math.abs(crossG) < 0.05) {
-                  crossG = 1.0;
-                }
-
-                const perpG = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-                if (crossG < 0) perpG.negate();
-
-                const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpG, 0.3).normalize();
-
-                const steerFactor = Math.min(1.0, (1.0 - tG) * 0.9 * 60.0 * dt);
-                walkDir.lerp(steerVec, steerFactor).normalize();
-              }
-            }
-
-            // Avoid 3D AR Phone
-            if (arPhoneGroup) {
-              const toInsectAr = tmpToInsectCube.subVectors(currentPos, arPhoneGroup.position);
-              toInsectAr.y = 0;
-              const distAr = toInsectAr.length();
-              if (distAr < avoidRadius) {
-                const tAr = Math.max(0, Math.min(1, (distAr - minObs) / (avoidRadius - minObs)));
-
-                const avoidVec = distAr < 0.001
-                  ? tmpAvoidVec.set(1, 0, 0)
-                  : tmpAvoidVec.copy(toInsectAr).normalize();
-
-                let crossAr = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
-                if (Math.abs(crossAr) < 0.05) {
-                  crossAr = 1.0;
-                }
-
-                const perpAr = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
-                if (crossAr < 0) perpAr.negate();
-
-                const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpAr, 0.3).normalize();
-
-                const steerFactor = Math.min(1.0, (1.0 - tAr) * 0.9 * 60.0 * dt);
-                walkDir.lerp(steerVec, steerFactor).normalize();
-              }
+              const steerFactor = Math.min(1.0, (1.0 - tW) * 0.9 * 60.0 * dt);
+              walkDir.lerp(steerVec, steerFactor).normalize();
             }
           }
 
-          // Re-normalize final direction vector and project back onto internal wander angle
-          walkDir.normalize();
-          bugWanderAngle = Math.atan2(walkDir.x, walkDir.z);
+          // Avoid Games Alien
+          if (gamesAlienGroup) {
+            const toInsectG = tmpToInsectCube.subVectors(currentPos, gamesAlienGroup.position);
+            toInsectG.y = 0;
+            const distG = toInsectG.length();
+            if (distG < avoidRadius) {
+              const tG = Math.max(0, Math.min(1, (distG - minObs) / (avoidRadius - minObs)));
 
-          // Move the insect
-          const speed = lCfg.speed !== undefined ? lCfg.speed : 0.015;
-          const speedStep = speed * 60.0 * dt;
-          bugCubeGroup.position.addScaledVector(walkDir, speedStep);
+              const avoidVec = distG < 0.001
+                ? tmpAvoidVec.set(1, 0, 0)
+                : tmpAvoidVec.copy(toInsectG).normalize();
 
-          // 4. Silent physical containment fallbacks (hard boundaries to prevent glitches during lag spikes)
-          // Hard boundary containment check (instantly snaps if it manages to escape the ellipse)
-          const ellipseValEsc = (currentPos.x / walkRx) * (currentPos.x / walkRx) + (currentPos.z / walkRz) * (currentPos.z / walkRz);
-          if (ellipseValEsc > 1.01) {
-            const borderAngle = Math.atan2(currentPos.z, currentPos.x);
-            bugCubeGroup.position.x = Math.cos(borderAngle) * walkRx * 0.98;
-            bugCubeGroup.position.z = Math.sin(borderAngle) * walkRz * 0.98;
+              let crossG = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+              if (Math.abs(crossG) < 0.05) {
+                crossG = 1.0;
+              }
+
+              const perpG = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+              if (crossG < 0) perpG.negate();
+
+              const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpG, 0.3).normalize();
+
+              const steerFactor = Math.min(1.0, (1.0 - tG) * 0.9 * 60.0 * dt);
+              walkDir.lerp(steerVec, steerFactor).normalize();
+            }
           }
 
-          // Physical colliders (if avoidance is enabled)
-          if (lCfg.avoidanceEnabled !== false) {
-            const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
-            const dxQ = bugCubeGroup.position.x - qBoxPos.x;
-            const dzQ = bugCubeGroup.position.z - qBoxPos.z;
-            const qBoxDistAfter = Math.sqrt(dxQ * dxQ + dzQ * dzQ);
-            if (qBoxDistAfter < minObs) {
+          // Avoid 3D AR Phone
+          if (arPhoneGroup) {
+            const toInsectAr = tmpToInsectCube.subVectors(currentPos, arPhoneGroup.position);
+            toInsectAr.y = 0;
+            const distAr = toInsectAr.length();
+            if (distAr < avoidRadius) {
+              const tAr = Math.max(0, Math.min(1, (distAr - minObs) / (avoidRadius - minObs)));
+
+              const avoidVec = distAr < 0.001
+                ? tmpAvoidVec.set(1, 0, 0)
+                : tmpAvoidVec.copy(toInsectAr).normalize();
+
+              let crossAr = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+              if (Math.abs(crossAr) < 0.05) {
+                crossAr = 1.0;
+              }
+
+              const perpAr = tmpPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+              if (crossAr < 0) perpAr.negate();
+
+              const steerVec = tmpSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpAr, 0.3).normalize();
+
+              const steerFactor = Math.min(1.0, (1.0 - tAr) * 0.9 * 60.0 * dt);
+              walkDir.lerp(steerVec, steerFactor).normalize();
+            }
+          }
+        }
+
+        // Re-normalize final direction vector and project back onto internal wander angle
+        walkDir.normalize();
+        bugWanderAngle = Math.atan2(walkDir.x, walkDir.z);
+
+        // Move the insect with smooth acceleration/deceleration speed factor
+        const speed = lCfg.speed !== undefined ? lCfg.speed : 0.015;
+        const speedStep = speed * bugCurrentSpeedFactor * 60.0 * dt;
+        bugCubeGroup.position.addScaledVector(walkDir, speedStep);
+
+        // 4. Silent physical containment fallbacks (hard boundaries to prevent glitches during lag spikes)
+        // Hard boundary containment check (instantly snaps if it manages to escape the ellipse)
+        const ellipseValEsc = (currentPos.x / walkRx) * (currentPos.x / walkRx) + (currentPos.z / walkRz) * (currentPos.z / walkRz);
+        if (ellipseValEsc > 1.01) {
+          const borderAngle = Math.atan2(currentPos.z, currentPos.x);
+          bugCubeGroup.position.x = Math.cos(borderAngle) * walkRx * 0.98;
+          bugCubeGroup.position.z = Math.sin(borderAngle) * walkRz * 0.98;
+        }
+
+        // Physical colliders (if avoidance is enabled)
+        if (lCfg.avoidanceEnabled !== false) {
+          const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
+          const dxQ = bugCubeGroup.position.x - qBoxPos.x;
+          const dzQ = bugCubeGroup.position.z - qBoxPos.z;
+          const qBoxDistAfter = Math.sqrt(dxQ * dxQ + dzQ * dzQ);
+          if (qBoxDistAfter < minObs) {
+            let pushVec;
+            if (qBoxDistAfter < 0.001) {
+              const randomAngle = Math.random() * Math.PI * 2;
+              pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
+            } else {
+              pushVec = tmpPushVec.set(dxQ, 0, dzQ).normalize();
+            }
+            bugCubeGroup.position.x = qBoxPos.x + pushVec.x * (minObs + 0.02);
+            bugCubeGroup.position.z = qBoxPos.z + pushVec.z * (minObs + 0.02);
+          }
+
+          if (webGlobeGroup) {
+            const dx = bugCubeGroup.position.x - webGlobeGroup.position.x;
+            const dz = bugCubeGroup.position.z - webGlobeGroup.position.z;
+            const d = Math.sqrt(dx * dx + dz * dz);
+            if (d < minObs) {
               let pushVec;
-              if (qBoxDistAfter < 0.001) {
+              if (d < 0.001) {
                 const randomAngle = Math.random() * Math.PI * 2;
                 pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
               } else {
-                pushVec = tmpPushVec.set(dxQ, 0, dzQ).normalize();
+                pushVec = tmpPushVec.set(dx, 0, dz).normalize();
               }
-              bugCubeGroup.position.x = qBoxPos.x + pushVec.x * (minObs + 0.02);
-              bugCubeGroup.position.z = qBoxPos.z + pushVec.z * (minObs + 0.02);
-            }
-
-            if (webGlobeGroup) {
-              const dx = bugCubeGroup.position.x - webGlobeGroup.position.x;
-              const dz = bugCubeGroup.position.z - webGlobeGroup.position.z;
-              const d = Math.sqrt(dx * dx + dz * dz);
-              if (d < minObs) {
-                let pushVec;
-                if (d < 0.001) {
-                  const randomAngle = Math.random() * Math.PI * 2;
-                  pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
-                } else {
-                  pushVec = tmpPushVec.set(dx, 0, dz).normalize();
-                }
-                bugCubeGroup.position.copy(webGlobeGroup.position).addScaledVector(pushVec, minObs + 0.02);
-              }
-            }
-
-            if (gamesAlienGroup) {
-              const dx = bugCubeGroup.position.x - gamesAlienGroup.position.x;
-              const dz = bugCubeGroup.position.z - gamesAlienGroup.position.z;
-              const d = Math.sqrt(dx * dx + dz * dz);
-              if (d < minObs) {
-                let pushVec;
-                if (d < 0.001) {
-                  const randomAngle = Math.random() * Math.PI * 2;
-                  pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
-                } else {
-                  pushVec = tmpPushVec.set(dx, 0, dz).normalize();
-                }
-                bugCubeGroup.position.copy(gamesAlienGroup.position).addScaledVector(pushVec, minObs + 0.02);
-              }
-            }
-
-            if (arPhoneGroup) {
-              const dx = bugCubeGroup.position.x - arPhoneGroup.position.x;
-              const dz = bugCubeGroup.position.z - arPhoneGroup.position.z;
-              const d = Math.sqrt(dx * dx + dz * dz);
-              if (d < minObs) {
-                let pushVec;
-                if (d < 0.001) {
-                  const randomAngle = Math.random() * Math.PI * 2;
-                  pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
-                } else {
-                  pushVec = tmpPushVec.set(dx, 0, dz).normalize();
-                }
-                bugCubeGroup.position.copy(arPhoneGroup.position).addScaledVector(pushVec, minObs + 0.02);
-              }
+              bugCubeGroup.position.copy(webGlobeGroup.position).addScaledVector(pushVec, minObs + 0.02);
             }
           }
 
-          // Face the direction of actual motion smoothly (frame-rate independent lerp)
-          const targetAngle = Math.atan2(walkDir.x, walkDir.z);
-          let diff = targetAngle - bugCubeGroup.rotation.y;
-          diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-          const rotateFactor = Math.min(1.0, 0.08 * 60.0 * dt);
-          bugCubeGroup.rotation.y += diff * rotateFactor;
+          if (gamesAlienGroup) {
+            const dx = bugCubeGroup.position.x - gamesAlienGroup.position.x;
+            const dz = bugCubeGroup.position.z - gamesAlienGroup.position.z;
+            const d = Math.sqrt(dx * dx + dz * dz);
+            if (d < minObs) {
+              let pushVec;
+              if (d < 0.001) {
+                const randomAngle = Math.random() * Math.PI * 2;
+                pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
+              } else {
+                pushVec = tmpPushVec.set(dx, 0, dz).normalize();
+              }
+              bugCubeGroup.position.copy(gamesAlienGroup.position).addScaledVector(pushVec, minObs + 0.02);
+            }
+          }
+
+          if (arPhoneGroup) {
+            const dx = bugCubeGroup.position.x - arPhoneGroup.position.x;
+            const dz = bugCubeGroup.position.z - arPhoneGroup.position.z;
+            const d = Math.sqrt(dx * dx + dz * dz);
+            if (d < minObs) {
+              let pushVec;
+              if (d < 0.001) {
+                const randomAngle = Math.random() * Math.PI * 2;
+                pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
+              } else {
+                pushVec = tmpPushVec.set(dx, 0, dz).normalize();
+              }
+              bugCubeGroup.position.copy(arPhoneGroup.position).addScaledVector(pushVec, minObs + 0.02);
+            }
+          }
         }
+
+        // Face the direction of actual motion smoothly (scaled by speed factor so turning stops smoothly with movement)
+        const targetAngle = Math.atan2(walkDir.x, walkDir.z);
+        let diff = targetAngle - bugCubeGroup.rotation.y;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        const rotateFactor = Math.min(1.0, 0.08 * bugCurrentSpeedFactor * 60.0 * dt);
+        bugCubeGroup.rotation.y += diff * rotateFactor;
       } else if (isInspecting && currentTarget === 'main' && loadingComplete) {
         // Rotation sway replaced by FBX skeletal Inspect animation action
       }
@@ -7181,40 +7278,117 @@ function init() {
     // 3D AR Phone float, hover scaling, and animation updates
     if (arPhoneGroup && SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.enabled !== false) {
       const aCfg = SCENE_CONFIG.ar3D;
-      const isHovered = isArPhoneHovered || linkHoveredAR;
+      const isHovered = (isArPhoneHovered || linkHoveredAR) && !isArPhoneClickAnimating && arRespawnStartTime === 0;
 
-      if (isHovered && !lastArPhoneHoveredState) {
-        lastArPhoneHoveredState = true;
-        if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
-          playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
+      if (!isArPhoneClickAnimating && arRespawnStartTime === 0) {
+        if (isHovered && !lastArPhoneHoveredState) {
+          lastArPhoneHoveredState = true;
+          if (arScreenMaterial && screenHoverEmissiveTexture) {
+            arScreenMaterial.emissiveMap = screenHoverEmissiveTexture;
+            arScreenMaterial.needsUpdate = true;
+          }
+          if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
+            playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
+          }
+        } else if (!isHovered && lastArPhoneHoveredState) {
+          lastArPhoneHoveredState = false;
+          if (arScreenMaterial && screenEmissiveTexture) {
+            arScreenMaterial.emissiveMap = screenEmissiveTexture;
+            arScreenMaterial.needsUpdate = true;
+          }
+          if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
+            playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
+          }
         }
-      } else if (!isHovered && lastArPhoneHoveredState) {
+      } else {
         lastArPhoneHoveredState = false;
-        if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
-          playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
-        }
       }
 
       const baseScale = aCfg.scale !== undefined ? aCfg.scale : 0.005;
       const hoverScaleMult = aCfg.hoverScale !== undefined ? aCfg.hoverScale : 1.18;
-      const arActiveScale = isHovered ? hoverScaleMult : 1.0;
-      const arTargetScale = baseScale * arActiveScale * targetScale;
-
-      const currentArScale = arPhoneGroup.scale.x;
-      const nextArScale = THREE.MathUtils.lerp(currentArScale, arTargetScale, 0.1);
-      arPhoneGroup.scale.set(nextArScale, nextArScale, nextArScale);
-
-      const hoverYTarget = isHovered ? (aCfg.hoverYOffset !== undefined ? aCfg.hoverYOffset : 0.1) : 0.0;
-      const currentHoverY = arPhoneGroup.userData.currentHoverY !== undefined ? arPhoneGroup.userData.currentHoverY : 0.0;
-      const nextHoverY = THREE.MathUtils.lerp(currentHoverY, hoverYTarget, 0.1);
-      arPhoneGroup.userData.currentHoverY = nextHoverY;
-
+      const hoverYOffsetVal = aCfg.hoverYOffset !== undefined ? aCfg.hoverYOffset : 0.09;
       const freq = aCfg.floatFrequency !== undefined ? aCfg.floatFrequency : 0.002;
       const amp = aCfg.floatAmplitude !== undefined ? aCfg.floatAmplitude : 0.08;
       const floatOffset = Math.sin(performance.now() * freq) * amp;
-
       const baseY = (arPhoneGroup.userData.baseY !== undefined) ? arPhoneGroup.userData.baseY : (aCfg.desktop ? aCfg.desktop.position.y : 1.3);
-      arPhoneGroup.position.y = baseY + nextHoverY + floatOffset;
+
+      if (arRespawnStartTime > 0) {
+        const cCfg = aCfg.clickAnimation || {};
+        const delay = cCfg.respawnDelay !== undefined ? cCfg.respawnDelay : 50;
+        const duration = cCfg.respawnDuration !== undefined ? cCfg.respawnDuration : 400;
+        const elapsed = performance.now() - arRespawnStartTime;
+
+        if (elapsed < delay) {
+          const startScale = baseScale * hoverScaleMult * targetScale;
+          arPhoneGroup.scale.set(startScale, startScale, startScale);
+          arPhoneGroup.position.y = baseY + hoverYOffsetVal + floatOffset;
+          arPhoneGroup.userData.currentHoverY = hoverYOffsetVal;
+        } else {
+          if (!isArRespawnSoundPlayed) {
+            isArRespawnSoundPlayed = true;
+            if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
+              playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
+            }
+          }
+          const pct = Math.min(1.0, (elapsed - delay) / Math.max(1, duration));
+          const easeOutCubic = 1.0 - Math.pow(1.0 - pct, 3.0);
+
+          const startScale = baseScale * hoverScaleMult * targetScale;
+          const endScale = baseScale * 1.0 * targetScale;
+          const currentScale = THREE.MathUtils.lerp(startScale, endScale, easeOutCubic);
+          arPhoneGroup.scale.set(currentScale, currentScale, currentScale);
+
+          const currentYOffset = hoverYOffsetVal * (1.0 - easeOutCubic);
+          arPhoneGroup.position.y = baseY + currentYOffset + floatOffset;
+          arPhoneGroup.userData.currentHoverY = currentYOffset;
+
+          if (pct >= 0.3 && !canInteract) {
+            canInteract = true;
+          }
+          if (pct >= 1.0) {
+            arRespawnStartTime = 0;
+          }
+        }
+      } else if (isArPhoneClickAnimating) {
+        const cCfg = aCfg.clickAnimation || {};
+        const duration = cCfg.duration !== undefined ? cCfg.duration : 1200;
+        const elapsed = performance.now() - arPhoneClickStartTime;
+        const pct = Math.min(1.0, elapsed / duration);
+
+        const arClickTargetScale = baseScale * hoverScaleMult * targetScale;
+        const currentArScale = arPhoneGroup.scale.x;
+        const nextArScale = THREE.MathUtils.lerp(currentArScale, arClickTargetScale, 0.25);
+        arPhoneGroup.scale.set(nextArScale, nextArScale, nextArScale);
+
+        const currentHoverY = arPhoneGroup.userData.currentHoverY !== undefined ? arPhoneGroup.userData.currentHoverY : 0.0;
+        const nextHoverY = THREE.MathUtils.lerp(currentHoverY, hoverYOffsetVal, 0.25);
+        arPhoneGroup.userData.currentHoverY = nextHoverY;
+        arPhoneGroup.position.y = baseY + nextHoverY + floatOffset;
+
+        if (pct >= 1.0) {
+          isArPhoneClickAnimating = false;
+          // Swap texture back to emojiface.png
+          if (arScreenMaterial && screenEmissiveTexture) {
+            arScreenMaterial.emissiveMap = screenEmissiveTexture;
+            arScreenMaterial.needsUpdate = true;
+          }
+          startArPhoneRespawn();
+        }
+      } else {
+        const arActiveScale = isHovered ? hoverScaleMult : 1.0;
+        const arTargetScale = baseScale * arActiveScale * targetScale;
+
+        const currentArScale = arPhoneGroup.scale.x;
+        const nextArScale = THREE.MathUtils.lerp(currentArScale, arTargetScale, 0.1);
+        arPhoneGroup.scale.set(nextArScale, nextArScale, nextArScale);
+
+        const hoverYTarget = isHovered ? hoverYOffsetVal : 0.0;
+        const currentHoverY = arPhoneGroup.userData.currentHoverY !== undefined ? arPhoneGroup.userData.currentHoverY : 0.0;
+        const nextHoverY = THREE.MathUtils.lerp(currentHoverY, hoverYTarget, 0.1);
+        arPhoneGroup.userData.currentHoverY = nextHoverY;
+
+        arPhoneGroup.position.y = baseY + nextHoverY + floatOffset;
+      }
     }
 
     // Update Web Globe click animation (emissive flash & god rays)
@@ -8355,6 +8529,38 @@ function init() {
     return true;
   }
 
+  function startArPhoneRespawn() {
+    isArRespawnSoundPlayed = false;
+    arRespawnStartTime = performance.now();
+    canInteract = false;
+  }
+
+  function triggerArPhoneClickAnimation() {
+    if (!canInteract || isArPhoneClickAnimating || arRespawnStartTime > 0 || !arPhoneGroup) return false;
+
+    const aCfg = SCENE_CONFIG.ar3D;
+    const cCfg = aCfg ? aCfg.clickAnimation : null;
+    if (cCfg && cCfg.enabled === false) return false;
+
+    isArPhoneClickAnimating = true;
+    canInteract = false;
+    clearOutlines();
+    body.style.setProperty('cursor', 'default');
+
+    arPhoneClickStartTime = performance.now();
+
+    if (arScreenMaterial && screenClickEmissiveTexture) {
+      arScreenMaterial.emissiveMap = screenClickEmissiveTexture;
+      arScreenMaterial.needsUpdate = true;
+    }
+
+    if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
+      playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
+    }
+
+    return true;
+  }
+
   function triggerWebGlobeClickAnimation() {
     if (!canInteract || isWebGlobeClickAnimating || !webGlobeGroup) return false;
 
@@ -8692,7 +8898,12 @@ function init() {
         gamesLinkClicked();
       }
     } else if (target.type === 'arPhone') {
-      arLinkClicked();
+      const cCfg = SCENE_CONFIG.ar3D ? SCENE_CONFIG.ar3D.clickAnimation : null;
+      if (cCfg && cCfg.enabled !== false) {
+        triggerArPhoneClickAnimation();
+      } else {
+        arLinkClicked();
+      }
     } else if (target.type === 'bug') {
       window.open('https://www.linkedin.com/in/noah-gunther-3128bb185/', '_blank');
     }
