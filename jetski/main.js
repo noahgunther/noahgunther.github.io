@@ -452,14 +452,14 @@ const SCENE_CONFIG = {
       position: { x: -2.0, y: 1.54, z: -4.3 } // Desktop 3D position
     },
     mobile: {
-      position: { x: -1.4, y: 1.3, z: -8.0 } // Mobile 3D position
+      position: { x: -1.4, y: 1.54, z: -8.4 } // Mobile 3D position
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.4,                       // Shadow plane scale factor
     shadowOpacity: 1.2,                    // Shadow opacity factor
     materials: {
       phone: {
-        color: 0x49505d,                    // Phone body metal tint
+        color: 0x59606d,                    // Phone body metal tint
         roughness: 0.3,
         metalness: 0.8
       },
@@ -479,17 +479,17 @@ const SCENE_CONFIG = {
         metalness: 0.8
       },
       cameraHouse: {
-        color: 0x49505d,                    // Camera bump housing tint
+        color: 0x59606d,                    // Camera bump housing tint
         roughness: 0.3,
         metalness: 0.8
       },
       shoes: {
-        color: 0x070c24,                    // Shoe material tint
+        color: 0x16226e,                    // Shoe material tint
         roughness: 0.6,
         metalness: 0.2
       },
       socks: {
-        color: 0x333344,                    // Sock material tint
+        color: 0x444455,                    // Sock material tint
         roughness: 0.8,
         metalness: 0.0
       }
