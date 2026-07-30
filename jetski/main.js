@@ -406,8 +406,8 @@ const SCENE_CONFIG = {
     },
     hover: {
       soundEnabled: true,                    // Enable mouse hover & out sound effects
-      hoverInSoundSrc: 'sound/gamesHover.ogg', // Mouse hover enter sound
-      hoverOutSoundSrc: 'sound/gamesOut.ogg', // Mouse hover exit sound
+      hoverInSoundSrc: 'sound/gamesHover.mp3', // Mouse hover enter sound
+      hoverOutSoundSrc: 'sound/gamesOut.mp3', // Mouse hover exit sound
       hoverInVolume: 0.1,                    // Hover enter volume
       hoverOutVolume: 0.1,                   // Hover exit volume
       hoverInCooldown: 180,                  // Min time in ms between rapid hover-in sounds
@@ -417,11 +417,11 @@ const SCENE_CONFIG = {
     pop: {
       enabled: true,                         // Enable click-to-pop animation
       soundEnabled: true,                    // Enable sound effects for click pop sequence
-      laserSoundSrc: 'sound/lazer.ogg',      // Laser sound played on alien click
+      laserSoundSrc: 'sound/lazer.mp3',      // Laser sound played on alien click
       laserVolume: 0.35,                      // Laser sound volume
-      explodeSoundSrc: 'sound/8bitExplode.ogg', // Explosion sound played on Pop1 transition
+      explodeSoundSrc: 'sound/8bitExplode.mp3', // Explosion sound played on Pop1 transition
       explodeVolume: 0.12,                    // Explosion sound volume
-      growSoundSrc: 'sound/alienGrow.ogg',   // Regrow sound played when alien starts regrowing
+      growSoundSrc: 'sound/alienGrow.mp3',   // Regrow sound played when alien starts regrowing
       growVolume: 0.35,                       // Regrow sound volume
       pop0Duration: 350,                     // Duration of Pop0 initial phase (ms)
       pop1Duration: 450,                     // Duration of Pop1 final phase (ms)
@@ -518,8 +518,8 @@ const SCENE_CONFIG = {
     },
     clickAnimation: {
       enabled: true,                         // Enable click animation sequence
-      soundEnabled: true,                    // Enable click audio effect (vibration.ogg)
-      soundSrc: 'sound/vibration.ogg',       // Click sound effect file
+      soundEnabled: true,                    // Enable click audio effect (vibration.mp3)
+      soundSrc: 'sound/vibration.mp3',       // Click sound effect file
       volume: 0.3,                          // Sound volume (0.0 to 1.0)
       duration: 800,                        // Duration of click animation sequence in ms
       shakeTransitionDuration: 0.06,         // Transition crossfade duration into/out of shake animation (seconds)
@@ -529,8 +529,8 @@ const SCENE_CONFIG = {
       soundEnabled: true,                   // Enable hover audio effects
       hoverInVolume: 0.35,
       hoverOutVolume: 0.25,
-      hoverInSoundSrc: 'sound/arHover.ogg',
-      hoverOutSoundSrc: 'sound/arOut.ogg',
+      hoverInSoundSrc: 'sound/arHover.mp3',
+      hoverOutSoundSrc: 'sound/arOut.mp3',
       hysteresisRadius: 1.4                // 3D ray-to-center radius (world units) to hold hover state
     }
   },
@@ -581,11 +581,11 @@ const SCENE_CONFIG = {
     fallRotationSpeedThreshold: 2.0,        // Rotation speed threshold to trigger bug fall
     soundEnabled: true,                     // Toggle to enable/disable bug sound effects
     fallVolume: 0.8,                        // Fall sound volume (0.0 to 1.0)
-    fallSoundSrc: 'sound/bugFall.ogg',      // Sound file played when bug falls
+    fallSoundSrc: 'sound/bugFall.mp3',      // Sound file played when bug falls
     riseVolume: 0.8,                        // Rise sound volume (0.0 to 1.0)
-    riseSoundSrc: 'sound/bugRise.ogg',      // Sound file played when bug gets back up
+    riseSoundSrc: 'sound/bugRise.mp3',      // Sound file played when bug gets back up
     hoverVolume: 0.6,                       // Hover sound volume (0.0 to 1.0)
-    hoverSoundSrc: 'sound/bugHover.ogg'     // Sound file played when hovering over bug
+    hoverSoundSrc: 'sound/bugHover.mp3'     // Sound file played when hovering over bug
   },
 
   // ==========================================
@@ -669,13 +669,13 @@ const SCENE_CONFIG = {
 
     // SOUND EFFECTS MAP PER RENDER STYLE MODE
     modeSounds: {
-      'default': { src: 'sound/rm_wind.ogg', volume: 0.5 },
-      'multiBit': { src: 'sound/rm_lazer.ogg', volume: 0.2 },
-      'oneBit': { src: 'sound/rm_123.ogg', volume: 0.23 },
-      'pixelated': { src: 'sound/rm_pixelate.ogg', volume: 0.26 },
-      'gameBoy': { src: 'sound/rm_gameboy.ogg', volume: 0.23 },
-      'blueprint': { src: 'sound/rm_bubble.ogg', volume: 0.9 },
-      'ascii': { src: 'sound/rm_tone.ogg', volume: 0.2 }
+      'default': { src: 'sound/rm_wind.mp3', volume: 0.5 },
+      'multiBit': { src: 'sound/rm_lazer.mp3', volume: 0.2 },
+      'oneBit': { src: 'sound/rm_123.mp3', volume: 0.23 },
+      'pixelated': { src: 'sound/rm_pixelate.mp3', volume: 0.26 },
+      'gameBoy': { src: 'sound/rm_gameboy.mp3', volume: 0.23 },
+      'blueprint': { src: 'sound/rm_bubble.mp3', volume: 0.9 },
+      'ascii': { src: 'sound/rm_tone.mp3', volume: 0.2 }
     },
 
     // Mode-specific configuration parameters
@@ -8585,34 +8585,75 @@ function init() {
     });
   }
 
-  // Web Audio API Sound Manager for zero-latency, full-length audio playback
+  // Web Audio API Sound Manager with iOS Safari WebKit unlock & universal audio format support
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let audioCtx = null;
   const soundBuffers = {};
+  const rawSoundData = {};
 
-  function loadSoundBuffer(url) {
-    fetch(url)
-      .then(res => res.arrayBuffer())
-      .then(arrayBuffer => {
-        if (!audioCtx) audioCtx = new AudioCtx();
-        return audioCtx.decodeAudioData(arrayBuffer);
-      })
-      .then(decodedBuffer => {
+  function decodeAndStoreBuffer(url, arrayBuffer) {
+    if (!audioCtx) return;
+    try {
+      audioCtx.decodeAudioData(arrayBuffer.slice(0), (decodedBuffer) => {
         soundBuffers[url] = decodedBuffer;
-      })
-      .catch(err => {
-      });
+        if (url.endsWith('.ogg')) {
+          soundBuffers[url.replace(/\.ogg$/, '.mp3')] = decodedBuffer;
+        } else if (url.endsWith('.mp3')) {
+          soundBuffers[url.replace(/\.mp3$/, '.ogg')] = decodedBuffer;
+        }
+      }, (err) => {});
+    } catch (e) {}
   }
 
-  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/vibration.ogg', 'sound/arHover.ogg', 'sound/arOut.ogg', 'sound/rm_gameboy.ogg', 'sound/lazer.ogg', 'sound/8bitExplode.ogg', 'sound/alienGrow.ogg', 'sound/gamesHover.ogg', 'sound/gamesOut.ogg', 'sound/bugFall.ogg', 'sound/bugRise.ogg', 'sound/bugHover.ogg'].forEach(loadSoundBuffer);
+  function loadSoundBuffer(url) {
+    const mp3Url = url.endsWith('.ogg') ? url.replace(/\.ogg$/, '.mp3') : url;
+    const oggUrl = url.endsWith('.mp3') ? url.replace(/\.mp3$/, '.ogg') : url;
+
+    fetch(mp3Url)
+      .then(res => {
+        if (!res.ok) throw new Error('mp3 not found');
+        return res.arrayBuffer();
+      })
+      .catch(() => fetch(oggUrl).then(res => res.arrayBuffer()))
+      .then(arrayBuffer => {
+        if (!arrayBuffer) return;
+        rawSoundData[url] = arrayBuffer;
+        rawSoundData[mp3Url] = arrayBuffer;
+        rawSoundData[oggUrl] = arrayBuffer;
+        if (audioCtx) {
+          decodeAndStoreBuffer(url, arrayBuffer);
+        }
+      })
+      .catch(err => {});
+  }
+
+  ['sound/pop.mp3', 'sound/shatter.mp3', 'sound/aboutGrow.mp3', 'sound/aboutHover.mp3', 'sound/aboutOut.mp3', 'sound/houdiniHover.mp3', 'sound/houdiniOut.mp3', 'sound/webHover.mp3', 'sound/webOut.mp3', 'sound/ring.mp3', 'sound/vibration.mp3', 'sound/arHover.mp3', 'sound/arOut.mp3', 'sound/rm_gameboy.mp3', 'sound/lazer.mp3', 'sound/8bitExplode.mp3', 'sound/alienGrow.mp3', 'sound/gamesHover.mp3', 'sound/gamesOut.mp3', 'sound/bugFall.mp3', 'sound/bugRise.mp3', 'sound/bugHover.mp3'].forEach(loadSoundBuffer);
 
   // Global user gesture listener to un-suspend AudioContext on the first interaction anywhere on the page
   function unlockAudioContext() {
-    if (!audioCtx) audioCtx = new AudioCtx();
+    if (!audioCtx) {
+      audioCtx = new AudioCtx();
+    }
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
+    // Force-unlock iOS WebKit AudioContext using a silent 1-sample buffer source
+    try {
+      const buffer = audioCtx.createBuffer(1, 1, 22050);
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioCtx.destination);
+      source.start(0);
+    } catch (e) {}
+
+    // Decode preloaded sound buffers fetched before initial user gesture
+    Object.keys(rawSoundData).forEach(url => {
+      if (!soundBuffers[url] && rawSoundData[url]) {
+        decodeAndStoreBuffer(url, rawSoundData[url]);
+      }
+    });
   }
+
   window.addEventListener('pointerdown', unlockAudioContext, { passive: true });
   window.addEventListener('click', unlockAudioContext, { passive: true });
   window.addEventListener('keydown', unlockAudioContext, { passive: true });
@@ -8623,14 +8664,24 @@ function init() {
     if (targetVol <= 0) return;
 
     try {
-      if (!audioCtx) audioCtx = new AudioCtx();
-      if (audioCtx.state === 'suspended') {
+      if (!audioCtx) unlockAudioContext();
+      if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
-        // Drop sound playback if AudioContext is still suspended to prevent queued/leftover audio bursts when un-suspended later
         if (audioCtx.state === 'suspended') return;
       }
-      const buffer = soundBuffers[url];
-      if (buffer) {
+
+      let buffer = soundBuffers[url];
+      if (!buffer) {
+        const altUrl = url.endsWith('.ogg') ? url.replace(/\.ogg$/, '.mp3') : (url.endsWith('.mp3') ? url.replace(/\.mp3$/, '.ogg') : url);
+        buffer = soundBuffers[altUrl];
+      }
+
+      if (!buffer && rawSoundData[url] && audioCtx) {
+        decodeAndStoreBuffer(url, rawSoundData[url]);
+        buffer = soundBuffers[url] || soundBuffers[url.replace(/\.ogg$/, '.mp3')];
+      }
+
+      if (buffer && audioCtx) {
         const source = audioCtx.createBufferSource();
         source.buffer = buffer;
 
@@ -8645,18 +8696,18 @@ function init() {
     }
   }
 
-  function playPopSound() {
+  function playHoudiniPopSound() {
     const pCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.pop : null;
     if (!pCfg || pCfg.soundEnabled === false) return;
     const vol = pCfg.volume !== undefined ? pCfg.volume : 0.8;
-    playWebAudioSound('sound/pop.ogg', vol);
+    playWebAudioSound('sound/pop.mp3', vol);
   }
 
   function playBugFallSound() {
     const lCfg = SCENE_CONFIG.linkedin3D;
     if (!lCfg || lCfg.soundEnabled === false) return;
     const vol = lCfg.fallVolume !== undefined ? lCfg.fallVolume : (lCfg.volume !== undefined ? lCfg.volume : 0.8);
-    const src = lCfg.fallSoundSrc || 'sound/bugFall.ogg';
+    const src = lCfg.fallSoundSrc || 'sound/bugFall.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8664,7 +8715,7 @@ function init() {
     const lCfg = SCENE_CONFIG.linkedin3D;
     if (!lCfg || lCfg.soundEnabled === false) return;
     const vol = lCfg.riseVolume !== undefined ? lCfg.riseVolume : (lCfg.volume !== undefined ? lCfg.volume : 0.8);
-    const src = lCfg.riseSoundSrc || 'sound/bugRise.ogg';
+    const src = lCfg.riseSoundSrc || 'sound/bugRise.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8672,7 +8723,7 @@ function init() {
     const lCfg = SCENE_CONFIG.linkedin3D;
     if (!lCfg || lCfg.soundEnabled === false) return;
     const vol = lCfg.hoverVolume !== undefined ? lCfg.hoverVolume : (lCfg.volume !== undefined ? lCfg.volume : 0.8);
-    const src = lCfg.hoverSoundSrc || 'sound/bugHover.ogg';
+    const src = lCfg.hoverSoundSrc || 'sound/bugHover.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8680,70 +8731,70 @@ function init() {
     const sCfg = SCENE_CONFIG.questionBox ? SCENE_CONFIG.questionBox.shatter : null;
     if (!sCfg || sCfg.soundEnabled === false) return;
     const rawVol = sCfg.growVolume !== undefined ? sCfg.growVolume : (sCfg.volume !== undefined ? sCfg.volume : 0.8);
-    playWebAudioSound('sound/aboutGrow.ogg', rawVol);
+    playWebAudioSound('sound/aboutGrow.mp3', rawVol);
   }
 
   function playShatterSound() {
     const sCfg = SCENE_CONFIG.questionBox ? SCENE_CONFIG.questionBox.shatter : null;
     if (!sCfg || sCfg.soundEnabled === false) return;
     const vol = sCfg.volume !== undefined ? sCfg.volume : 0.8;
-    playWebAudioSound('sound/shatter.ogg', vol);
+    playWebAudioSound('sound/shatter.mp3', vol);
   }
 
   function playAboutHoverSound() {
     const hCfg = SCENE_CONFIG.questionBox ? SCENE_CONFIG.questionBox.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const rawVol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    playWebAudioSound('sound/aboutHover.ogg', rawVol);
+    playWebAudioSound('sound/aboutHover.mp3', rawVol);
   }
 
   function playAboutOutSound() {
     const hCfg = SCENE_CONFIG.questionBox ? SCENE_CONFIG.questionBox.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const rawVol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    playWebAudioSound('sound/aboutOut.ogg', rawVol);
+    playWebAudioSound('sound/aboutOut.mp3', rawVol);
   }
 
   function playHoudiniHoverSound() {
     const hCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const rawVol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    playWebAudioSound('sound/houdiniHover.ogg', rawVol);
+    playWebAudioSound('sound/houdiniHover.mp3', rawVol);
   }
 
   function playHoudiniOutSound() {
     const hCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const rawVol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    playWebAudioSound('sound/houdiniOut.ogg', rawVol);
+    playWebAudioSound('sound/houdiniOut.mp3', rawVol);
   }
 
   function playHoudiniGrowSound() {
     const pCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.pop : null;
     if (!pCfg || pCfg.soundEnabled === false) return;
     const rawVol = pCfg.growVolume !== undefined ? pCfg.growVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
-    playWebAudioSound('sound/aboutGrow.ogg', rawVol);
+    playWebAudioSound('sound/aboutGrow.mp3', rawVol);
   }
 
   function playWebHoverSound() {
     const hCfg = SCENE_CONFIG.web3D ? SCENE_CONFIG.web3D.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const rawVol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    playWebAudioSound('sound/webHover.ogg', rawVol);
+    playWebAudioSound('sound/webHover.mp3', rawVol);
   }
 
   function playWebOutSound() {
     const hCfg = SCENE_CONFIG.web3D ? SCENE_CONFIG.web3D.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const rawVol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    playWebAudioSound('sound/webOut.ogg', rawVol);
+    playWebAudioSound('sound/webOut.mp3', rawVol);
   }
 
   function playWebRingSound() {
     const cCfg = SCENE_CONFIG.web3D ? SCENE_CONFIG.web3D.clickAnimation : null;
     if (!cCfg || cCfg.soundEnabled === false) return;
     const vol = cCfg.volume !== undefined ? cCfg.volume : 0.8;
-    playWebAudioSound('sound/ring.ogg', vol);
+    playWebAudioSound('sound/ring.mp3', vol);
   }
 
   function playArPhoneClickSound() {
@@ -8751,7 +8802,7 @@ function init() {
     const cCfg = aCfg ? aCfg.clickAnimation : null;
     if (!cCfg || cCfg.soundEnabled === false) return;
     const vol = cCfg.volume !== undefined ? cCfg.volume : 0.25;
-    const src = cCfg.soundSrc || 'sound/vibration.ogg';
+    const src = cCfg.soundSrc || 'sound/vibration.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8760,7 +8811,7 @@ function init() {
     const hCfg = aCfg ? aCfg.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const vol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : 0.15;
-    const src = hCfg.hoverInSoundSrc || 'sound/arHover.ogg';
+    const src = hCfg.hoverInSoundSrc || 'sound/arHover.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8769,7 +8820,7 @@ function init() {
     const hCfg = aCfg ? aCfg.hover : null;
     if (!hCfg || hCfg.soundEnabled === false) return;
     const vol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : 0.15;
-    const src = hCfg.hoverOutSoundSrc || 'sound/arOut.ogg';
+    const src = hCfg.hoverOutSoundSrc || 'sound/arOut.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8777,7 +8828,7 @@ function init() {
     const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
     if (!pCfg || pCfg.soundEnabled === false) return;
     const vol = pCfg.laserVolume !== undefined ? pCfg.laserVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
-    const src = pCfg.laserSoundSrc || 'sound/lazer.ogg';
+    const src = pCfg.laserSoundSrc || 'sound/lazer.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8785,7 +8836,7 @@ function init() {
     const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
     if (!pCfg || pCfg.soundEnabled === false) return;
     const vol = pCfg.explodeVolume !== undefined ? pCfg.explodeVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
-    const src = pCfg.explodeSoundSrc || 'sound/8bitExplode.ogg';
+    const src = pCfg.explodeSoundSrc || 'sound/8bitExplode.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8793,7 +8844,7 @@ function init() {
     const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
     if (!pCfg || pCfg.soundEnabled === false) return;
     const vol = pCfg.growVolume !== undefined ? pCfg.growVolume : (pCfg.volume !== undefined ? pCfg.volume : 0.8);
-    const src = pCfg.growSoundSrc || 'sound/alienGrow.ogg';
+    const src = pCfg.growSoundSrc || 'sound/alienGrow.mp3';
     playWebAudioSound(src, vol);
   }
 
@@ -8807,7 +8858,7 @@ function init() {
     lastGamesHoverInSoundTime = now;
 
     const rawVol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    const src = hCfg.hoverInSoundSrc || 'sound/gamesHover.ogg';
+    const src = hCfg.hoverInSoundSrc || 'sound/gamesHover.mp3';
     playWebAudioSound(src, rawVol);
   }
 
@@ -8821,14 +8872,14 @@ function init() {
     lastGamesHoverOutSoundTime = now;
 
     const rawVol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
-    const src = hCfg.hoverOutSoundSrc || 'sound/gamesOut.ogg';
+    const src = hCfg.hoverOutSoundSrc || 'sound/gamesOut.mp3';
     playWebAudioSound(src, rawVol);
   }
 
   function playGameBoyModeSound() {
     const gCfg = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles.gameBoy) ? SCENE_CONFIG.renderStyles.gameBoy : null;
     const vol = (gCfg && gCfg.soundVolume !== undefined) ? gCfg.soundVolume : 0.8;
-    playWebAudioSound('sound/rm_gameboy.ogg', vol);
+    playWebAudioSound('sound/rm_gameboy.mp3', vol);
   }
 
   function playSoundForRenderMode(modeName) {
