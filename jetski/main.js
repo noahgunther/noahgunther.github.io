@@ -443,16 +443,37 @@ const SCENE_CONFIG = {
     enabled: true,                          // Toggle to enable/disable 3D AR Phone
     unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
     scale: 0.0044,                           // Model scale factor
-    rotation: { x: 0, y: 90, z: 0 },        // Initial base rotation in degrees
+    rotation: { x: 0, y: -90, z: 0 },        // Initial base rotation in degrees
+    walkRadiusX: 2.2,                       // Max walk wander radius X
+    walkRadiusZ: 2.2,                       // Max walk wander radius Z
+    speed: 0.006,                           // Walk movement speed per frame
+    inspectEnabled: true,                   // Enable pause moments (transition to stand animation)
+    walkDuration: 4000,                     // Average walking duration between pauses (ms)
+    pauseDuration: 3000,                     // Duration of stand pause moments (ms)
+    maxTurnLeanDeg: 15,                     // Max Y rotation lean angle from camera (degrees)
+    cameraTrackingSpeed: 30,               // Linear Y rotation turn speed tracking camera (deg/sec)
+    hoverTurnSpeed: 400,                    // Linear Y rotation turn speed when aligning to camera on hover (deg/sec)
+    hoverWalkAnimSpeed: 6.0,                // Walk animation playback speed multiplier when hovered
+    rotationWalkAnimSpeed: 2.0,             // Walk animation playback speed multiplier during rotation to face camera
+    idleWalkAnimSpeed: 4.0,                 // Walk animation playback speed multiplier during idle random walking
+    minRotationDeg: 20,                     // Minimum rotation angle threshold to trigger camera facing turn (degrees)
+    animTransitionDuration: 0.15,           // Fade duration for smooth animation crossfades (seconds)
     floatFrequency: 0.0,                  // Bobbing float frequency
     floatAmplitude: 0.0,                   // Bobbing float amplitude
     hoverScale: 1.075,                       // Scale multiplier when hovered
     hoverYOffset: 0.09,                      // Vertical lift offset when hovered
+    walkRadiusOffsetX: 0.0,                 // X offset for walk area center
+    walkRadiusOffsetZ: 0.0,                 // Z offset for walk area center
+    showDebug: false,                       // Toggle to show cyan debug walk radius boundary ring
     desktop: {
       position: { x: -2.0, y: 1.54, z: -4.3 } // Desktop 3D position
     },
     mobile: {
-      position: { x: -1.4, y: 1.54, z: -8.4 } // Mobile 3D position
+      position: { x: -1.4, y: 1.54, z: -8.4 }, // Mobile 3D position
+      walkRadiusX: 1.2,                     // Mobile walk wander radius X
+      walkRadiusZ: 1.6,                     // Mobile walk wander radius Z
+      walkRadiusOffsetX: 0.5,               // Mobile walk area X center offset
+      walkRadiusOffsetZ: 0.8                // Mobile walk area Z center offset
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.4,                       // Shadow plane scale factor
@@ -1341,9 +1362,23 @@ function init() {
   let screenHoverEmissiveTexture = null;
   let screenClickEmissiveTexture = null;
   let isArPhoneClickAnimating = false;
+  let isArPhoneHoverTurning = false;
   let arPhoneClickStartTime = 0;
   let arRespawnStartTime = 0;
   let isArRespawnSoundPlayed = false;
+  let arSkinnedMeshes = [];
+  let arMixer = null;
+  let arWalkAction = null;
+  let arNeutralAction = null;
+  let currentArWalkWeight = 0.0;
+  let arBehaviorState = 'walking'; // 'walking' | 'inspecting'
+  let arWanderAngle = 0;
+  let arNextPauseTime = 0;
+  let arPauseEndTime = 0;
+  let arCurrentSpeedFactor = 0;
+  let arHoverAligning = false;
+  let isArPhoneRotatingToCamera = false;
+  let arBoundaryMesh = null;
   let arCamerasMesh = null;
   let arCameraHouseMesh = null;
   let arLegMesh = null;
@@ -1354,8 +1389,45 @@ function init() {
   let isArPhoneHovered = false;
   let linkHoveredAR = false;
   let lastArPhoneHoveredState = false;
-  let arPhoneReachedFullHoverScale = false;
   let arPhoneObstacleMesh = null;
+
+  function setArScreenEmissiveTexture(tex) {
+    if (!tex) return;
+    if (arScreenMaterial) {
+      arScreenMaterial.emissiveMap = tex;
+      arScreenMaterial.needsUpdate = true;
+    }
+    if (arScreenMesh && arScreenMesh.material) {
+      if (Array.isArray(arScreenMesh.material)) {
+        arScreenMesh.material.forEach(m => {
+          if (m) {
+            m.emissiveMap = tex;
+            m.needsUpdate = true;
+          }
+        });
+      } else {
+        arScreenMesh.material.emissiveMap = tex;
+        arScreenMesh.material.needsUpdate = true;
+      }
+    }
+    if (arPhoneGroup) {
+      arPhoneGroup.traverse((child) => {
+        if (child.isMesh && child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(m => {
+              if (m && (m === arScreenMaterial || (m.name && m.name.toLowerCase().includes('screen')))) {
+                m.emissiveMap = tex;
+                m.needsUpdate = true;
+              }
+            });
+          } else if (child.material === arScreenMaterial || (child.material.name && child.material.name.toLowerCase().includes('screen'))) {
+            child.material.emissiveMap = tex;
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+    }
+  }
 
   // Games popping & respawn state
   let isGamesPopping = false;
@@ -1467,6 +1539,8 @@ function init() {
   const tmpCameraWorldPos = new THREE.Vector3();
   const tmpWalkDir = new THREE.Vector3();
   const tmpCenterPush = new THREE.Vector3();
+  const tmpArWalkDir = new THREE.Vector3();
+  const tmpArCenterPush = new THREE.Vector3();
   const tmpToInsectQ = new THREE.Vector3();
   const tmpToInsectCube = new THREE.Vector3();
   const tmpAvoidVec = new THREE.Vector3();
@@ -3069,7 +3143,8 @@ function init() {
       emissive: new THREE.Color(sMatCfg.emissive !== undefined ? sMatCfg.emissive : 0xffffff),
       emissiveIntensity: sMatCfg.emissiveIntensity !== undefined ? sMatCfg.emissiveIntensity : 1.0,
       roughness: sMatCfg.roughness !== undefined ? sMatCfg.roughness : 0.1,
-      metalness: sMatCfg.metalness !== undefined ? sMatCfg.metalness : 0.9
+      metalness: sMatCfg.metalness !== undefined ? sMatCfg.metalness : 0.9,
+      skinning: true
     });
     screenEmissiveTexture = loadColorMap(
       textureLoader,
@@ -3152,6 +3227,19 @@ function init() {
     arShadowMesh.renderOrder = 3;
     sceneGroup.add(arShadowMesh);
 
+    // Cyan walk radius boundary visualizer ring for the 3D AR Phone
+    const walkCenter = getArPhoneWalkCenter();
+    const { rx: initialWalkRx, rz: initialWalkRz } = getArPhoneWalkRadius();
+    const boundaryCurve = new THREE.EllipseCurve(0, 0, initialWalkRx, initialWalkRz, 0, 2 * Math.PI, false, 0);
+    const boundaryPoints = boundaryCurve.getPoints(64);
+    const boundaryGeo = new THREE.BufferGeometry().setFromPoints(boundaryPoints);
+    const boundaryMat = new THREE.LineBasicMaterial({ color: 0x00ffff });
+    arBoundaryMesh = new THREE.LineLoop(boundaryGeo, boundaryMat);
+    arBoundaryMesh.rotation.x = -Math.PI / 2;
+    arBoundaryMesh.position.set(walkCenter.x, shadowBaseY + 0.005, walkCenter.z);
+    arBoundaryMesh.visible = (aCfg.showDebug === true);
+    sceneGroup.add(arBoundaryMesh);
+
     fbxLoader.load('geometry/phone.fbx', (fbx) => {
       fbx.traverse((child) => {
         if (child.isMesh) {
@@ -3169,33 +3257,45 @@ function init() {
             // Multi-material mesh (e.g. Phone mesh with Phone body and Screen materials)
             child.material = child.material.map(m => {
               const mName = (m && m.name || "").toLowerCase();
-              if (mName.includes('screen')) return arScreenMaterial;
-              if (mName.includes('camera') && !mName.includes('house')) return arCameraMaterial;
-              if (mName.includes('camerahouse') || mName.includes('house')) return arCameraHouseMaterial;
-              if (mName.includes('shoe')) return arShoesMaterial;
-              if (mName.includes('sock')) return arSocksMaterial;
-              return arPhoneMaterial;
+              let mat = arPhoneMaterial;
+              if (mName.includes('screen')) mat = arScreenMaterial;
+              else if (mName.includes('camera') && !mName.includes('house')) mat = arCameraMaterial;
+              else if (mName.includes('camerahouse') || mName.includes('house')) mat = arCameraHouseMaterial;
+              else if (mName.includes('shoe')) mat = arShoesMaterial;
+              else if (mName.includes('sock')) mat = arSocksMaterial;
+              if (child.isSkinnedMesh && mat !== arScreenMaterial) {
+                mat = mat.clone();
+                mat.skinning = true;
+              }
+              return mat;
             });
           } else if (fullName.includes('shoe')) {
-            child.material = arShoesMaterial;
+            child.material = child.isSkinnedMesh ? arShoesMaterial.clone() : arShoesMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             if (!arShoesMesh) arShoesMesh = child;
           } else if (fullName.includes('sock')) {
-            child.material = arSocksMaterial;
+            child.material = child.isSkinnedMesh ? arSocksMaterial.clone() : arSocksMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             if (!arSocksMesh) arSocksMesh = child;
           } else if (fullName.includes('camera') && !fullName.includes('house')) {
-            child.material = arCameraMaterial;
+            child.material = child.isSkinnedMesh ? arCameraMaterial.clone() : arCameraMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             arCamerasMesh = child;
           } else if (fullName.includes('camerahouse') || fullName.includes('house')) {
-            child.material = arCameraHouseMaterial;
+            child.material = child.isSkinnedMesh ? arCameraHouseMaterial.clone() : arCameraHouseMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             arCameraHouseMesh = child;
           } else if (fullName.includes('screen')) {
             child.material = arScreenMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             arScreenMesh = child;
           } else if (fullName.includes('leg')) {
-            child.material = arPhoneMaterial;
+            child.material = child.isSkinnedMesh ? arPhoneMaterial.clone() : arPhoneMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             arLegMesh = child;
           } else {
-            child.material = arPhoneMaterial;
+            child.material = child.isSkinnedMesh ? arPhoneMaterial.clone() : arPhoneMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
             if (!arPhoneMesh) arPhoneMesh = child;
           }
         }
@@ -3204,10 +3304,11 @@ function init() {
       arPhoneGroup = fbx;
       arPhoneGroup.renderOrder = 10;
 
+      const walkCenter = getArPhoneWalkCenter();
       fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
-      fbx.userData.baseX = initialPos.x;
+      fbx.userData.baseX = walkCenter.x;
       fbx.userData.baseY = initialPos.y;
-      fbx.userData.baseZ = initialPos.z;
+      fbx.userData.baseZ = walkCenter.z;
       fbx.userData.currentHoverY = 0;
 
       const s = aCfg.scale !== undefined ? aCfg.scale : 0.005;
@@ -3219,6 +3320,39 @@ function init() {
           (aCfg.rotation.y || 0) * Math.PI / 180,
           (aCfg.rotation.z || 0) * Math.PI / 180
         );
+      }
+
+      // Collect skinned meshes for OutlinePass deformer
+      arSkinnedMeshes = [];
+      fbx.traverse((child) => {
+        if (child.isSkinnedMesh) {
+          arSkinnedMeshes.push(child);
+        }
+      });
+
+      // Setup animation mixer for Walk & Neutral animations
+      if (fbx.animations && fbx.animations.length > 0) {
+        arMixer = new THREE.AnimationMixer(fbx);
+        const walkClip = fbx.animations.find(clip => clip.name.toLowerCase().includes('walk')) || fbx.animations[0];
+        if (walkClip) {
+          arWalkAction = arMixer.clipAction(walkClip);
+          arWalkAction.setLoop(THREE.LoopRepeat, Infinity);
+          arWalkAction.enabled = true;
+          arWalkAction.setEffectiveWeight(0.0);
+          arWalkAction.play();
+        }
+
+        const neutralClip = fbx.animations.find(clip => {
+          const name = clip.name.toLowerCase();
+          return name.includes('stand') || name.includes('neutral') || name.includes('idle') || name.includes('pose') || name.includes('stance');
+        });
+        if (neutralClip) {
+          arNeutralAction = arMixer.clipAction(neutralClip);
+          arNeutralAction.setLoop(THREE.LoopRepeat, Infinity);
+          arNeutralAction.enabled = true;
+          arNeutralAction.setEffectiveWeight(1.0);
+          arNeutralAction.play();
+        }
       }
 
       sceneGroup.add(fbx);
@@ -4677,12 +4811,191 @@ function init() {
     } else if (targetType === 'gamesAlien') {
       selectRegularOutline(gamesAlienGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
     } else if (targetType === 'arPhone') {
-      selectRegularOutline(arPhoneGroup, SCENE_CONFIG.interaction.hoverColor3D || '#91bfff');
+      selectDeformerOutline(
+        (arSkinnedMeshes && arSkinnedMeshes.length > 0) ? arSkinnedMeshes : arPhoneGroup,
+        SCENE_CONFIG.interaction.hoverColor3D || '#91bfff'
+      );
     } else if (targetType === 'bug') {
       selectDeformerOutline(
         bugCubeGroup,
         SCENE_CONFIG.interaction.hoverColor3D || '#91bfff'
       );
+    }
+  }
+
+  function getArPhoneInitialPos() {
+    const aCfg = SCENE_CONFIG.ar3D;
+    if (!aCfg) return { x: -2.0, y: 1.54, z: -4.3 };
+    const pos = isMobileInitial ? (aCfg.mobile ? aCfg.mobile.position : aCfg.desktop.position) : (aCfg.desktop ? aCfg.desktop.position : { x: -2.0, y: 1.54, z: -4.3 });
+    return pos || { x: -2.0, y: 1.54, z: -4.3 };
+  }
+
+  function getArPhoneWalkRadius() {
+    const aCfg = SCENE_CONFIG.ar3D;
+    if (!aCfg) return { rx: 2.0, rz: 1.2 };
+    if (typeof isMobileInitial !== 'undefined' && isMobileInitial && aCfg.mobile) {
+      const rx = aCfg.mobile.walkRadiusX !== undefined ? aCfg.mobile.walkRadiusX : (aCfg.walkRadiusX !== undefined ? aCfg.walkRadiusX : 2.0);
+      const rz = aCfg.mobile.walkRadiusZ !== undefined ? aCfg.mobile.walkRadiusZ : (aCfg.walkRadiusZ !== undefined ? aCfg.walkRadiusZ : 1.2);
+      return { rx, rz };
+    }
+    const rx = aCfg.walkRadiusX !== undefined ? aCfg.walkRadiusX : 2.0;
+    const rz = aCfg.walkRadiusZ !== undefined ? aCfg.walkRadiusZ : 1.2;
+    return { rx, rz };
+  }
+
+  function getArPhoneWalkCenter() {
+    const aCfg = SCENE_CONFIG.ar3D;
+    const initPos = getArPhoneInitialPos();
+    if (!aCfg) return { x: initPos.x, z: initPos.z };
+
+    let offX = 0;
+    let offZ = 0;
+    if (typeof isMobileInitial !== 'undefined' && isMobileInitial && aCfg.mobile) {
+      offX = aCfg.mobile.walkRadiusOffsetX !== undefined ? aCfg.mobile.walkRadiusOffsetX : (aCfg.walkRadiusOffsetX !== undefined ? aCfg.walkRadiusOffsetX : 0);
+      offZ = aCfg.mobile.walkRadiusOffsetZ !== undefined ? aCfg.mobile.walkRadiusOffsetZ : (aCfg.walkRadiusOffsetZ !== undefined ? aCfg.walkRadiusOffsetZ : 0);
+    } else {
+      offX = aCfg.walkRadiusOffsetX !== undefined ? aCfg.walkRadiusOffsetX : 0;
+      offZ = aCfg.walkRadiusOffsetZ !== undefined ? aCfg.walkRadiusOffsetZ : 0;
+    }
+
+    return {
+      x: initPos.x + offX,
+      z: initPos.z + offZ
+    };
+  }
+
+  function startArPhoneInspect(now, aCfg) {
+    arBehaviorState = 'inspecting';
+    const dur = aCfg.pauseDuration !== undefined ? aCfg.pauseDuration : (Math.random() * 2000 + 2000);
+    arPauseEndTime = now + dur;
+    arNextPauseTime = arPauseEndTime + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : (Math.random() * 4000 + 3000));
+  }
+
+  function pickNewArWalkDirection(currentPos, baseX, baseZ, walkRx, walkRz) {
+    const relX = currentPos.x - baseX;
+    const relZ = currentPos.z - baseZ;
+    const centerAngle = Math.atan2(-relX, -relZ);
+    // Pick a clean, straight heading pointing generally towards open space
+    arWanderAngle = centerAngle + (Math.random() - 0.5) * (Math.PI * 0.5);
+  }
+
+  function updateArPhoneMovement(dt) {
+    if (!arPhoneGroup || !SCENE_CONFIG.ar3D || SCENE_CONFIG.ar3D.enabled === false) return;
+    const aCfg = SCENE_CONFIG.ar3D;
+    const now = performance.now();
+    const initPos = getArPhoneInitialPos();
+    const walkCenter = getArPhoneWalkCenter();
+    const { rx: walkRx, rz: walkRz } = getArPhoneWalkRadius();
+
+    const isHovered = (isArPhoneHovered || linkHoveredAR) && !isArPhoneClickAnimating && arRespawnStartTime === 0;
+    const isClickingOrRespawning = isArPhoneClickAnimating || arRespawnStartTime > 0;
+    const isPriorityBusy = isHovered || isClickingOrRespawning;
+
+    const baseRadY = ((aCfg.rotation && aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
+    // Add Math.PI (180 degrees) so front screen faces directly TOWARDS camera on hover
+    const targetCamFacingRotY = baseRadY + Math.PI - sceneGroup.rotation.y;
+    let diffCamY = targetCamFacingRotY - arPhoneGroup.rotation.y;
+    diffCamY = Math.atan2(Math.sin(diffCamY), Math.cos(diffCamY));
+
+    const hoverTurnSpeedDeg = aCfg.hoverTurnSpeed !== undefined ? aCfg.hoverTurnSpeed : 260;
+    const hoverTurnSpeedRad = hoverTurnSpeedDeg * Math.PI / 180;
+
+    // Track state to detect mouse-out / sequence completion
+    const wasHoveredOrClicked = arPhoneGroup.userData.wasHoveredOrClicked || false;
+    if (wasHoveredOrClicked && !isPriorityBusy) {
+      // Hover or click sequence ended -> take an inspect moment facing camera before walking
+      startArPhoneInspect(now, aCfg);
+    }
+    arPhoneGroup.userData.wasHoveredOrClicked = isPriorityBusy;
+
+    // Smooth speed ramping for idle position walking
+    const targetSpeedFactor = (arBehaviorState === 'walking' && !isPriorityBusy) ? 1.0 : 0.0;
+    const speedLerpRate = Math.min(1.0, 7.0 * dt);
+    arCurrentSpeedFactor += (targetSpeedFactor - arCurrentSpeedFactor) * speedLerpRate;
+    if (arCurrentSpeedFactor < 0.001) arCurrentSpeedFactor = 0;
+
+    // 1. HOVER & CLICK / RESPAWN (Priority Fast Camera Alignment)
+    if (isPriorityBusy) {
+      if (arBehaviorState === 'walking') {
+        arBehaviorState = 'inspecting';
+      }
+      if (isClickingOrRespawning) {
+        // Instantly face camera when clicked or respawning
+        arPhoneGroup.rotation.y = targetCamFacingRotY;
+        isArPhoneHoverTurning = false;
+      } else if (isHovered && Math.abs(diffCamY) > 0.01) {
+        // Quickly turn to face camera when hovered over
+        isArPhoneHoverTurning = true;
+        const step = hoverTurnSpeedRad * dt;
+        arPhoneGroup.rotation.y += Math.sign(diffCamY) * Math.min(Math.abs(diffCamY), step);
+      } else if (isHovered) {
+        arPhoneGroup.rotation.y = targetCamFacingRotY;
+        isArPhoneHoverTurning = false;
+      }
+      return;
+    }
+    isArPhoneHoverTurning = false;
+
+    // 2. IDLE RANDOM WALKING BEHAVIOR (unhovered, unclicked)
+    if (arBehaviorState === 'inspecting') {
+      if (now >= arPauseEndTime) {
+        arBehaviorState = 'walking';
+        const currentPos = arPhoneGroup.position;
+        pickNewArWalkDirection(currentPos, walkCenter.x, walkCenter.z, walkRx, walkRz);
+        arNextPauseTime = now + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : 4000);
+      }
+    } else if (arBehaviorState === 'walking') {
+      const currentPos = arPhoneGroup.position;
+      const baseX = walkCenter.x;
+      const baseZ = walkCenter.z;
+
+      const walkDir = tmpArWalkDir.set(Math.sin(arWanderAngle), 0, Math.cos(arWanderAngle)).normalize();
+
+      // Ellipsoid Boundary Avoidance
+      const relX = currentPos.x - baseX;
+      const relZ = currentPos.z - baseZ;
+      const ellipseVal = (relX / walkRx) * (relX / walkRx) + (relZ / walkRz) * (relZ / walkRz);
+
+      if (ellipseVal > 0.75) {
+        const centerPush = tmpArCenterPush.set(-relX, 0, -relZ).normalize();
+        const tBoundary = Math.max(0, Math.min(1, (ellipseVal - 0.75) / (1.0 - 0.75)));
+        const steerFactor = Math.min(1.0, tBoundary * 0.8 * 60.0 * dt);
+        walkDir.lerp(centerPush, steerFactor).normalize();
+        arWanderAngle = Math.atan2(walkDir.x, walkDir.z);
+      }
+
+      // Smoothly rotate phone to face its walking direction (including baseRadY rotation offset)!
+      const targetWalkRotY = baseRadY + Math.atan2(walkDir.x, walkDir.z);
+      let diffWalkY = targetWalkRotY - arPhoneGroup.rotation.y;
+      diffWalkY = Math.atan2(Math.sin(diffWalkY), Math.cos(diffWalkY));
+      const turnRate = Math.min(1.0, 6.0 * dt);
+      arPhoneGroup.rotation.y += diffWalkY * turnRate;
+
+      // Move phone position along straight walk vector scaled by smooth speed factor
+      if (arCurrentSpeedFactor > 0) {
+        const speed = aCfg.speed !== undefined ? aCfg.speed : 0.008;
+        const speedStep = speed * arCurrentSpeedFactor * 60.0 * dt;
+        arPhoneGroup.position.addScaledVector(walkDir, speedStep);
+
+        // Hard containment check
+        const relXEsc = arPhoneGroup.position.x - baseX;
+        const relZEsc = arPhoneGroup.position.z - baseZ;
+        const ellipseValEsc = (relXEsc / walkRx) * (relXEsc / walkRx) + (relZEsc / walkRz) * (relZEsc / walkRz);
+        if (ellipseValEsc > 1.01) {
+          const borderAngle = Math.atan2(relZEsc, relXEsc);
+          arPhoneGroup.position.x = baseX + Math.cos(borderAngle) * walkRx * 0.98;
+          arPhoneGroup.position.z = baseZ + Math.sin(borderAngle) * walkRz * 0.98;
+        }
+      }
+
+      if (arNextPauseTime === 0) {
+        arNextPauseTime = now + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : 4000);
+      }
+      if (now > arNextPauseTime && aCfg.inspectEnabled !== false) {
+        startArPhoneInspect(now, aCfg);
+      }
+    } else {
+      arBehaviorState = 'walking';
     }
   }
 
@@ -7283,18 +7596,16 @@ function init() {
       if (!isArPhoneClickAnimating && arRespawnStartTime === 0) {
         if (isHovered && !lastArPhoneHoveredState) {
           lastArPhoneHoveredState = true;
-          if (arScreenMaterial && screenHoverEmissiveTexture) {
-            arScreenMaterial.emissiveMap = screenHoverEmissiveTexture;
-            arScreenMaterial.needsUpdate = true;
+          if (screenHoverEmissiveTexture) {
+            setArScreenEmissiveTexture(screenHoverEmissiveTexture);
           }
           if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
             playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
           }
         } else if (!isHovered && lastArPhoneHoveredState) {
           lastArPhoneHoveredState = false;
-          if (arScreenMaterial && screenEmissiveTexture) {
-            arScreenMaterial.emissiveMap = screenEmissiveTexture;
-            arScreenMaterial.needsUpdate = true;
+          if (screenEmissiveTexture) {
+            setArScreenEmissiveTexture(screenEmissiveTexture);
           }
           if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
             playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
@@ -7368,9 +7679,8 @@ function init() {
         if (pct >= 1.0) {
           isArPhoneClickAnimating = false;
           // Swap texture back to emojiface.png
-          if (arScreenMaterial && screenEmissiveTexture) {
-            arScreenMaterial.emissiveMap = screenEmissiveTexture;
-            arScreenMaterial.needsUpdate = true;
+          if (screenEmissiveTexture) {
+            setArScreenEmissiveTexture(screenEmissiveTexture);
           }
           startArPhoneRespawn();
         }
@@ -7388,6 +7698,53 @@ function init() {
         arPhoneGroup.userData.currentHoverY = nextHoverY;
 
         arPhoneGroup.position.y = baseY + nextHoverY + floatOffset;
+      }
+
+      // Update AR Phone walking movement
+      updateArPhoneMovement(dt);
+
+      // Update AR Phone skeletal animation mixer ('Walk' clip vs Neutral 'stand' pose)
+      if (arMixer) {
+        const hoverWalkSpeed = aCfg.hoverWalkAnimSpeed !== undefined ? aCfg.hoverWalkAnimSpeed : 2.0;
+        const idleWalkSpeed = aCfg.idleWalkAnimSpeed !== undefined ? aCfg.idleWalkAnimSpeed : 1.0;
+        const fadeDur = aCfg.animTransitionDuration !== undefined ? aCfg.animTransitionDuration : 0.15;
+
+        let targetWalkWeight = 0.0;
+        let activeSpeed = 1.0;
+
+        if (isArPhoneClickAnimating || arRespawnStartTime > 0) {
+          targetWalkWeight = 0.0;
+          activeSpeed = 1.0;
+        } else if (isArPhoneHoverTurning) {
+          targetWalkWeight = 1.0;
+          activeSpeed = hoverWalkSpeed;
+        } else if (isHovered) {
+          targetWalkWeight = 0.0;
+          activeSpeed = 1.0;
+        } else if (arBehaviorState === 'walking') {
+          targetWalkWeight = 1.0;
+          activeSpeed = idleWalkSpeed;
+        } else {
+          targetWalkWeight = 0.0;
+          activeSpeed = 1.0;
+        }
+
+        arMixer.timeScale = activeSpeed;
+
+        // Smoothly lerp current walk weight towards target walk weight
+        const lerpRate = Math.min(1.0, (1.0 / Math.max(0.01, fadeDur)) * dt);
+        currentArWalkWeight += (targetWalkWeight - currentArWalkWeight) * lerpRate;
+
+        if (arWalkAction) {
+          arWalkAction.enabled = true;
+          arWalkAction.setEffectiveWeight(currentArWalkWeight);
+        }
+        if (arNeutralAction) {
+          arNeutralAction.enabled = true;
+          arNeutralAction.setEffectiveWeight(1.0 - currentArWalkWeight);
+        }
+
+        arMixer.update(dt);
       }
     }
 
@@ -7516,6 +7873,13 @@ function init() {
       // Dynamic visibility toggles for red debug geometry
       if (bugBoundaryMesh) {
         bugBoundaryMesh.visible = !!lCfg.showDebug;
+      }
+      if (arBoundaryMesh && SCENE_CONFIG.ar3D) {
+        const aCfg = SCENE_CONFIG.ar3D;
+        arBoundaryMesh.visible = !!(aCfg.showDebug || aCfg.showWalkRadius);
+        const walkCenter = getArPhoneWalkCenter();
+        const shadowBaseY = aCfg.shadowY !== undefined ? aCfg.shadowY : 0.335;
+        arBoundaryMesh.position.set(walkCenter.x, shadowBaseY + 0.005, walkCenter.z);
       }
       if (bugObstacleMesh) {
         if (questionBoxGroup) {
@@ -8549,9 +8913,13 @@ function init() {
 
     arPhoneClickStartTime = performance.now();
 
-    if (arScreenMaterial && screenClickEmissiveTexture) {
-      arScreenMaterial.emissiveMap = screenClickEmissiveTexture;
-      arScreenMaterial.needsUpdate = true;
+    // Instantly snap rotation to face camera when clicked
+    const baseRadY = ((aCfg && aCfg.rotation && aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
+    const targetCamFacingRotY = baseRadY + Math.PI - sceneGroup.rotation.y;
+    arPhoneGroup.rotation.y = targetCamFacingRotY;
+
+    if (screenClickEmissiveTexture) {
+      setArScreenEmissiveTexture(screenClickEmissiveTexture);
     }
 
     if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
