@@ -518,13 +518,17 @@ const SCENE_CONFIG = {
     },
     clickAnimation: {
       enabled: true,                         // Enable click animation sequence
+      soundEnabled: true,                    // Enable click audio effect (vibration.ogg)
+      soundSrc: 'sound/vibration.ogg',       // Click sound effect file
+      volume: 0.3,                          // Sound volume (0.0 to 1.0)
       duration: 800,                        // Duration of click animation sequence in ms
+      shakeTransitionDuration: 0.06,         // Transition crossfade duration into/out of shake animation (seconds)
       scaleMultiplier: 1.35                  // Peak scale multiplier during click animation
     },
     hover: {
       soundEnabled: true,                   // Enable hover audio effects
-      hoverInVolume: 0.15,
-      hoverOutVolume: 0.15,
+      hoverInVolume: 0.35,
+      hoverOutVolume: 0.25,
       hoverInSoundSrc: 'sound/arHover.ogg',
       hoverOutSoundSrc: 'sound/arOut.ogg',
       hysteresisRadius: 1.4                // 3D ray-to-center radius (world units) to hold hover state
@@ -860,8 +864,13 @@ function loadColorMap(loader, path, material, entityColor, colorProperty = 'colo
     return null;
   }
 
-  // Textures enabled — load texture normally without mutating material color
-  return loader.load(path);
+  // Textures enabled — load texture normally and pre-initialize GPU texture buffer
+  return loader.load(path, (tex) => {
+    if (typeof renderer !== 'undefined' && renderer && renderer.initTexture) {
+      try { renderer.initTexture(tex); } catch (e) {}
+    }
+    if (typeof onLoad === 'function') onLoad(tex);
+  });
 }
 
 /* Initial settings */
@@ -1394,6 +1403,7 @@ function init() {
   let isArPhoneHovered = false;
   let linkHoveredAR = false;
   let lastArPhoneHoveredState = false;
+  let arPhoneReachedFullHoverScale = false;
   let arPhoneObstacleMesh = null;
 
   function setArScreenEmissiveTexture(tex) {
@@ -4339,7 +4349,34 @@ function init() {
 
     // Pre-compile WebGL shaders & upload textures/geometries to GPU before fading out loading screen
     try {
+      if (typeof renderer !== 'undefined' && renderer && renderer.initTexture) {
+        if (typeof screenEmissiveTexture !== 'undefined' && screenEmissiveTexture) try { renderer.initTexture(screenEmissiveTexture); } catch(e) {}
+        if (typeof screenHoverEmissiveTexture !== 'undefined' && screenHoverEmissiveTexture) try { renderer.initTexture(screenHoverEmissiveTexture); } catch(e) {}
+        if (typeof screenClickEmissiveTexture !== 'undefined' && screenClickEmissiveTexture) try { renderer.initTexture(screenClickEmissiveTexture); } catch(e) {}
+      }
       renderer.compile(scene, camera);
+
+      // Pre-warm EffectComposer post-processing passes & GLSL skinning shaders for OutlinePass
+      if (typeof composer !== 'undefined' && composer) {
+        const dummySkinned = (typeof arSkinnedMeshes !== 'undefined' && arSkinnedMeshes.length > 0) ? arSkinnedMeshes : (typeof arPhoneGroup !== 'undefined' && arPhoneGroup ? [arPhoneGroup] : []);
+        if (typeof deformerOutlinePass !== 'undefined' && deformerOutlinePass) {
+          deformerOutlinePass.selectedObjects = dummySkinned;
+          deformerOutlinePass.enabled = dummySkinned.length > 0;
+        }
+        if (typeof outlinePass !== 'undefined' && outlinePass) {
+          const dummyReg = typeof questionBoxGroup !== 'undefined' && questionBoxGroup ? [questionBoxGroup] : [];
+          outlinePass.selectedObjects = dummyReg;
+          outlinePass.enabled = dummyReg.length > 0;
+        }
+        if (typeof houdiniOutlinePass !== 'undefined' && houdiniOutlinePass) {
+          const dummyHou = typeof houdiniToyGroup !== 'undefined' && houdiniToyGroup ? [houdiniToyGroup] : [];
+          houdiniOutlinePass.selectedObjects = dummyHou;
+          houdiniOutlinePass.enabled = dummyHou.length > 0;
+        }
+
+        composer.render();
+        clearOutlines();
+      }
     } catch (e) {
     }
 
@@ -7632,23 +7669,24 @@ function init() {
       if (!isArPhoneClickAnimating && arRespawnStartTime === 0) {
         if (isHovered && !lastArPhoneHoveredState) {
           lastArPhoneHoveredState = true;
+          arPhoneReachedFullHoverScale = false;
           if (screenHoverEmissiveTexture) {
             setArScreenEmissiveTexture(screenHoverEmissiveTexture);
           }
-          if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
-            playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
-          }
+          playArPhoneHoverSound();
         } else if (!isHovered && lastArPhoneHoveredState) {
           lastArPhoneHoveredState = false;
           if (screenEmissiveTexture) {
             setArScreenEmissiveTexture(screenEmissiveTexture);
           }
-          if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
-            playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
+          if (arPhoneReachedFullHoverScale) {
+            playArPhoneOutSound();
           }
+          arPhoneReachedFullHoverScale = false;
         }
       } else {
         lastArPhoneHoveredState = false;
+        arPhoneReachedFullHoverScale = false;
       }
 
       const baseScale = aCfg.scale !== undefined ? aCfg.scale : 0.005;
@@ -7673,9 +7711,7 @@ function init() {
         } else {
           if (!isArRespawnSoundPlayed) {
             isArRespawnSoundPlayed = true;
-            if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverOutSoundSrc) {
-              playAudioEffect(aCfg.hover.hoverOutSoundSrc, aCfg.hover.hoverOutVolume || 0.15);
-            }
+            playArPhoneOutSound();
           }
           const pct = Math.min(1.0, (elapsed - delay) / Math.max(1, duration));
           const easeOutCubic = 1.0 - Math.pow(1.0 - pct, 3.0);
@@ -7735,6 +7771,10 @@ function init() {
         arPhoneGroup.userData.currentHoverY = nextHoverY;
 
         arPhoneGroup.position.y = baseY + nextHoverY + floatOffset;
+
+        if (isHovered && currentArScale >= arTargetScale * 0.98) {
+          arPhoneReachedFullHoverScale = true;
+        }
       }
 
       // Update AR Phone walking movement
@@ -7745,20 +7785,21 @@ function init() {
         const hoverWalkSpeed = aCfg.hoverWalkAnimSpeed !== undefined ? aCfg.hoverWalkAnimSpeed : 2.0;
         const idleWalkSpeed = aCfg.idleWalkAnimSpeed !== undefined ? aCfg.idleWalkAnimSpeed : 1.0;
         const fadeDur = aCfg.animTransitionDuration !== undefined ? aCfg.animTransitionDuration : 0.15;
-        const fadeDurMs = fadeDur * 1000;
+        const cCfg = aCfg.clickAnimation || {};
+        const shakeFadeDur = cCfg.shakeTransitionDuration !== undefined ? cCfg.shakeTransitionDuration : 0.06;
+        const shakeFadeDurMs = shakeFadeDur * 1000;
 
         let targetWalkWeight = 0.0;
         let targetShakeWeight = 0.0;
         let activeSpeed = 1.0;
 
         if (isArPhoneClickAnimating) {
-          const cCfg = aCfg.clickAnimation || {};
           const shakeClipDurMs = (arShakeAction && arShakeAction.getClip()) ? (arShakeAction.getClip().duration * 1000) : 1200;
           const duration = cCfg.duration !== undefined ? cCfg.duration : shakeClipDurMs;
           const elapsed = performance.now() - arPhoneClickStartTime;
 
           // Transition into shake at start, and transition out before click duration ends
-          if (elapsed < Math.max(0, duration - fadeDurMs)) {
+          if (elapsed < Math.max(0, duration - shakeFadeDurMs)) {
             targetShakeWeight = 1.0;
           } else {
             targetShakeWeight = 0.0;
@@ -7783,7 +7824,7 @@ function init() {
           activeSpeed = idleWalkSpeed;
         } else {
           targetShakeWeight = 0.0;
-          targetWalkWeight = 0.0;
+          targetShakeWeight = 0.0;
           activeSpeed = 1.0;
         }
 
@@ -7791,8 +7832,10 @@ function init() {
 
         // Smoothly lerp current weights towards target weights
         const lerpRate = Math.min(1.0, (1.0 / Math.max(0.01, fadeDur)) * dt);
+        const shakeLerpRate = Math.min(1.0, (1.0 / Math.max(0.005, shakeFadeDur)) * dt);
+
         currentArWalkWeight += (targetWalkWeight - currentArWalkWeight) * lerpRate;
-        currentArShakeWeight += (targetShakeWeight - currentArShakeWeight) * lerpRate;
+        currentArShakeWeight += (targetShakeWeight - currentArShakeWeight) * shakeLerpRate;
 
         const currentNeutralWeight = Math.max(0.0, 1.0 - currentArWalkWeight - currentArShakeWeight);
 
@@ -8561,7 +8604,7 @@ function init() {
       });
   }
 
-  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/rm_gameboy.ogg', 'sound/lazer.ogg', 'sound/8bitExplode.ogg', 'sound/alienGrow.ogg', 'sound/gamesHover.ogg', 'sound/gamesOut.ogg', 'sound/bugFall.ogg', 'sound/bugRise.ogg', 'sound/bugHover.ogg'].forEach(loadSoundBuffer);
+  ['sound/pop.ogg', 'sound/shatter.ogg', 'sound/aboutGrow.ogg', 'sound/aboutHover.ogg', 'sound/aboutOut.ogg', 'sound/houdiniHover.ogg', 'sound/houdiniOut.ogg', 'sound/webHover.ogg', 'sound/webOut.ogg', 'sound/ring.ogg', 'sound/vibration.ogg', 'sound/arHover.ogg', 'sound/arOut.ogg', 'sound/rm_gameboy.ogg', 'sound/lazer.ogg', 'sound/8bitExplode.ogg', 'sound/alienGrow.ogg', 'sound/gamesHover.ogg', 'sound/gamesOut.ogg', 'sound/bugFall.ogg', 'sound/bugRise.ogg', 'sound/bugHover.ogg'].forEach(loadSoundBuffer);
 
   // Global user gesture listener to un-suspend AudioContext on the first interaction anywhere on the page
   function unlockAudioContext() {
@@ -8701,6 +8744,33 @@ function init() {
     if (!cCfg || cCfg.soundEnabled === false) return;
     const vol = cCfg.volume !== undefined ? cCfg.volume : 0.8;
     playWebAudioSound('sound/ring.ogg', vol);
+  }
+
+  function playArPhoneClickSound() {
+    const aCfg = SCENE_CONFIG.ar3D;
+    const cCfg = aCfg ? aCfg.clickAnimation : null;
+    if (!cCfg || cCfg.soundEnabled === false) return;
+    const vol = cCfg.volume !== undefined ? cCfg.volume : 0.25;
+    const src = cCfg.soundSrc || 'sound/vibration.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playArPhoneHoverSound() {
+    const aCfg = SCENE_CONFIG.ar3D;
+    const hCfg = aCfg ? aCfg.hover : null;
+    if (!hCfg || hCfg.soundEnabled === false) return;
+    const vol = hCfg.hoverInVolume !== undefined ? hCfg.hoverInVolume : 0.15;
+    const src = hCfg.hoverInSoundSrc || 'sound/arHover.ogg';
+    playWebAudioSound(src, vol);
+  }
+
+  function playArPhoneOutSound() {
+    const aCfg = SCENE_CONFIG.ar3D;
+    const hCfg = aCfg ? aCfg.hover : null;
+    if (!hCfg || hCfg.soundEnabled === false) return;
+    const vol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : 0.15;
+    const src = hCfg.hoverOutSoundSrc || 'sound/arOut.ogg';
+    playWebAudioSound(src, vol);
   }
 
   function playGamesLaserSound() {
@@ -8991,9 +9061,7 @@ function init() {
       setArScreenEmissiveTexture(screenClickEmissiveTexture);
     }
 
-    if (aCfg.hover && aCfg.hover.soundEnabled && aCfg.hover.hoverInSoundSrc) {
-      playAudioEffect(aCfg.hover.hoverInSoundSrc, aCfg.hover.hoverInVolume || 0.15);
-    }
+    playArPhoneClickSound();
 
     return true;
   }
