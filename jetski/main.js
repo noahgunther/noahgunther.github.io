@@ -749,7 +749,7 @@ const SCENE_CONFIG = {
       hideGel: false,               // Legacy toggle (replaced by gelMaterialOverride)
       c0: '#0f380f',                // 1989 Game Boy darkest olive green
       c1: '#306230',                // Dark olive green
-      c2: '#8bac0f',                // Light olive green
+      c2: '#76930d',                // Light olive green
       c3: '#adcd1e',                // Lightest olive green
       textColor: '#ffffff',          // Classic 1989 Game Boy LCD light olive green rest color
       hoverColor: '#adcd1e',         // Bright 1989 Game Boy LCD olive green hover color
@@ -788,6 +788,15 @@ const SCENE_CONFIG = {
         type: 'lit',
         color: '#2e2e2e',          // Pure white diffuse for high luminance in Game Boy pass
         roughness: 0.1,
+        metalness: 0.0
+      },
+
+      // Mode-specific 3D AR Phone material override
+      arMaterialOverride: {
+        override: true,            // Enable phone material override for Game Boy mode
+        type: 'lit',               // 'lit' (MeshStandardMaterial) or 'unlit' (MeshBasicMaterial)
+        color: '#2e2e2e',          // Game Boy LCD light olive green tint
+        roughness: 0.25,
         metalness: 0.0
       }
     },
@@ -1367,7 +1376,12 @@ function init() {
   let arPhoneGroup = null;
   let arPhoneMesh = null;
   let arScreenMesh = null;
+  let arPhoneMaterial = null;
   let arScreenMaterial = null;
+  let arCameraMaterial = null;
+  let arCameraHouseMaterial = null;
+  let arShoesMaterial = null;
+  let arSocksMaterial = null;
   let screenEmissiveTexture = null;
   let screenHoverEmissiveTexture = null;
   let screenClickEmissiveTexture = null;
@@ -1398,6 +1412,7 @@ function init() {
   let arLegMesh = null;
   let arShoesMesh = null;
   let arSocksMesh = null;
+  let arPhoneBodyTargets = [];
   let arShadowMesh = null;
   let arShadowMaterial = null;
   let isArPhoneHovered = false;
@@ -1556,6 +1571,10 @@ function init() {
   const tmpCenterPush = new THREE.Vector3();
   const tmpArWalkDir = new THREE.Vector3();
   const tmpArCenterPush = new THREE.Vector3();
+  const tmpArAvoidVec = new THREE.Vector3();
+  const tmpArPerpVec = new THREE.Vector3();
+  const tmpArSteerVec = new THREE.Vector3();
+  const tmpArPushVec = new THREE.Vector3();
   const tmpToInsectQ = new THREE.Vector3();
   const tmpToInsectCube = new THREE.Vector3();
   const tmpAvoidVec = new THREE.Vector3();
@@ -3146,7 +3165,7 @@ function init() {
     const mCfg = aCfg.materials || {};
 
     const pMatCfg = mCfg.phone || {};
-    const arPhoneMaterial = new THREE.MeshStandardMaterial({
+    arPhoneMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(pMatCfg.color !== undefined ? pMatCfg.color : 0x1f242d),
       roughness: pMatCfg.roughness !== undefined ? pMatCfg.roughness : 0.25,
       metalness: pMatCfg.metalness !== undefined ? pMatCfg.metalness : 0.75
@@ -3194,28 +3213,28 @@ function init() {
     arScreenMaterial.emissiveMap = screenEmissiveTexture;
 
     const cMatCfg = mCfg.camera || {};
-    const arCameraMaterial = new THREE.MeshStandardMaterial({
+    arCameraMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(cMatCfg.color !== undefined ? cMatCfg.color : 0x111111),
       roughness: cMatCfg.roughness !== undefined ? cMatCfg.roughness : 0.1,
       metalness: cMatCfg.metalness !== undefined ? cMatCfg.metalness : 0.9
     });
 
     const chMatCfg = mCfg.cameraHouse || {};
-    const arCameraHouseMaterial = new THREE.MeshStandardMaterial({
+    arCameraHouseMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(chMatCfg.color !== undefined ? chMatCfg.color : 0x1a1e26),
       roughness: chMatCfg.roughness !== undefined ? chMatCfg.roughness : 0.3,
       metalness: chMatCfg.metalness !== undefined ? chMatCfg.metalness : 0.7
     });
 
     const shMatCfg = mCfg.shoes || {};
-    const arShoesMaterial = new THREE.MeshStandardMaterial({
+    arShoesMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(shMatCfg.color !== undefined ? shMatCfg.color : 0x222222),
       roughness: shMatCfg.roughness !== undefined ? shMatCfg.roughness : 0.6,
       metalness: shMatCfg.metalness !== undefined ? shMatCfg.metalness : 0.2
     });
 
     const skMatCfg = mCfg.socks || {};
-    const arSocksMaterial = new THREE.MeshStandardMaterial({
+    arSocksMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(skMatCfg.color !== undefined ? skMatCfg.color : 0xeeeeee),
       roughness: skMatCfg.roughness !== undefined ? skMatCfg.roughness : 0.8,
       metalness: skMatCfg.metalness !== undefined ? skMatCfg.metalness : 0.0
@@ -3284,6 +3303,7 @@ function init() {
               }
               return mat;
             });
+            arPhoneBodyTargets.push({ mesh: child, isMulti: true, originalMaterials: [...child.material] });
           } else if (fullName.includes('shoe')) {
             child.material = child.isSkinnedMesh ? arShoesMaterial.clone() : arShoesMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
@@ -3300,6 +3320,7 @@ function init() {
             child.material = child.isSkinnedMesh ? arCameraHouseMaterial.clone() : arCameraHouseMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
             arCameraHouseMesh = child;
+            arPhoneBodyTargets.push({ mesh: child, isMulti: false, originalMaterial: child.material });
           } else if (fullName.includes('screen')) {
             child.material = arScreenMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
@@ -3308,10 +3329,12 @@ function init() {
             child.material = child.isSkinnedMesh ? arPhoneMaterial.clone() : arPhoneMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
             arLegMesh = child;
+            arPhoneBodyTargets.push({ mesh: child, isMulti: false, originalMaterial: child.material });
           } else {
             child.material = child.isSkinnedMesh ? arPhoneMaterial.clone() : arPhoneMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
             if (!arPhoneMesh) arPhoneMesh = child;
+            arPhoneBodyTargets.push({ mesh: child, isMulti: false, originalMaterial: child.material });
           }
         }
       });
@@ -5037,6 +5060,35 @@ function init() {
         arWanderAngle = Math.atan2(walkDir.x, walkDir.z);
       }
 
+      // Avoid LinkedIn Crawling Bug
+      if (bugCubeGroup && SCENE_CONFIG.linkedin3D && SCENE_CONFIG.linkedin3D.enabled !== false) {
+        const arMinObs = getLinkedInBugMinObstacleDist();
+        const arAvoidRadius = arMinObs * 1.5;
+        const dxBug = currentPos.x - bugCubeGroup.position.x;
+        const dzBug = currentPos.z - bugCubeGroup.position.z;
+        const distBug = Math.sqrt(dxBug * dxBug + dzBug * dzBug);
+
+        if (distBug < arAvoidRadius) {
+          const tBug = Math.max(0, Math.min(1, (distBug - arMinObs) / (arAvoidRadius - arMinObs)));
+          const avoidVec = distBug < 0.001
+            ? tmpArAvoidVec.set(1, 0, 0)
+            : tmpArAvoidVec.set(dxBug, 0, dzBug).normalize();
+
+          let crossBug = avoidVec.x * walkDir.z - avoidVec.z * walkDir.x;
+          if (Math.abs(crossBug) < 0.05) {
+            crossBug = 1.0;
+          }
+
+          const perpBug = tmpArPerpVec.set(-avoidVec.z, 0, avoidVec.x);
+          if (crossBug < 0) perpBug.negate();
+
+          const steerVec = tmpArSteerVec.copy(avoidVec).multiplyScalar(0.7).addScaledVector(perpBug, 0.3).normalize();
+          const steerFactor = Math.min(1.0, (1.0 - tBug) * 0.9 * 60.0 * dt);
+          walkDir.lerp(steerVec, steerFactor).normalize();
+          arWanderAngle = Math.atan2(walkDir.x, walkDir.z);
+        }
+      }
+
       // Smoothly rotate phone to face its walking direction (including baseRadY rotation offset)!
       const targetWalkRotY = baseRadY + Math.atan2(walkDir.x, walkDir.z);
       let diffWalkY = targetWalkRotY - arPhoneGroup.rotation.y;
@@ -5049,6 +5101,25 @@ function init() {
         const speed = aCfg.speed !== undefined ? aCfg.speed : 0.008;
         const speedStep = speed * arCurrentSpeedFactor * 60.0 * dt;
         arPhoneGroup.position.addScaledVector(walkDir, speedStep);
+
+        // Physical collider against LinkedIn Bug
+        if (bugCubeGroup && SCENE_CONFIG.linkedin3D && SCENE_CONFIG.linkedin3D.enabled !== false) {
+          const arMinObs = getLinkedInBugMinObstacleDist();
+          const dxBug = arPhoneGroup.position.x - bugCubeGroup.position.x;
+          const dzBug = arPhoneGroup.position.z - bugCubeGroup.position.z;
+          const distBug = Math.sqrt(dxBug * dxBug + dzBug * dzBug);
+          if (distBug < arMinObs) {
+            let pushVec;
+            if (distBug < 0.001) {
+              const rAngle = Math.random() * Math.PI * 2;
+              pushVec = tmpArPushVec.set(Math.cos(rAngle), 0, Math.sin(rAngle));
+            } else {
+              pushVec = tmpArPushVec.set(dxBug, 0, dzBug).normalize();
+            }
+            arPhoneGroup.position.x = bugCubeGroup.position.x + pushVec.x * (arMinObs + 0.02);
+            arPhoneGroup.position.z = bugCubeGroup.position.z + pushVec.z * (arMinObs + 0.02);
+          }
+        }
 
         // Hard containment check
         const relXEsc = arPhoneGroup.position.x - baseX;
@@ -5146,9 +5217,11 @@ function init() {
   let activeDishOverrideMat = null;
   let activeGelOverrideMat = null;
   let activeAlienOverrideMat = null;
+  let activeArOverrideMat = null;
   let lastAppliedDishOverrideKey = null;
   let lastAppliedGelOverrideKey = null;
   let lastAppliedAlienOverrideKey = null;
+  let lastAppliedArOverrideKey = null;
 
   function updateDishAndGelMaterialOverrides(modeName) {
     const cfg = SCENE_CONFIG.renderStyles;
@@ -5289,6 +5362,70 @@ function init() {
           if (gamesAlienPose1Mesh) gamesAlienPose1Mesh.material = gamesMaterial;
           if (gamesAlienPop0Mesh) gamesAlienPop0Mesh.material = gamesPopMaterial;
           if (gamesAlienPop1Mesh) gamesAlienPop1Mesh.material = gamesPopMaterial;
+        }
+      }
+    }
+
+    // 4. 3D AR Phone "phone" Material Override (Game Boy & custom render mode overrides)
+    const arOv = modeCfg.arMaterialOverride || modeCfg.phoneMaterialOverride;
+    if (arPhoneBodyTargets && arPhoneBodyTargets.length > 0) {
+      if (arOv && arOv.override) {
+        const key = `${modeName}_ar_${arOv.type}_${arOv.color}_${arOv.emissive}_${arOv.emissiveIntensity}_${arOv.roughness}_${arOv.metalness}`;
+        if (lastAppliedArOverrideKey !== key) {
+          lastAppliedArOverrideKey = key;
+          const color = new THREE.Color(arOv.color || '#ffffff');
+          const emissive = new THREE.Color(arOv.emissive || '#000000');
+          const emissiveIntensity = arOv.emissiveIntensity !== undefined ? arOv.emissiveIntensity : 0.0;
+          if (arOv.type === 'unlit') {
+            activeArOverrideMat = new THREE.MeshBasicMaterial({
+              color: color,
+              skinning: true,
+              transparent: false,
+              opacity: 1.0,
+              depthWrite: true,
+              side: THREE.FrontSide
+            });
+          } else {
+            activeArOverrideMat = new THREE.MeshStandardMaterial({
+              color: color,
+              emissive: emissive,
+              emissiveIntensity: emissiveIntensity,
+              roughness: arOv.roughness !== undefined ? arOv.roughness : 0.25,
+              metalness: arOv.metalness !== undefined ? arOv.metalness : 0.0,
+              skinning: true,
+              transparent: false,
+              opacity: 1.0,
+              depthWrite: true,
+              side: THREE.FrontSide
+            });
+          }
+        }
+        arPhoneBodyTargets.forEach(target => {
+          if (target.isMulti && Array.isArray(target.mesh.material)) {
+            target.mesh.material = target.originalMaterials.map(m => {
+              const isOtherMat = (typeof arScreenMaterial !== 'undefined' && m === arScreenMaterial) ||
+                (typeof arShoesMaterial !== 'undefined' && m === arShoesMaterial) ||
+                (typeof arSocksMaterial !== 'undefined' && m === arSocksMaterial) ||
+                (typeof arCameraMaterial !== 'undefined' && m === arCameraMaterial);
+              if (!isOtherMat) {
+                return activeArOverrideMat;
+              }
+              return m;
+            });
+          } else {
+            target.mesh.material = activeArOverrideMat;
+          }
+        });
+      } else {
+        if (lastAppliedArOverrideKey !== 'default') {
+          lastAppliedArOverrideKey = 'default';
+          arPhoneBodyTargets.forEach(target => {
+            if (target.isMulti) {
+              target.mesh.material = [...target.originalMaterials];
+            } else {
+              target.mesh.material = target.originalMaterial;
+            }
+          });
         }
       }
     }
@@ -6753,9 +6890,30 @@ function init() {
         const targetAngle = Math.atan2(walkDir.x, walkDir.z);
         let diff = targetAngle - bugCubeGroup.rotation.y;
         diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-        const rotateFactor = Math.min(1.0, 0.08 * bugCurrentSpeedFactor * 60.0 * dt);
-        bugCubeGroup.rotation.y += diff * rotateFactor;
-      } else if (isInspecting && currentTarget === 'main' && loadingComplete) {
+        const turnRate = Math.min(1.0, 6.0 * dt * bugCurrentSpeedFactor);
+        bugCubeGroup.rotation.y += diff * turnRate;
+      }
+
+      // Continuous physical collider check for LinkedIn Bug (enforced continuously even during inspect pauses)
+      if (lCfg.avoidanceEnabled !== false) {
+        const minObs = getLinkedInBugMinObstacleDist();
+        if (arPhoneGroup) {
+          const dx = bugCubeGroup.position.x - arPhoneGroup.position.x;
+          const dz = bugCubeGroup.position.z - arPhoneGroup.position.z;
+          const d = Math.sqrt(dx * dx + dz * dz);
+          if (d < minObs) {
+            let pushVec;
+            if (d < 0.001) {
+              const randomAngle = Math.random() * Math.PI * 2;
+              pushVec = tmpPushVec.set(Math.cos(randomAngle), 0, Math.sin(randomAngle));
+            } else {
+              pushVec = tmpPushVec.set(dx, 0, dz).normalize();
+            }
+            bugCubeGroup.position.copy(arPhoneGroup.position).addScaledVector(pushVec, minObs + 0.02);
+          }
+        }
+      }
+      else if (isInspecting && currentTarget === 'main' && loadingComplete) {
         // Rotation sway replaced by FBX skeletal Inspect animation action
       }
 
@@ -6770,7 +6928,6 @@ function init() {
       if (bugMixer) {
         bugMixer.update(dt);
       }
-
     }
 
     // Update Boids Flocking Simulation
@@ -9472,3 +9629,4 @@ function init() {
     mainCanvas.addEventListener('click', handle3DPointerTap);
   }
 }
+
