@@ -9013,7 +9013,7 @@ function init() {
     houdiniPopStartTime = performance.now();
     houdiniRespawnStartTime = 0;
 
-    playPopSound();
+    playHoudiniPopSound();
     clearOutlines();
 
     if (!sparkleTexture) {
