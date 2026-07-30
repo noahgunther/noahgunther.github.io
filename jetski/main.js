@@ -446,16 +446,17 @@ const SCENE_CONFIG = {
     rotation: { x: 0, y: -90, z: 0 },        // Initial base rotation in degrees
     walkRadiusX: 2.2,                       // Max walk wander radius X
     walkRadiusZ: 2.2,                       // Max walk wander radius Z
-    speed: 0.006,                           // Walk movement speed per frame
+    speed: 0.004,                           // Walk movement speed per frame
     inspectEnabled: true,                   // Enable pause moments (transition to stand animation)
+    initialWalkDelay: 4000,                 // Delay before starting initial walk cycle after page load (ms)
     walkDuration: 4000,                     // Average walking duration between pauses (ms)
     pauseDuration: 3000,                     // Duration of stand pause moments (ms)
     maxTurnLeanDeg: 15,                     // Max Y rotation lean angle from camera (degrees)
     cameraTrackingSpeed: 30,               // Linear Y rotation turn speed tracking camera (deg/sec)
     hoverTurnSpeed: 400,                    // Linear Y rotation turn speed when aligning to camera on hover (deg/sec)
-    hoverWalkAnimSpeed: 6.0,                // Walk animation playback speed multiplier when hovered
+    hoverWalkAnimSpeed: 8.0,                // Walk animation playback speed multiplier when hovered
     rotationWalkAnimSpeed: 2.0,             // Walk animation playback speed multiplier during rotation to face camera
-    idleWalkAnimSpeed: 4.0,                 // Walk animation playback speed multiplier during idle random walking
+    idleWalkAnimSpeed: 2.0,                 // Walk animation playback speed multiplier during idle random walking
     minRotationDeg: 20,                     // Minimum rotation angle threshold to trigger camera facing turn (degrees)
     animTransitionDuration: 0.15,           // Fade duration for smooth animation crossfades (seconds)
     floatFrequency: 0.0,                  // Bobbing float frequency
@@ -517,7 +518,7 @@ const SCENE_CONFIG = {
     },
     clickAnimation: {
       enabled: true,                         // Enable click animation sequence
-      duration: 1200,                        // Duration of click animation sequence in ms
+      duration: 800,                        // Duration of click animation sequence in ms
       scaleMultiplier: 1.35                  // Peak scale multiplier during click animation
     },
     hover: {
@@ -1370,8 +1371,12 @@ function init() {
   let arMixer = null;
   let arWalkAction = null;
   let arNeutralAction = null;
+  let arShakeAction = null;
   let currentArWalkWeight = 0.0;
-  let arBehaviorState = 'walking'; // 'walking' | 'inspecting'
+  let currentArShakeWeight = 0.0;
+  let arBehaviorState = 'inspecting'; // 'walking' | 'inspecting'
+  let initialArPauseSet = false;
+  let initialArWalkStarted = false;
   let arWanderAngle = 0;
   let arNextPauseTime = 0;
   let arPauseEndTime = 0;
@@ -3315,9 +3320,11 @@ function init() {
       fbx.scale.set(s, s, s);
 
       if (aCfg.rotation) {
+        const baseRadY = ((aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
+        const initialFacingRotY = baseRadY + Math.PI;
         fbx.rotation.set(
           (aCfg.rotation.x || 0) * Math.PI / 180,
-          (aCfg.rotation.y || 0) * Math.PI / 180,
+          initialFacingRotY,
           (aCfg.rotation.z || 0) * Math.PI / 180
         );
       }
@@ -3352,6 +3359,15 @@ function init() {
           arNeutralAction.enabled = true;
           arNeutralAction.setEffectiveWeight(1.0);
           arNeutralAction.play();
+        }
+
+        const shakeClip = fbx.animations.find(clip => clip.name.toLowerCase().includes('shake'));
+        if (shakeClip) {
+          arShakeAction = arMixer.clipAction(shakeClip);
+          arShakeAction.setLoop(THREE.LoopRepeat, Infinity);
+          arShakeAction.enabled = true;
+          arShakeAction.setEffectiveWeight(0.0);
+          arShakeAction.play();
         }
       }
 
@@ -4892,10 +4908,20 @@ function init() {
     const isPriorityBusy = isHovered || isClickingOrRespawning;
 
     const baseRadY = ((aCfg.rotation && aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
+    const initialFacingRotY = baseRadY + Math.PI;
     // Add Math.PI (180 degrees) so front screen faces directly TOWARDS camera on hover
     const targetCamFacingRotY = baseRadY + Math.PI - sceneGroup.rotation.y;
     let diffCamY = targetCamFacingRotY - arPhoneGroup.rotation.y;
     diffCamY = Math.atan2(Math.sin(diffCamY), Math.cos(diffCamY));
+
+    if (!initialArPauseSet && typeof loadingComplete !== 'undefined' && loadingComplete) {
+      initialArPauseSet = true;
+      arBehaviorState = 'inspecting';
+      const initDelay = aCfg.initialWalkDelay !== undefined ? aCfg.initialWalkDelay : 4000;
+      arPauseEndTime = now + initDelay;
+      arNextPauseTime = arPauseEndTime + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : 4000);
+      arPhoneGroup.rotation.y = initialFacingRotY;
+    }
 
     const hoverTurnSpeedDeg = aCfg.hoverTurnSpeed !== undefined ? aCfg.hoverTurnSpeed : 260;
     const hoverTurnSpeedRad = hoverTurnSpeedDeg * Math.PI / 180;
@@ -4938,8 +4964,18 @@ function init() {
 
     // 2. IDLE RANDOM WALKING BEHAVIOR (unhovered, unclicked)
     if (arBehaviorState === 'inspecting') {
+      if (!initialArWalkStarted) {
+        // Smoothly maintain initial front-facing static rotation during page load initial delay
+        let inspectDiffY = initialFacingRotY - arPhoneGroup.rotation.y;
+        inspectDiffY = Math.atan2(Math.sin(inspectDiffY), Math.cos(inspectDiffY));
+        const inspectTurnRate = Math.min(1.0, 6.0 * dt);
+        arPhoneGroup.rotation.y += inspectDiffY * inspectTurnRate;
+      }
+      // After initial walk has started, stay facing current direction during inspect pauses!
+
       if (now >= arPauseEndTime) {
         arBehaviorState = 'walking';
+        initialArWalkStarted = true;
         const currentPos = arPhoneGroup.position;
         pickNewArWalkDirection(currentPos, walkCenter.x, walkCenter.z, walkRx, walkRz);
         arNextPauseTime = now + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : 4000);
@@ -7662,7 +7698,8 @@ function init() {
         }
       } else if (isArPhoneClickAnimating) {
         const cCfg = aCfg.clickAnimation || {};
-        const duration = cCfg.duration !== undefined ? cCfg.duration : 1200;
+        const shakeClipDurMs = (arShakeAction && arShakeAction.getClip()) ? (arShakeAction.getClip().duration * 1000) : 1200;
+        const duration = cCfg.duration !== undefined ? cCfg.duration : shakeClipDurMs;
         const elapsed = performance.now() - arPhoneClickStartTime;
         const pct = Math.min(1.0, elapsed / duration);
 
@@ -7703,45 +7740,73 @@ function init() {
       // Update AR Phone walking movement
       updateArPhoneMovement(dt);
 
-      // Update AR Phone skeletal animation mixer ('Walk' clip vs Neutral 'stand' pose)
+      // Update AR Phone skeletal animation mixer ('Walk' clip vs Neutral 'stand' pose vs Shake animation)
       if (arMixer) {
         const hoverWalkSpeed = aCfg.hoverWalkAnimSpeed !== undefined ? aCfg.hoverWalkAnimSpeed : 2.0;
         const idleWalkSpeed = aCfg.idleWalkAnimSpeed !== undefined ? aCfg.idleWalkAnimSpeed : 1.0;
         const fadeDur = aCfg.animTransitionDuration !== undefined ? aCfg.animTransitionDuration : 0.15;
+        const fadeDurMs = fadeDur * 1000;
 
         let targetWalkWeight = 0.0;
+        let targetShakeWeight = 0.0;
         let activeSpeed = 1.0;
 
-        if (isArPhoneClickAnimating || arRespawnStartTime > 0) {
+        if (isArPhoneClickAnimating) {
+          const cCfg = aCfg.clickAnimation || {};
+          const shakeClipDurMs = (arShakeAction && arShakeAction.getClip()) ? (arShakeAction.getClip().duration * 1000) : 1200;
+          const duration = cCfg.duration !== undefined ? cCfg.duration : shakeClipDurMs;
+          const elapsed = performance.now() - arPhoneClickStartTime;
+
+          // Transition into shake at start, and transition out before click duration ends
+          if (elapsed < Math.max(0, duration - fadeDurMs)) {
+            targetShakeWeight = 1.0;
+          } else {
+            targetShakeWeight = 0.0;
+          }
+          targetWalkWeight = 0.0;
+          activeSpeed = 1.0;
+        } else if (arRespawnStartTime > 0) {
+          targetShakeWeight = 0.0;
           targetWalkWeight = 0.0;
           activeSpeed = 1.0;
         } else if (isArPhoneHoverTurning) {
+          targetShakeWeight = 0.0;
           targetWalkWeight = 1.0;
           activeSpeed = hoverWalkSpeed;
         } else if (isHovered) {
+          targetShakeWeight = 0.0;
           targetWalkWeight = 0.0;
           activeSpeed = 1.0;
         } else if (arBehaviorState === 'walking') {
+          targetShakeWeight = 0.0;
           targetWalkWeight = 1.0;
           activeSpeed = idleWalkSpeed;
         } else {
+          targetShakeWeight = 0.0;
           targetWalkWeight = 0.0;
           activeSpeed = 1.0;
         }
 
         arMixer.timeScale = activeSpeed;
 
-        // Smoothly lerp current walk weight towards target walk weight
+        // Smoothly lerp current weights towards target weights
         const lerpRate = Math.min(1.0, (1.0 / Math.max(0.01, fadeDur)) * dt);
         currentArWalkWeight += (targetWalkWeight - currentArWalkWeight) * lerpRate;
+        currentArShakeWeight += (targetShakeWeight - currentArShakeWeight) * lerpRate;
+
+        const currentNeutralWeight = Math.max(0.0, 1.0 - currentArWalkWeight - currentArShakeWeight);
 
         if (arWalkAction) {
           arWalkAction.enabled = true;
           arWalkAction.setEffectiveWeight(currentArWalkWeight);
         }
+        if (arShakeAction) {
+          arShakeAction.enabled = true;
+          arShakeAction.setEffectiveWeight(currentArShakeWeight);
+        }
         if (arNeutralAction) {
           arNeutralAction.enabled = true;
-          arNeutralAction.setEffectiveWeight(1.0 - currentArWalkWeight);
+          arNeutralAction.setEffectiveWeight(currentNeutralWeight);
         }
 
         arMixer.update(dt);
@@ -8912,6 +8977,10 @@ function init() {
     body.style.setProperty('cursor', 'default');
 
     arPhoneClickStartTime = performance.now();
+
+    if (arShakeAction) {
+      arShakeAction.reset().play();
+    }
 
     // Instantly snap rotation to face camera when clicked
     const baseRadY = ((aCfg && aCfg.rotation && aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
