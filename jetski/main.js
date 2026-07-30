@@ -790,15 +790,6 @@ const SCENE_CONFIG = {
         roughness: 0.1,
         metalness: 0.0
       },
-
-      // Mode-specific 3D AR Phone material override
-      arMaterialOverride: {
-        override: true,            // Enable phone material override for Game Boy mode
-        type: 'lit',               // 'lit' (MeshStandardMaterial) or 'unlit' (MeshBasicMaterial)
-        color: '#2e2e2e',          // Game Boy LCD light olive green tint
-        roughness: 0.25,
-        metalness: 0.0
-      }
     },
 
     blueprint: {
