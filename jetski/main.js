@@ -8,6 +8,8 @@ import { RGBELoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders
 import { OBJLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/OBJLoader.js';
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.128.0/examples/jsm/utils/BufferGeometryUtils.js';
 import { FBXLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/DRACOLoader.js';
 
 // Global Three.js LoadingManager to track all 3D geometries, textures, HDR maps, and preloaded images
 const loadingManager = new THREE.LoadingManager();
@@ -322,7 +324,7 @@ const SCENE_CONFIG = {
         color: 0x000000,                    // Diffuse color tint
         emissive: 0xffffff,                  // Emissive tint
         emissiveIntensity: 1.2,             // Emissive intensity
-        emissiveMap: './graphics/grid.png', // Emissive map texture path
+        emissiveMap: './graphics/grid.webp', // Emissive map texture path
         roughness: 0.3,
         metalness: 0.1
       },
@@ -489,9 +491,9 @@ const SCENE_CONFIG = {
         color: 0x000000,                    // Glass screen dark tint
         emissive: 0xddddff,                 // Emissive display glow tint
         emissiveIntensity: 1.0,
-        emissiveMap: 'graphics/emojiface.png', // Emissive screen graphic texture path
-        hoverEmissiveMap: 'graphics/emojieyes.png', // Emissive screen hover graphic texture path
-        clickEmissiveMap: 'graphics/emojihuh.png', // Emissive screen click graphic texture path
+        emissiveMap: 'graphics/emojiface.webp', // Emissive screen graphic texture path
+        hoverEmissiveMap: 'graphics/emojieyes.webp', // Emissive screen hover graphic texture path
+        clickEmissiveMap: 'graphics/emojihuh.webp', // Emissive screen click graphic texture path
         roughness: 0.1,
         metalness: 0.0
       },
@@ -658,13 +660,13 @@ const SCENE_CONFIG = {
 
     // LOGO IMAGES MAP PER RENDER STYLE MODE
     logoImages: {
-      'default': './graphics/thumbnail_ng_logo.png',
-      'multiBit': './graphics/thumbnail_ng_logo_dithered_00.png',
-      'oneBit': './graphics/thumbnail_ng_logo_dithered_01.png',
-      'pixelated': './graphics/thumbnail_ng_logo_pixelated.png',
-      'gameBoy': './graphics/thumbnail_ng_logo_gb.png',
-      'blueprint': './graphics/thumbnail_ng_logo_outline.png',
-      'ascii': './graphics/thumbnail_ng_logo_ascii.png'
+      'default': './graphics/thumbnail_ng_logo.webp',
+      'multiBit': './graphics/thumbnail_ng_logo_dithered_00.webp',
+      'oneBit': './graphics/thumbnail_ng_logo_dithered_01.webp',
+      'pixelated': './graphics/thumbnail_ng_logo_pixelated.webp',
+      'gameBoy': './graphics/thumbnail_ng_logo_gb.webp',
+      'blueprint': './graphics/thumbnail_ng_logo_outline.webp',
+      'ascii': './graphics/thumbnail_ng_logo_ascii.webp'
     },
 
     // SOUND EFFECTS MAP PER RENDER STYLE MODE
@@ -851,7 +853,7 @@ const SCENE_CONFIG = {
 
 // Texture loading helper: respects SCENE_CONFIG.textures.disabled and per-entity unloadedColor
 // When textures.disabled = true: returns null (no texture) and sets specified material color property ('color' or 'emissive') to unloadedColor
-// When textures.disabled = false: loads the texture normally without tinting material color
+// When textures.disabled = false: loads the texture normally; if texture loading fails (404/missing), falls back to unloadedColor
 function loadColorMap(loader, path, material, entityColor, colorProperty = 'color') {
   const tCfg = SCENE_CONFIG.textures || {};
   const unloadedColor = entityColor || tCfg.unloadedColor || '#888888';
@@ -864,19 +866,36 @@ function loadColorMap(loader, path, material, entityColor, colorProperty = 'colo
     return null;
   }
 
-  // Textures enabled — load texture normally and pre-initialize GPU texture buffer
-  return loader.load(path, (tex) => {
-    if (typeof renderer !== 'undefined' && renderer && renderer.initTexture) {
-      try { renderer.initTexture(tex); } catch (e) {}
+  const mapProp = colorProperty === 'color' ? 'map' : (colorProperty === 'emissive' ? 'emissiveMap' : colorProperty);
+
+  // Textures enabled — load texture normally and handle error fallbacks
+  return loader.load(
+    path,
+    (tex) => {
+      if (typeof renderer !== 'undefined' && renderer && renderer.initTexture) {
+        try { renderer.initTexture(tex); } catch (e) {}
+      }
+    },
+    undefined,
+    (err) => {
+      console.warn(`[loadColorMap] Failed to load texture "${path}". Applying unloaded color (${unloadedColor}).`);
+      if (material) {
+        if (material[mapProp] !== undefined) {
+          material[mapProp] = null;
+        }
+        if (material[colorProperty] && unloadedColor !== null && unloadedColor !== undefined) {
+          material[colorProperty].set(unloadedColor);
+        }
+        material.needsUpdate = true;
+      }
     }
-    if (typeof onLoad === 'function') onLoad(tex);
-  });
+  );
 }
 
 /* Initial settings */
 
 // Logo
-const noahLogoSrc = './graphics/thumbnail_ng_logo.png';
+const noahLogoSrc = './graphics/thumbnail_ng_logo.webp';
 document.getElementById("logo").href = noahLogoSrc;
 
 function applyMaskToElement(el, src) {
@@ -919,9 +938,7 @@ function preloadLogoImages() {
   }
 }
 preloadLogoImages();
-preloadImage('./graphics/portrait.png');
-// preloadImage('./graphics/phoneback.png');
-// preloadImage('./graphics/phonewidgeticons.png');
+preloadImage('./graphics/portrait.webp');
 
 document.getElementById("title").innerHTML = 'Noah Gunther | Portfolio';
 
@@ -930,46 +947,12 @@ const mainNavLinksContents = '<div id="houdini" class="link" style="pointer-even
 document.getElementById("mainnavlinks").innerHTML = mainNavLinksContents;
 
 // Mobile nav links
-const mobileNavLinksContents = '<div class="mobilemenuwrapper"><div class="mobilelinkwrapper"><div id="aboutmobile" class="mobilelink">About</div></div> <div class="mobilelinkwrapper"><div id="armobile" class="mobilelink">AR</div></div> <div class="mobilelinkwrapper"><div id="gamesmobile" class="mobilelink">Games</div></div> <div class="mobilelinkwrapper"><div id="webmobile" class="mobilelink">Web</div></div> <div class="mobilelinkwrapper"><div id="houdinimobile" class="mobilelink">Houdini</div></div></div><div id="linkedin-mobile-wrapper"><a id="linkedin-mobile" href="https://www.linkedin.com/in/noah-gunther-3128bb185/" target="_blank"><div id="linkedin-mobile-icon" class="logo-tint-mask" style="-webkit-mask-image: url(\'graphics/li_logo_white.png\'); mask-image: url(\'graphics/li_logo_white.png\'); width: 100%; height: 100%;"></div></a></div>';
+const mobileNavLinksContents = '<div class="mobilemenuwrapper"><div class="mobilelinkwrapper"><div id="aboutmobile" class="mobilelink">About</div></div> <div class="mobilelinkwrapper"><div id="armobile" class="mobilelink">AR</div></div> <div class="mobilelinkwrapper"><div id="gamesmobile" class="mobilelink">Games</div></div> <div class="mobilelinkwrapper"><div id="webmobile" class="mobilelink">Web</div></div> <div class="mobilelinkwrapper"><div id="houdinimobile" class="mobilelink">Houdini</div></div></div><div id="linkedin-mobile-wrapper"><a id="linkedin-mobile" href="https://www.linkedin.com/in/noah-gunther-3128bb185/" target="_blank"><div id="linkedin-mobile-icon" class="logo-tint-mask" style="-webkit-mask-image: url(\'graphics/li_logo_white.webp\'); mask-image: url(\'graphics/li_logo_white.webp\'); width: 100%; height: 100%;"></div></a></div>';
 document.getElementById("mobilenavlinks").innerHTML = mobileNavLinksContents;
 
 // Plain text icon
-const plainTextIconSrc = './graphics/plaintexticon.png';
 
-// Phone UI background videos (disabled for current build)
-// const alienAttackPreviewUrl = './meta_ar_captures/AlienAttack.mp4';
-// const friendsSpacewalkPreviewUrl = './meta_ar_captures/FriendsSpacewalk.mp4';
 
-/* Get browser and os */
-var browserId = 'unknown';
-var osId = 'unknown';
-function getBrowser() {
-  const ua = navigator.userAgent.toLowerCase();
-  if ((ua.indexOf("opera") || navigator.userAgent.indexOf('OPR')) != -1) {
-    browserId = 'opera';
-  } else if (ua.indexOf("edg") != -1) {
-    browserId = 'edge';
-  } else if (ua.indexOf("chrome") != -1) {
-    browserId = 'chrome';
-  } else if (ua.indexOf("safari") != -1) {
-    browserId = 'safari';
-  } else if (ua.indexOf("firefox") != -1) {
-    browserId = 'firefox';
-  } else if ((ua.indexOf("msie") != -1) || (!!document.documentMode == true)) {
-    browserId = 'ie';
-  }
-
-  if (ua.indexOf("windows") != -1) {
-    osId = 'windows';
-  } else if (ua.indexOf("mac") != -1) {
-    osId = 'osx';
-  } else if (ua.indexOf("linux") != -1) {
-    osId = 'linux';
-  } else if (ua.indexOf("android") != -1) {
-    osId = 'android';
-  }
-}
-getBrowser();
 
 /* Animation timeout helper */
 function requestTimeout(callback, delay) {
@@ -1226,7 +1209,7 @@ function init() {
   aboutPanelContent.innerHTML = `
     <h1 class="about-panel__title">About</h1>
     <div class="about-panel__portrait-wrapper">
-      <img src="./graphics/portrait.png" alt="Noah Gunther Self Portrait" class="about-panel__portrait" />
+      <img src="./graphics/portrait.webp" alt="Noah Gunther Self Portrait" class="about-panel__portrait" />
     </div>
     <p class="about-panel__email"><a href="mailto:noah.gunther@gmail.com">noah.gunther@gmail.com</a></p>
     <p class="about-panel__body">I'm a Technical Artist and Creative Coder with a focus on 3D graphics and rendering. I've worked in web development, VR, mobile AR, game development, and offline rendered video.</p>
@@ -1256,7 +1239,27 @@ function init() {
   // ==========================================
   const canvas = document.getElementById('bg');
 
-  // Outer scope declarations to resolve Temporal Dead Zone (TDZ) ReferenceErrors
+  // Outer scope declarations to resolve Temporal Dead Zone (TDZ) ReferenceErrors and prevent GC pressure in animate()
+  const staticBoidUpVector = new THREE.Vector3(0, 1, 0);
+  const staticBaseEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+  const staticBaseQuat = new THREE.Quaternion();
+  const staticSwayEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+  const staticSwayQuat = new THREE.Quaternion();
+  const staticFinalQuat = new THREE.Quaternion();
+  const staticLocalPivot = new THREE.Vector3();
+  const staticRotatedLocalPivot = new THREE.Vector3();
+  const staticPivotShift = new THREE.Vector3();
+
+  const staticGodRayGlobeCenterWorld = new THREE.Vector3();
+  const staticGodRayGlobeCenterScene = new THREE.Vector3();
+  const staticGodRayRayWorldPos = new THREE.Vector3();
+  const staticGodRayWorldDir = new THREE.Vector3();
+  const staticGodRayCamDir = new THREE.Vector3();
+  const staticGodRaySideVec = new THREE.Vector3();
+  const staticGodRayNormVec = new THREE.Vector3();
+  const staticGodRayWorldMat = new THREE.Matrix4();
+  const staticGodRayParentInvMat = new THREE.Matrix4();
+
   let plateTargetPos;
   let plateTargetRot;
   let plate = null;
@@ -1265,6 +1268,12 @@ function init() {
   let mouse = new THREE.Vector2(-9999, -9999);
   let lastClientX = -9999;
   let lastClientY = -9999;
+  var cachedPointerX = -99999;
+  var cachedPointerY = -99999;
+  var cachedIsPointerOver2DUI = false;
+  var staticHitMouse = new THREE.Vector2();
+  var staticDishMouse = new THREE.Vector2();
+  var staticDragRaycaster = new THREE.Raycaster();
   let active3DPointerDownTarget = null;
   let linkHoveredAbout = false;
   let linkHoveredHoudini = false;
@@ -2207,7 +2216,6 @@ function init() {
   // ==========================================
   let plateShader;
   let gelShader;
-  let qboxShader;
   // Custom uniforms for the rainbow overlay effect
   const rainbowUniforms = {
     uTime: { value: 0.0 },
@@ -2428,73 +2436,7 @@ function init() {
     });
   }
 
-  let pickNewBugTarget = null;
   if (SCENE_CONFIG.linkedin3D.enabled !== false) {
-    // Helper to pick a new safe random wander target for the LinkedIn cube
-    pickNewBugTarget = () => {
-      const { rx: walkRx, rz: walkRz } = getLinkedInBugWalkRadius();
-      const minObs = getLinkedInBugMinObstacleDist();
-      const bugPos = getLinkedInBugInitialPos();
-
-      let attempts = 0;
-      while (attempts < 100) {
-        let collides = false;
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random(); // uniformly distributed distance factor
-        const x = Math.cos(angle) * dist * walkRx;
-        const z = Math.sin(angle) * dist * walkRz;
-
-        // Avoid Question Box
-        const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
-        const dxQ = x - qBoxPos.x;
-        const dzQ = z - qBoxPos.z;
-        const qBoxDist = Math.sqrt(dxQ * dxQ + dzQ * dzQ);
-        if (qBoxDist < minObs) {
-          collides = true;
-        }
-
-        // Avoid Houdini Toy
-        if (houdiniToyGroup) {
-          const dx = x - houdiniToyGroup.position.x;
-          const dz = z - houdiniToyGroup.position.z;
-          const d = Math.sqrt(dx * dx + dz * dz);
-          if (d < minObs) {
-            collides = true;
-          }
-        }
-
-        // Avoid Web Globe
-        if (webGlobeGroup) {
-          const dx = x - webGlobeGroup.position.x;
-          const dz = z - webGlobeGroup.position.z;
-          const d = Math.sqrt(dx * dx + dz * dz);
-          if (d < minObs) {
-            collides = true;
-          }
-        }
-
-        // Avoid Games Alien
-        if (gamesAlienGroup) {
-          const dx = x - gamesAlienGroup.position.x;
-          const dz = z - gamesAlienGroup.position.z;
-          const d = Math.sqrt(dx * dx + dz * dz);
-          if (d < minObs) {
-            collides = true;
-          }
-        }
-
-        if (collides) {
-          attempts++;
-          continue;
-        }
-
-        return new THREE.Vector3(x, bugPos.y, z);
-      }
-
-      // Fallback point
-      return new THREE.Vector3(walkRx * 0.5, bugPos.y, 0);
-    };
-
     // Create bright red boundary ring visualizer at y=0 (gel surface) using EllipseCurve
     const visualShadowBaseY = SCENE_CONFIG.questionBox.shadowY !== undefined ? SCENE_CONFIG.questionBox.shadowY : 0.22;
     const { rx: walkRx, rz: walkRz } = getLinkedInBugWalkRadius();
@@ -2616,7 +2558,7 @@ function init() {
       roughness: 1.0,
       metalness: 0.0
     });
-    const bugTexture = loadColorMap(new THREE.TextureLoader(loadingManager), 'graphics/li_logo_blue.png', bugMaterial, SCENE_CONFIG.linkedin3D.unloadedColor);
+    const bugTexture = loadColorMap(new THREE.TextureLoader(loadingManager), 'graphics/li_logo_blue.webp', bugMaterial, SCENE_CONFIG.linkedin3D.unloadedColor);
     if (bugTexture) bugTexture.encoding = THREE.sRGBEncoding;
     bugMaterial.map = bugTexture;
 
@@ -2703,7 +2645,7 @@ function init() {
       // Create shadow under the LinkedIn block
       const lOpacity = SCENE_CONFIG.linkedin3D.shadowOpacity !== undefined ? SCENE_CONFIG.linkedin3D.shadowOpacity : 0.85;
       linkedinShadowMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader(loadingManager).load('graphics/shadow.png'),
+        map: new THREE.TextureLoader(loadingManager).load('graphics/shadow.webp'),
         transparent: true,
         opacity: lOpacity,
         depthWrite: false,
@@ -2739,14 +2681,14 @@ function init() {
   const fbxLoader = new FBXLoader(loadingManager);
   fbxLoader.setResourcePath('graphics/');
   const textureLoader = new THREE.TextureLoader(loadingManager);
-  const dotsNormalMap = textureLoader.load('graphics/dots_normals.png');
+  const dotsNormalMap = textureLoader.load('graphics/dots_normals.webp');
 
   // Set texture wrap and filtering for normal map
   dotsNormalMap.wrapS = THREE.RepeatWrapping;
   dotsNormalMap.wrapT = THREE.RepeatWrapping;
 
   // Load and construct contact shadow plane below the question box
-  const shadowTexture = textureLoader.load('graphics/shadow.png');
+  const shadowTexture = textureLoader.load('graphics/shadow.webp');
   const qOpacity = SCENE_CONFIG.questionBox.shadowOpacity !== undefined ? SCENE_CONFIG.questionBox.shadowOpacity : 0.85;
   shadowMaterial = new THREE.MeshBasicMaterial({
     map: shadowTexture,
@@ -2800,7 +2742,7 @@ function init() {
       opacity: 1.0,
       side: THREE.DoubleSide
     });
-    fbxPlaneMaterial.map = loadColorMap(textureLoader, 'graphics/question.png', fbxPlaneMaterial, SCENE_CONFIG.questionBox.unloadedColor);
+    fbxPlaneMaterial.map = loadColorMap(textureLoader, 'graphics/question.webp', fbxPlaneMaterial, SCENE_CONFIG.questionBox.unloadedColor);
 
     fbxLoader.load('geometry/question_box.fbx', (fbx) => {
       fbx.traverse((child) => {
@@ -2839,10 +2781,6 @@ function init() {
         fbx.scale.set(s, s, s);
       }
 
-      // Log size for debugging
-      const box3 = new THREE.Box3().setFromObject(fbx);
-      const sizeVec = new THREE.Vector3();
-      box3.getSize(sizeVec);
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
@@ -2851,7 +2789,7 @@ function init() {
 
   // Load rubbertoy textures and FBX
   if (SCENE_CONFIG.houdini3D && SCENE_CONFIG.houdini3D.enabled !== false) {
-    const toySpecularMap = textureLoader.load('graphics/toyspeclowres.png');
+    const toySpecularMap = textureLoader.load('graphics/toyspeclowres.webp');
 
     const matCfg = SCENE_CONFIG.houdini3D.material || {};
     toyMaterial = new THREE.MeshPhongMaterial({
@@ -2862,12 +2800,12 @@ function init() {
       morphTargets: true,
       skinning: true
     });
-    const toyBaseColorMap = loadColorMap(textureLoader, 'graphics/toylowres.png', toyMaterial, SCENE_CONFIG.houdini3D.unloadedColor);
+    const toyBaseColorMap = loadColorMap(textureLoader, 'graphics/toylowres.webp', toyMaterial, SCENE_CONFIG.houdini3D.unloadedColor);
     if (toyBaseColorMap) toyBaseColorMap.encoding = THREE.sRGBEncoding;
     toyMaterial.map = toyBaseColorMap;
 
     // Create shadow plane for the rubber toy
-    const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const shadowTexture = textureLoader.load('graphics/shadow.webp');
     const hOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
     houdiniShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -2942,7 +2880,7 @@ function init() {
       roughness: gMatCfg.roughness !== undefined ? gMatCfg.roughness : 0.2,
       metalness: gMatCfg.metalness !== undefined ? gMatCfg.metalness : 0.1
     });
-    const gridTexture = loadColorMap(textureLoader, (mCfg.grid && mCfg.grid.emissiveMap) || 'graphics/grid.png', webGridMaterial, SCENE_CONFIG.web3D.unloadedColor, 'emissive');
+    const gridTexture = loadColorMap(textureLoader, (mCfg.grid && mCfg.grid.emissiveMap) || 'graphics/grid.webp', webGridMaterial, SCENE_CONFIG.web3D.unloadedColor, 'emissive');
     webGridMaterial.emissiveMap = gridTexture;
 
     const aMatCfg = mCfg.antenna || {};
@@ -2971,7 +2909,7 @@ function init() {
     });
 
     // Contact shadow plane for the Web Globe
-    const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const shadowTexture = textureLoader.load('graphics/shadow.webp');
     const wOpacity = wCfg.shadowOpacity !== undefined ? wCfg.shadowOpacity : 0.85;
     webShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3040,10 +2978,6 @@ function init() {
         );
       }
 
-      // Log bounding box for scale verification
-      const box3 = new THREE.Box3().setFromObject(fbx);
-      const sizeVec = new THREE.Vector3();
-      box3.getSize(sizeVec);
 
       sceneGroup.add(fbx);
     }, undefined, (error) => {
@@ -3069,7 +3003,7 @@ function init() {
     });
 
     // Contact shadow plane for the Games Alien
-    const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const shadowTexture = textureLoader.load('graphics/shadow.webp');
     const gOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
     gamesShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3141,10 +3075,6 @@ function init() {
         );
       }
 
-      const box3 = new THREE.Box3().setFromObject(fbx);
-      const sizeVec = new THREE.Vector3();
-      box3.getSize(sizeVec);
-
       sceneGroup.add(fbx);
     }, undefined, (error) => {
     });
@@ -3173,7 +3103,7 @@ function init() {
     });
     screenEmissiveTexture = loadColorMap(
       textureLoader,
-      (sMatCfg && sMatCfg.emissiveMap) || 'graphics/emojiface.png',
+      (sMatCfg && sMatCfg.emissiveMap) || 'graphics/emojiface.webp',
       arScreenMaterial,
       SCENE_CONFIG.ar3D.unloadedColor,
       'emissive'
@@ -3183,7 +3113,7 @@ function init() {
     }
     screenHoverEmissiveTexture = loadColorMap(
       textureLoader,
-      (sMatCfg && sMatCfg.hoverEmissiveMap) || 'graphics/emojieyes.png',
+      (sMatCfg && sMatCfg.hoverEmissiveMap) || 'graphics/emojieyes.webp',
       arScreenMaterial,
       SCENE_CONFIG.ar3D.unloadedColor,
       'emissive'
@@ -3193,7 +3123,7 @@ function init() {
     }
     screenClickEmissiveTexture = loadColorMap(
       textureLoader,
-      (sMatCfg && sMatCfg.clickEmissiveMap) || 'graphics/emojihuh.png',
+      (sMatCfg && sMatCfg.clickEmissiveMap) || 'graphics/emojihuh.webp',
       arScreenMaterial,
       SCENE_CONFIG.ar3D.unloadedColor,
       'emissive'
@@ -3232,7 +3162,7 @@ function init() {
     });
 
     // Contact shadow plane for the 3D AR Phone
-    const shadowTexture = textureLoader.load('graphics/shadow.png');
+    const shadowTexture = textureLoader.load('graphics/shadow.webp');
     const aOpacity = aCfg.shadowOpacity !== undefined ? aCfg.shadowOpacity : 0.66;
     arShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3422,37 +3352,7 @@ function init() {
   let startSpinRotation = 0;
   let lastRotationX = 0;
 
-  // Helper to render text labels onto CanvasTextures
-  function createTextTexture(text, textColor) {
-    const textCanvas = document.createElement('canvas');
-    textCanvas.width = 512;
-    textCanvas.height = 512;
-    const ctx = textCanvas.getContext('2d');
 
-    // Fill soft dark radial gradient background
-    const grad = ctx.createRadialGradient(256, 256, 10, 256, 256, 360);
-    grad.addColorStop(0, '#1c122c');
-    grad.addColorStop(1, '#0c0514');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 512, 512);
-
-    // Dynamic colored border
-    ctx.strokeStyle = textColor;
-    ctx.lineWidth = 16;
-    ctx.strokeRect(15, 15, 482, 482);
-
-    // Text Label in the center
-    ctx.font = 'bold 72px "IBM Plex Mono", monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = textColor;
-    ctx.shadowBlur = 15;
-    ctx.fillText(text, 256, 256);
-
-    const texture = new THREE.CanvasTexture(textCanvas);
-    return texture;
-  }
 
   // Helper to generate a placeholder star/sparkle CanvasTexture
   function createPlaceholderSparkleTexture() {
@@ -3580,11 +3480,6 @@ function init() {
   `;
   phoneScreenScrollWrapper.innerHTML = phoneScreenContents;
 
-  // const arGamesDivBackground = document.getElementById("argamesdivback");
-  // if (arGamesDivBackground && typeof alienAttackPreviewUrl !== 'undefined') arGamesDivBackground.innerHTML = '<video autoplay loop muted playsinline preload="metadata" disablePictureInPicture> <source type="video/mp4" src="' + alienAttackPreviewUrl + '#t=0.1"> </video>';
-
-  // const socialArDivBackground = document.getElementById("socialardivback");
-  // if (socialArDivBackground && typeof friendsSpacewalkPreviewUrl !== 'undefined') socialArDivBackground.innerHTML = '<video autoplay loop muted playsinline preload="metadata" disablePictureInPicture> <source type="video/mp4" src="' + friendsSpacewalkPreviewUrl + '#t=0.1"> </video>';
 
   arGamesButton = document.getElementById('viewargamesbutton');
   socialArButton = document.getElementById('viewsocialarbutton');
@@ -3964,9 +3859,6 @@ function init() {
     });
   }
 
-  function playLogoPress() {
-    // Logo bounce animation removed on click
-  }
 
   function startQuestionBoxRespawn() {
     if (questionBoxGroup) {
@@ -4081,7 +3973,7 @@ function init() {
 
   function updateLogoImageForRenderMode(modeName) {
     const cfg = SCENE_CONFIG.renderStyles;
-    let targetSrc = './graphics/thumbnail_ng_logo.png';
+    let targetSrc = './graphics/thumbnail_ng_logo.webp';
 
     if (cfg && cfg.logoImages && cfg.logoImages[modeName]) {
       targetSrc = cfg.logoImages[modeName];
@@ -4857,7 +4749,7 @@ function init() {
     };
   }
 
-  function applyHoverTarget(targetType, targetObject) {
+  function applyHoverTarget(targetType) {
     if (!targetType) {
       clearOutlines();
       body.style.setProperty('cursor', 'default');
@@ -4938,7 +4830,7 @@ function init() {
     arNextPauseTime = arPauseEndTime + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : (Math.random() * 4000 + 3000));
   }
 
-  function pickNewArWalkDirection(currentPos, baseX, baseZ, walkRx, walkRz) {
+  function pickNewArWalkDirection(currentPos, baseX, baseZ) {
     const relX = currentPos.x - baseX;
     const relZ = currentPos.z - baseZ;
     const centerAngle = Math.atan2(-relX, -relZ);
@@ -5028,7 +4920,7 @@ function init() {
         arBehaviorState = 'walking';
         initialArWalkStarted = true;
         const currentPos = arPhoneGroup.position;
-        pickNewArWalkDirection(currentPos, walkCenter.x, walkCenter.z, walkRx, walkRz);
+        pickNewArWalkDirection(currentPos, walkCenter.x, walkCenter.z);
         arNextPauseTime = now + (aCfg.walkDuration !== undefined ? aCfg.walkDuration : 4000);
       }
     } else if (arBehaviorState === 'walking') {
@@ -5530,7 +5422,7 @@ function init() {
     const shadowGeo = new THREE.PlaneGeometry(size * 2.2 * shadowScale, length * 1.5 * shadowScale);
     shadowGeo.rotateX(-Math.PI / 2); // lie flat on XZ plane
 
-    const shadowMap = new THREE.TextureLoader(loadingManager).load('graphics/shadow.png');
+    const shadowMap = new THREE.TextureLoader(loadingManager).load('graphics/shadow.webp');
     const shadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowMap,
       transparent: true,
@@ -5693,7 +5585,7 @@ function init() {
     // Mouse Cursor World Position Raycasting
     let isCursorValid = false;
     if (mouse && mouse.x > -900 && camera && raycaster) {
-      tmpCursorPlane.set(new THREE.Vector3(0, 1, 0), -yHeight);
+      tmpCursorPlane.set(staticBoidUpVector, -yHeight);
       tmpCursorRay.setFromCamera(mouse, camera);
       const hitCursor = tmpCursorRay.ray.intersectPlane(tmpCursorPlane, tmpCursorWorldPos);
       if (hitCursor) {
@@ -6165,7 +6057,6 @@ function init() {
     // Raycast for hover state (only active on non-mobile devices when interaction is enabled, on main page, once loaded, and when about panel is closed)
     if (!isMobileBrowser && canInteract && currentTarget === 'main' && loadingComplete && !aboutOverlayVisible && !aboutOverlayAnimating) {
       let hoverTargetType = null;
-      let hoverTargetObject = null;
 
       if (linkHoveredAbout && questionBoxGroup && respawnStartTime === 0) {
         hoverTargetType = 'questionBox';
@@ -6270,7 +6161,7 @@ function init() {
       isWebGlobeHovered = hoverTargetType === 'webGlobe';
       isGamesAlienHovered = hoverTargetType === 'gamesAlien';
       isBugCubeHovered = hoverTargetType === 'bug';
-      applyHoverTarget(hoverTargetType, hoverTargetObject);
+      applyHoverTarget(hoverTargetType);
     } else {
       isQBoxHovered = false;
       isArPhoneHovered = false;
@@ -6593,10 +6484,6 @@ function init() {
     if (bugCubeGroup && isBugModelLoaded && SCENE_CONFIG.linkedin3D && SCENE_CONFIG.linkedin3D.enabled !== false) {
       const lCfg = SCENE_CONFIG.linkedin3D;
       const now = performance.now();
-      const minObs = getLinkedInBugMinObstacleDist();
-      const walkRx = lCfg.walkRadiusX !== undefined ? lCfg.walkRadiusX : 2.2;
-      const walkRz = lCfg.walkRadiusZ !== undefined ? lCfg.walkRadiusZ : 1.1;
-
       const isInspecting = (lCfg.inspectEnabled !== false) && (now < bugPauseEndTime);
       const isWalkTargetActive = (currentTarget === 'main' && loadingComplete && !isInspecting && bugBehaviorState !== 'falling' && bugBehaviorState !== 'standing');
 
@@ -6904,10 +6791,6 @@ function init() {
           }
         }
       }
-      else if (isInspecting && currentTarget === 'main' && loadingComplete) {
-        // Rotation sway replaced by FBX skeletal Inspect animation action
-      }
-
       // Apply scaling logic (frame-rate independent lerp)
       const bugBaseScale = lCfg.scale || 0.4;
       const bugTargetScale = bugBaseScale * targetScale;
@@ -6999,12 +6882,10 @@ function init() {
         sceneGroup.remove(shatterGroup);
 
         // Clean up unique geometries and materials
-        const uniqueGeoms = new Set();
         shatterShards.forEach((shard) => {
           if (shard.geometry) shard.geometry.dispose();
           if (shard.material) shard.material.dispose();
         });
-        uniqueGeoms.forEach((g) => g.dispose());
 
         shatterSparkles.forEach((sparkle) => {
           if (sparkle.geometry) sparkle.geometry.dispose();
@@ -7447,9 +7328,9 @@ function init() {
         const baseRotY = (hCfg.rotation && hCfg.rotation.y !== undefined ? hCfg.rotation.y : 210) * (Math.PI / 180);
         const baseRotZ = (hCfg.rotation && hCfg.rotation.z !== undefined ? hCfg.rotation.z : 0) * (Math.PI / 180);
 
-        const baseQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(baseRotX, baseRotY, baseRotZ, 'YXZ'));
-        let finalQuaternion = baseQuaternion.clone();
-        const pivotShift = new THREE.Vector3(0, 0, 0);
+        staticBaseEuler.set(baseRotX, baseRotY, baseRotZ, 'YXZ');
+        staticBaseQuat.setFromEuler(staticBaseEuler);
+        staticPivotShift.set(0, 0, 0);
 
         if (isSwayEnabled) {
           const nowTime = performance.now() * 0.001;
@@ -7492,21 +7373,23 @@ function init() {
             else swayYRad = rad;
           }
 
-          const localEuler = new THREE.Euler(swayXRad, swayYRad, swayZRad, 'YXZ');
-          const swayQuaternion = new THREE.Quaternion().setFromEuler(localEuler);
+          staticSwayEuler.set(swayXRad, swayYRad, swayZRad, 'YXZ');
+          staticSwayQuat.setFromEuler(staticSwayEuler);
 
           // Apply sway rotation in object's local coordinate frame
-          finalQuaternion = baseQuaternion.clone().multiply(swayQuaternion);
+          staticFinalQuat.copy(staticBaseQuat).multiply(staticSwayQuat);
 
           const pX = (swayCfg.pivotOffset && swayCfg.pivotOffset.x) || 0.0;
           const pY = (swayCfg.pivotOffset && swayCfg.pivotOffset.y) || 0.0;
           const pZ = (swayCfg.pivotOffset && swayCfg.pivotOffset.z) || 0.0;
 
           if (pY !== 0 || pX !== 0 || pZ !== 0) {
-            const localPivot = new THREE.Vector3(pX, pY, pZ);
-            const rotatedLocalPivot = localPivot.clone().applyQuaternion(swayQuaternion);
-            pivotShift.copy(rotatedLocalPivot.sub(localPivot)).applyQuaternion(baseQuaternion);
+            staticLocalPivot.set(pX, pY, pZ);
+            staticRotatedLocalPivot.copy(staticLocalPivot).applyQuaternion(staticSwayQuat);
+            staticPivotShift.copy(staticRotatedLocalPivot.sub(staticLocalPivot)).applyQuaternion(staticBaseQuat);
           }
+        } else {
+          staticFinalQuat.copy(staticBaseQuat);
         }
 
         // Normal position & orientation updates (applied continuously during idling, hover, and regrow)
@@ -7516,11 +7399,11 @@ function init() {
         const baseZ = (houdiniToyGroup.userData.baseZ !== undefined) ? houdiniToyGroup.userData.baseZ : hCfg.desktop.position.z;
 
         houdiniToyGroup.position.set(
-          baseX + pivotShift.x,
-          baseY + (hoverOffsetVal * nextInfluence) + pivotShift.y,
-          baseZ + pivotShift.z
+          baseX + staticPivotShift.x,
+          baseY + (hoverOffsetVal * nextInfluence) + staticPivotShift.y,
+          baseZ + staticPivotShift.z
         );
-        houdiniToyGroup.quaternion.copy(finalQuaternion);
+        houdiniToyGroup.quaternion.copy(staticFinalQuat);
 
         if (houdiniRespawnStartTime > 0) {
           // Scale is handled by the regrow loop!
@@ -7899,7 +7782,7 @@ function init() {
 
         if (pct >= 1.0) {
           isArPhoneClickAnimating = false;
-          // Swap texture back to emojiface.png
+          // Swap texture back to emojiface.webp
           if (screenEmissiveTexture) {
             setArScreenEmissiveTexture(screenEmissiveTexture);
           }
@@ -7972,7 +7855,6 @@ function init() {
           activeSpeed = idleWalkSpeed;
         } else {
           targetShakeWeight = 0.0;
-          targetShakeWeight = 0.0;
           activeSpeed = 1.0;
         }
 
@@ -8029,22 +7911,16 @@ function init() {
 
       // 2. God rays particle animation in a single burst fading out (no scale change)
       if (webGodRayGroup && webGodRays.length > 0) {
-        const globeCenterWorld = new THREE.Vector3();
         if (webGlobeMesh) {
-          webGlobeMesh.getWorldPosition(globeCenterWorld);
+          webGlobeMesh.getWorldPosition(staticGodRayGlobeCenterWorld);
         } else if (webGlobeGroup) {
-          webGlobeGroup.getWorldPosition(globeCenterWorld);
+          webGlobeGroup.getWorldPosition(staticGodRayGlobeCenterWorld);
         }
-        const globeCenterScene = sceneGroup.worldToLocal(globeCenterWorld.clone());
-        webGodRayGroup.position.copy(globeCenterScene);
-
-        const rayWorldPos = new THREE.Vector3();
-        const worldDir = new THREE.Vector3();
-        const camDir = new THREE.Vector3();
-        const sideVec = new THREE.Vector3();
-        const normVec = new THREE.Vector3();
-        const worldMat = new THREE.Matrix4();
-        const parentInvMat = new THREE.Matrix4();
+        staticGodRayGlobeCenterScene.copy(staticGodRayGlobeCenterWorld);
+        if (sceneGroup) {
+          sceneGroup.worldToLocal(staticGodRayGlobeCenterScene);
+        }
+        webGodRayGroup.position.copy(staticGodRayGlobeCenterScene);
 
         webGodRays.forEach((ray) => {
           const dir = ray.userData.direction;
@@ -8058,29 +7934,29 @@ function init() {
           ray.position.set(dir.x * dist, dir.y * dist, dir.z * dist);
 
           // Get world position of ray and direction in world space
-          ray.getWorldPosition(rayWorldPos);
-          worldDir.copy(dir).transformDirection(sceneGroup.matrixWorld).normalize();
+          ray.getWorldPosition(staticGodRayRayWorldPos);
+          staticGodRayWorldDir.copy(dir).transformDirection(sceneGroup.matrixWorld).normalize();
 
           // Camera direction from ray world position
-          camDir.subVectors(camera.position, rayWorldPos).normalize();
+          staticGodRayCamDir.subVectors(camera.position, staticGodRayRayWorldPos).normalize();
 
           // Calculate Z axis facing camera (perpendicular component of camDir relative to worldDir)
-          const dot = camDir.dot(worldDir);
-          normVec.copy(camDir).addScaledVector(worldDir, -dot);
-          if (normVec.lengthSq() < 0.0001) {
-            normVec.set(0, 0, 1).addScaledVector(worldDir, -worldDir.z);
+          const dot = staticGodRayCamDir.dot(staticGodRayWorldDir);
+          staticGodRayNormVec.copy(staticGodRayCamDir).addScaledVector(staticGodRayWorldDir, -dot);
+          if (staticGodRayNormVec.lengthSq() < 0.0001) {
+            staticGodRayNormVec.set(0, 0, 1).addScaledVector(staticGodRayWorldDir, -staticGodRayWorldDir.z);
           }
-          normVec.normalize();
+          staticGodRayNormVec.normalize();
 
           // X axis = Y (worldDir) cross Z (normVec)
-          sideVec.crossVectors(worldDir, normVec).normalize();
+          staticGodRaySideVec.crossVectors(staticGodRayWorldDir, staticGodRayNormVec).normalize();
 
           // Set basis: Column 0 = sideVec (X), Column 1 = worldDir (Y), Column 2 = normVec (Z)
-          worldMat.makeBasis(sideVec, worldDir, normVec);
+          staticGodRayWorldMat.makeBasis(staticGodRaySideVec, staticGodRayWorldDir, staticGodRayNormVec);
 
           // Convert world matrix to parent local space
-          parentInvMat.copy(sceneGroup.matrixWorld).invert();
-          const localMat = parentInvMat.multiply(worldMat);
+          staticGodRayParentInvMat.copy(sceneGroup.matrixWorld).invert();
+          const localMat = staticGodRayParentInvMat.multiply(staticGodRayWorldMat);
           ray.quaternion.setFromRotationMatrix(localMat);
 
           // Constant scale (no scale growth or shrink)
@@ -8463,13 +8339,18 @@ function init() {
 
     // Update outline pass settings dynamically
     if (SCENE_CONFIG.interaction && SCENE_CONFIG.interaction.outline) {
-      [outlinePass, deformerOutlinePass, houdiniOutlinePass].forEach((pass) => {
-        if (pass) {
-          pass.edgeStrength = SCENE_CONFIG.interaction.outline.edgeStrength;
-          pass.edgeGlow = SCENE_CONFIG.interaction.outline.edgeGlow;
-          pass.edgeThickness = SCENE_CONFIG.interaction.outline.edgeThickness;
-        }
-      });
+      const edgeStr = SCENE_CONFIG.interaction.outline.edgeStrength;
+      const edgeGlow = SCENE_CONFIG.interaction.outline.edgeGlow;
+      const edgeThick = SCENE_CONFIG.interaction.outline.edgeThickness;
+      if (outlinePass && outlinePass.edgeStrength !== edgeStr) {
+        [outlinePass, deformerOutlinePass, houdiniOutlinePass].forEach((pass) => {
+          if (pass) {
+            pass.edgeStrength = edgeStr;
+            pass.edgeGlow = edgeGlow;
+            pass.edgeThickness = edgeThick;
+          }
+        });
+      }
     }
 
     // Update question box material properties dynamically
@@ -8513,57 +8394,88 @@ function init() {
     if (typeof mobileNavMenuVisible !== 'undefined' && mobileNavMenuVisible) return true;
     if (typeof aboutOverlayVisible !== 'undefined' && aboutOverlayVisible) return true;
     if (clientX === undefined || clientY === undefined) return false;
+
+    if (clientX === cachedPointerX && clientY === cachedPointerY) {
+      return cachedIsPointerOver2DUI;
+    }
+    cachedPointerX = clientX;
+    cachedPointerY = clientY;
+
     const target = document.elementFromPoint(clientX, clientY);
-    if (!target) return false;
-    return !!target.closest(
+    if (!target) {
+      cachedIsPointerOver2DUI = false;
+      return false;
+    }
+    cachedIsPointerOver2DUI = !!target.closest(
       '#mainnavlinks, #home, #linkedin-desktop-wrapper, #linkedin-desktop, #linkedin-mobile, ' +
       '#mobilenavmenu, #mobilenavlinksbutton, #plaintext-link, .link, .mobilelink, .logolink, ' +
       '#aboutmepanel, #aboutmepanelwrapper, .logo-tint-mask'
     );
+    return cachedIsPointerOver2DUI;
   }
+
+  const staticWorldHitPos = new THREE.Vector3();
 
   function get3DHitTarget(clientX, clientY) {
     if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating || mobileNavMenuVisible) return null;
     if (isPointerOver2DUI(clientX, clientY)) return null;
 
-    const hitMouse = new THREE.Vector2(
+    staticHitMouse.set(
       (clientX / window.innerWidth) * 2 - 1,
       -(clientY / window.innerHeight) * 2 + 1
     );
 
-    raycaster.setFromCamera(hitMouse, camera);
+    raycaster.setFromCamera(staticHitMouse, camera);
+
+    const hitDistThreshold = 2.5;
 
     if (questionBoxGroup && respawnStartTime === 0) {
-      const qBoxIntersects = raycaster.intersectObject(questionBoxGroup, true);
-      if (qBoxIntersects.length > 0) return { type: 'questionBox' };
+      questionBoxGroup.getWorldPosition(staticWorldHitPos);
+      if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
+        const qBoxIntersects = raycaster.intersectObject(questionBoxGroup, true);
+        if (qBoxIntersects.length > 0) return { type: 'questionBox' };
+      }
     }
 
     if (houdiniToyGroup && !isHoudiniPopping && houdiniRespawnStartTime === 0) {
-      const toyIntersects = raycaster.intersectObject(houdiniToyGroup, true);
-      if (toyIntersects.length > 0) return { type: 'houdiniToy' };
+      houdiniToyGroup.getWorldPosition(staticWorldHitPos);
+      if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
+        const toyIntersects = raycaster.intersectObject(houdiniToyGroup, true);
+        if (toyIntersects.length > 0) return { type: 'houdiniToy' };
+      }
     }
 
     if (bugCubeGroup) {
-      const bugIntersects = raycaster.intersectObject(bugCubeGroup, true);
-      if (bugIntersects.length > 0) return { type: 'bug' };
+      bugCubeGroup.getWorldPosition(staticWorldHitPos);
+      if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
+        const bugIntersects = raycaster.intersectObject(bugCubeGroup, true);
+        if (bugIntersects.length > 0) return { type: 'bug' };
+      }
     }
 
     if (webGlobeGroup) {
-      const webIntersects = raycaster.intersectObject(webGlobeGroup, true);
-      if (webIntersects.length > 0) return { type: 'webGlobe' };
+      webGlobeGroup.getWorldPosition(staticWorldHitPos);
+      if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
+        const webIntersects = raycaster.intersectObject(webGlobeGroup, true);
+        if (webIntersects.length > 0) return { type: 'webGlobe' };
+      }
     }
 
     if (gamesAlienGroup) {
-      const gamesIntersects = raycaster.intersectObject(gamesAlienGroup, true);
-      if (gamesIntersects.length > 0) return { type: 'gamesAlien' };
+      gamesAlienGroup.getWorldPosition(staticWorldHitPos);
+      if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
+        const gamesIntersects = raycaster.intersectObject(gamesAlienGroup, true);
+        if (gamesIntersects.length > 0) return { type: 'gamesAlien' };
+      }
     }
 
     if (arPhoneGroup) {
-      const arIntersects = raycaster.intersectObject(arPhoneGroup, true);
-      if (arIntersects.length > 0) return { type: 'arPhone' };
+      arPhoneGroup.getWorldPosition(staticWorldHitPos);
+      if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
+        const arIntersects = raycaster.intersectObject(arPhoneGroup, true);
+        if (arIntersects.length > 0) return { type: 'arPhone' };
+      }
     }
-
-
 
     return null;
   }
@@ -8576,11 +8488,11 @@ function init() {
     const normX = (clientX / window.innerWidth) * 2 - 1;
     const normY = -(clientY / window.innerHeight) * 2 + 1;
 
-    const dragRaycaster = new THREE.Raycaster();
-    dragRaycaster.setFromCamera(new THREE.Vector2(normX, normY), camera);
+    staticDishMouse.set(normX, normY);
+    staticDragRaycaster.setFromCamera(staticDishMouse, camera);
 
     const dishPlaneY = -0.4; // Average 3D height of dish surface
-    const ray = dragRaycaster.ray;
+    const ray = staticDragRaycaster.ray;
 
     if (Math.abs(ray.direction.y) < 1e-4) return null;
 
@@ -8628,10 +8540,10 @@ function init() {
     previousPointerInfo = getPointerDishInfo(event.clientX, event.clientY);
   };
 
-  window.addEventListener('pointerdown', handlePointerDown);
+  window.addEventListener('pointerdown', handlePointerDown, { passive: true });
   const mainCanvas = document.getElementById('bg');
   if (mainCanvas) {
-    mainCanvas.addEventListener('pointerdown', handlePointerDown);
+    mainCanvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
   }
 
   window.addEventListener('pointermove', (event) => {
@@ -8669,17 +8581,17 @@ function init() {
       // Move raycast pointer away during active drags to prevent accidental hovering highlights
       mouse.set(-9999, -9999);
     }
-  });
+  }, { passive: true });
 
   window.addEventListener('pointerup', () => {
     isDraggingPointer = false;
     previousPointerInfo = null;
-  });
+  }, { passive: true });
 
   window.addEventListener('pointercancel', () => {
     isDraggingPointer = false;
     previousPointerInfo = null;
-  });
+  }, { passive: true });
 
   function updateHoudiniMorphTargets(meshGroup, inflatedVal, popVal) {
     if (!meshGroup) return;
@@ -9022,12 +8934,6 @@ function init() {
     const rawVol = hCfg.hoverOutVolume !== undefined ? hCfg.hoverOutVolume : (hCfg.volume !== undefined ? hCfg.volume : 0.8);
     const src = hCfg.hoverOutSoundSrc || 'sound/gamesOut.mp3';
     playWebAudioSound(src, rawVol);
-  }
-
-  function playGameBoyModeSound() {
-    const gCfg = (SCENE_CONFIG.renderStyles && SCENE_CONFIG.renderStyles.gameBoy) ? SCENE_CONFIG.renderStyles.gameBoy : null;
-    const vol = (gCfg && gCfg.soundVolume !== undefined) ? gCfg.soundVolume : 0.8;
-    playWebAudioSound('sound/rm_gameboy.mp3', vol);
   }
 
   function playSoundForRenderMode(modeName) {
@@ -9533,7 +9439,7 @@ function init() {
     lastClientY = event.clientY;
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  });
+  }, { passive: true });
 
   let lastTapTimestamp = 0;
   function handle3DPointerTap(event) {
@@ -9613,11 +9519,11 @@ function init() {
     }
   }
 
-  window.addEventListener('pointerup', handle3DPointerTap);
-  window.addEventListener('click', handle3DPointerTap);
+  window.addEventListener('pointerup', handle3DPointerTap, { passive: true });
+  window.addEventListener('click', handle3DPointerTap, { passive: true });
   if (mainCanvas) {
-    mainCanvas.addEventListener('pointerup', handle3DPointerTap);
-    mainCanvas.addEventListener('click', handle3DPointerTap);
+    mainCanvas.addEventListener('pointerup', handle3DPointerTap, { passive: true });
+    mainCanvas.addEventListener('click', handle3DPointerTap, { passive: true });
   }
 }
 
