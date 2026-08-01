@@ -96,7 +96,7 @@ ul {
 /* When a panel is open, freeze the link in its selected state: dashed outline visible, white text, scale 1.0 */
 .link.is-panel-open,
 .mobilelink.is-panel-open {
-  pointer-events: none !important;
+  pointer-events: auto !important;
   cursor: default !important;
   transform: scale(1.0) !important;
   /* Hold the end-state of menuSelect: dashed border visible, white text */
@@ -410,10 +410,29 @@ ul {
   overflow: hidden;
 }
 
+/* AR, Games, Web, Houdini Panel specific dimensions */
+.ar-panel,
+.games-panel,
+.web-panel,
+.houdini-panel {
+  top: max(50%, calc(108px + (min(920px, 80vh) / 2)));
+  width: min(980px, 92vw, calc(80vh * 1.15));
+  height: min(920px, 80vh);
+}
+
 @media (max-width: 768px) {
   .about-panel {
     top: max(50%, calc(92px + (min(880px, 72vh) / 2)));
     width: min(440px, 88vw, calc(72vh * 0.818));
+    --about-panel-border-inset: clamp(14px, 2.5vh, 22px);
+  }
+  .ar-panel,
+  .games-panel,
+  .web-panel,
+  .houdini-panel {
+    top: max(50%, calc(92px + (min(880px, 72vh) / 2)));
+    width: min(440px, 88vw, calc(72vh * 0.818));
+    height: min(880px, 72vh);
     --about-panel-border-inset: clamp(14px, 2.5vh, 22px);
   }
   .about-panel__content {

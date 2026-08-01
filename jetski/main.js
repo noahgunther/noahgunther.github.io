@@ -13,6 +13,12 @@ import { DRACOLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loader
 
 // Global Three.js LoadingManager to track all 3D geometries, textures, HDR maps, and preloaded images
 const loadingManager = new THREE.LoadingManager();
+loadingManager.setURLModifier((url) => {
+  if (url && typeof url === 'string' && url.toLowerCase().endsWith('.png')) {
+    return url.replace(/\.png$/i, '.webp');
+  }
+  return url;
+});
 
 /* ==========================================
    WebGL & Layout Customization Config (`SCENE_CONFIG`)
@@ -443,6 +449,7 @@ const SCENE_CONFIG = {
   // ==========================================
   ar3D: {
     enabled: true,                          // Toggle to enable/disable 3D AR Phone
+    clickAnimation: { enabled: true, duration: 1200, respawnDelay: 50, respawnDuration: 400 },
     unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
     scale: 0.0044,                           // Model scale factor
     rotation: { x: 0, y: -90, z: 0 },        // Initial base rotation in degrees
@@ -1065,29 +1072,8 @@ function init() {
   const phoneScreenPanel = document.getElementById("phonescreen");
   const phoneScreenHeader = document.getElementById("mobilearprojectsheader");
   const phoneScreenScrollWrapper = document.getElementById("mobilearscrollwrapper");
-  const phoneScreenTray = document.getElementById("mobileartray");
-  const phoneScreenInfoButton = document.getElementById("mobilearinfobutton");
   const phoneScreenClock = document.getElementById("mobilearprojectsheaderclock");
 
-  const phoneScreenLoading = [
-    document.getElementById("mobilearloading0"),
-    document.getElementById("mobilearloading1"),
-    document.getElementById("mobilearloading2")
-  ];
-  const arLoading = document.getElementById("mobilearloading");
-
-  const arInfoPanelParent = document.getElementById("arinfopanel");
-  const arInfoPanel = document.getElementById("arinfopanelwrapper");
-  const arInfoPanelBackgroundBlur = document.getElementById("arinfopanelbackgroundblur");
-  const arInfoPanelIcon = document.getElementById("arinfopanelicon");
-  const arInfoPanelCloseButton = document.getElementById("arinfopanelclosebuttonwrapper");
-  const arInfoPanelMobileButtons = document.getElementById("arinfopanelmobilebuttonswrapper");
-  const arInfoPanelText = document.getElementById("arinfopaneltextwrapper");
-  const arInfoPanelSubtitle = document.getElementById("arinfopanelsubtitle");
-
-  const arInfoPanelSubject = document.getElementById('arinfopanelsubject');
-  const arInfoPanelTitle = document.getElementById('arinfopaneltitle');
-  const arInfoPanelContent = document.getElementById('arinfopanelcontent');
 
   const leftArrow = document.getElementById('leftarrow');
   const leftArrowFront = document.getElementById('leftarrowfront');
@@ -1234,6 +1220,283 @@ function init() {
   aboutOverlay.appendChild(aboutBlur);
   aboutOverlay.appendChild(aboutPanel);
   document.body.appendChild(aboutOverlay);
+
+  // Dynamic AR Overlay Panel
+  const arOverlay = document.createElement('div');
+  const arBlur = document.createElement('div');
+  const arPanel = document.createElement('section');
+  const arPanelSurface = document.createElement('div');
+  const arPanelContent = document.createElement('div');
+  const arCloseButton = document.createElement('button');
+  arOverlay.className = 'about-overlay ar-overlay';
+  arBlur.className = 'about-overlay__blur';
+  arPanel.className = 'about-panel ar-panel';
+  arPanelSurface.className = 'about-panel__surface';
+  arPanelContent.className = 'about-panel__content';
+  arCloseButton.className = 'about-panel__close';
+
+  const arBorderSvg      = document.createElementNS(NS, 'svg');
+  const arBorderTopLeft  = document.createElementNS(NS, 'path');
+  const arBorderTopRight = document.createElementNS(NS, 'path');
+  const arBorderBotLeft  = document.createElementNS(NS, 'path');
+  const arBorderBotRight = document.createElementNS(NS, 'path');
+
+  arBorderSvg.setAttribute('class', 'about-panel__border-svg');
+  arBorderSvg.setAttribute('aria-hidden', 'true');
+
+  [arBorderTopLeft, arBorderTopRight, arBorderBotLeft, arBorderBotRight].forEach(path => {
+    path.setAttribute('class', 'about-panel__border-path');
+    path.setAttribute('pathLength', '1');
+    arBorderSvg.appendChild(path);
+  });
+
+  function updateArBorderPaths() {
+    const W  = arBorderSvg.clientWidth;
+    const H  = arBorderSvg.clientHeight;
+    if (!W || !H) return;
+    const rx = 8;
+    const s  = 0.5;
+    const gap = 26;
+
+    arBorderTopLeft.setAttribute('d', [
+      `M ${W/2},${s}`,
+      `L ${rx+s},${s}`,
+      `A ${rx},${rx} 0 0 0 ${s},${rx+s}`,
+      `L ${s},${H/2}`
+    ].join(' '));
+
+    arBorderTopRight.setAttribute('d', [
+      `M ${W/2},${s}`,
+      `L ${W - gap},${s}`
+    ].join(' '));
+
+    arBorderBotLeft.setAttribute('d', [
+      `M ${W/2},${H-s}`,
+      `L ${rx+s},${H-s}`,
+      `A ${rx},${rx} 0 0 1 ${s},${H-rx-s}`,
+      `L ${s},${H/2}`
+    ].join(' '));
+
+    arBorderBotRight.setAttribute('d', [
+      `M ${W/2},${H-s}`,
+      `L ${W-rx-s},${H-s}`,
+      `A ${rx},${rx} 0 0 0 ${W-s},${H-rx-s}`,
+      `L ${W-s},${gap}`
+    ].join(' '));
+  }
+
+  const arScrollFade = document.createElement('div');
+  const arScrollArrow = document.createElement('div');
+  arScrollFade.className = 'about-panel__scroll-fade';
+  arScrollArrow.className = 'about-panel__scroll-arrow';
+  arScrollArrow.setAttribute('aria-hidden', 'true');
+  arScrollArrow.innerHTML = `
+    <svg width="18" height="10" viewBox="0 0 18 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 2L9 8L16 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+
+  function updateArPanelScrollIndicators() {
+    if (!arPanelContent) return;
+    const { scrollTop, scrollHeight, clientHeight } = arPanelContent;
+    const hasMoreContent = scrollHeight > clientHeight + 4 && (scrollHeight - clientHeight - scrollTop > 8);
+
+    arScrollFade.classList.toggle('is-visible', hasMoreContent);
+    arScrollArrow.classList.toggle('is-visible', hasMoreContent);
+  }
+
+  arPanelContent.addEventListener('scroll', updateArPanelScrollIndicators, { passive: true });
+
+  if (window.ResizeObserver && arPanel) {
+    const arResizeObserver = new ResizeObserver(() => {
+      if (typeof arOverlayVisible !== 'undefined' && (arOverlayVisible || arOverlayAnimating)) {
+        updateArBorderPaths();
+        updateArPanelScrollIndicators();
+      }
+    });
+    arResizeObserver.observe(arPanel);
+  }
+
+  arPanelContent.innerHTML = `
+    <h1 class="about-panel__title">AR</h1>
+    <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">Augmented Reality &amp; Spatial Computing</p>
+    <p class="about-panel__body">Interactive mobile AR filters, real-time spatial computing prototypes, and WebAR applications created for mobile, web, and headset platforms.</p>
+    <br/>
+    <p class="about-panel__body">This section features custom real-time shaders, computer vision pipelines, face tracking filters, and 3D spatial experiences built with Three.js, Spark AR, and WebXR.</p>
+  `;
+  arCloseButton.type = 'button';
+  arCloseButton.setAttribute('aria-label', 'Close AR panel');
+  arCloseButton.innerHTML = `
+    <span class="about-panel__close-bar about-panel__close-bar--top"></span>
+    <span class="about-panel__close-bar about-panel__close-bar--bottom"></span>
+  `;
+
+  arPanel.appendChild(arPanelSurface);
+  arPanel.appendChild(arBorderSvg);
+  arPanel.appendChild(arCloseButton);
+  arPanel.appendChild(arPanelContent);
+  arPanel.appendChild(arScrollFade);
+  arPanel.appendChild(arScrollArrow);
+  arOverlay.appendChild(arBlur);
+  arOverlay.appendChild(arPanel);
+  document.body.appendChild(arOverlay);
+
+  // Helper factory for creating panel overlays (Games, Web, Houdini)
+  function createGenericOverlay(config) {
+    const { name, title, subtitle, bodyHtml } = config;
+    const overlay = document.createElement('div');
+    const blur = document.createElement('div');
+    const panel = document.createElement('section');
+    const panelSurface = document.createElement('div');
+    const panelContent = document.createElement('div');
+    const closeButton = document.createElement('button');
+
+    overlay.className = `about-overlay ${name}-overlay`;
+    blur.className = 'about-overlay__blur';
+    panel.className = `about-panel ${name}-panel`;
+    panelSurface.className = 'about-panel__surface';
+    panelContent.className = 'about-panel__content';
+    closeButton.className = 'about-panel__close';
+
+    const borderSvg = document.createElementNS(NS, 'svg');
+    const borderTopLeft = document.createElementNS(NS, 'path');
+    const borderTopRight = document.createElementNS(NS, 'path');
+    const borderBotLeft = document.createElementNS(NS, 'path');
+    const borderBotRight = document.createElementNS(NS, 'path');
+
+    borderSvg.setAttribute('class', 'about-panel__border-svg');
+    borderSvg.setAttribute('aria-hidden', 'true');
+
+    [borderTopLeft, borderTopRight, borderBotLeft, borderBotRight].forEach(path => {
+      path.setAttribute('class', 'about-panel__border-path');
+      path.setAttribute('pathLength', '1');
+      borderSvg.appendChild(path);
+    });
+
+    function updateBorderPaths() {
+      const W = borderSvg.clientWidth;
+      const H = borderSvg.clientHeight;
+      if (!W || !H) return;
+      const rx = 8;
+      const s = 0.5;
+      const gap = 26;
+
+      borderTopLeft.setAttribute('d', [
+        `M ${W/2},${s}`,
+        `L ${rx+s},${s}`,
+        `A ${rx},${rx} 0 0 0 ${s},${rx+s}`,
+        `L ${s},${H/2}`
+      ].join(' '));
+
+      borderTopRight.setAttribute('d', [
+        `M ${W/2},${s}`,
+        `L ${W - gap},${s}`
+      ].join(' '));
+
+      borderBotLeft.setAttribute('d', [
+        `M ${W/2},${H-s}`,
+        `L ${rx+s},${H-s}`,
+        `A ${rx},${rx} 0 0 1 ${s},${H-rx-s}`,
+        `L ${s},${H/2}`
+      ].join(' '));
+
+      borderBotRight.setAttribute('d', [
+        `M ${W/2},${H-s}`,
+        `L ${W-rx-s},${H-s}`,
+        `A ${rx},${rx} 0 0 0 ${W-s},${H-rx-s}`,
+        `L ${W-s},${gap}`
+      ].join(' '));
+    }
+
+    const scrollFade = document.createElement('div');
+    const scrollArrow = document.createElement('div');
+    scrollFade.className = 'about-panel__scroll-fade';
+    scrollArrow.className = 'about-panel__scroll-arrow';
+    scrollArrow.setAttribute('aria-hidden', 'true');
+    scrollArrow.innerHTML = `
+      <svg width="18" height="10" viewBox="0 0 18 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2L9 8L16 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    function updateScrollIndicators() {
+      if (!panelContent) return;
+      const { scrollTop, scrollHeight, clientHeight } = panelContent;
+      const hasMoreContent = scrollHeight > clientHeight + 4 && (scrollHeight - clientHeight - scrollTop > 8);
+      scrollFade.classList.toggle('is-visible', hasMoreContent);
+      scrollArrow.classList.toggle('is-visible', hasMoreContent);
+    }
+
+    panelContent.addEventListener('scroll', updateScrollIndicators, { passive: true });
+
+    if (window.ResizeObserver && panel) {
+      const resizeObserver = new ResizeObserver(() => {
+        updateBorderPaths();
+        updateScrollIndicators();
+      });
+      resizeObserver.observe(panel);
+    }
+
+    panelContent.innerHTML = `
+      <h1 class="about-panel__title">${title}</h1>
+      <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">${subtitle}</p>
+      ${bodyHtml}
+    `;
+
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', `Close ${name} panel`);
+    closeButton.innerHTML = `
+      <span class="about-panel__close-bar about-panel__close-bar--top"></span>
+      <span class="about-panel__close-bar about-panel__close-bar--bottom"></span>
+    `;
+
+    panel.appendChild(panelSurface);
+    panel.appendChild(borderSvg);
+    panel.appendChild(closeButton);
+    panel.appendChild(panelContent);
+    panel.appendChild(scrollFade);
+    panel.appendChild(scrollArrow);
+    overlay.appendChild(blur);
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    return {
+      overlay, blur, panel, panelContent, closeButton, updateBorderPaths, updateScrollIndicators
+    };
+  }
+
+  const gamesOverlayData = createGenericOverlay({
+    name: 'games',
+    title: 'Games',
+    subtitle: 'Real-Time Interactive & Game Development',
+    bodyHtml: `
+      <p class="about-panel__body">Interactive gameplay experiences, real-time shaders, and custom game mechanics built for desktop, web, and mobile environments.</p>
+      <br/>
+      <p class="about-panel__body">This section features game design prototypes, procedural mesh generation, physics integration, and WebGL rendering shaders built with Three.js and custom engine tech.</p>
+    `
+  });
+
+  const webOverlayData = createGenericOverlay({
+    name: 'web',
+    title: 'Web',
+    subtitle: 'Interactive Web & 3D Experiences',
+    bodyHtml: `
+      <p class="about-panel__body">High-performance web applications, custom WebGL graphics, and interactive 3D web experiences built with modern web technologies.</p>
+      <br/>
+      <p class="about-panel__body">Focusing on rich visual aesthetics, custom post-processing pipelines, micro-animations, and seamless user interaction design.</p>
+    `
+  });
+
+  const houdiniOverlayData = createGenericOverlay({
+    name: 'houdini',
+    title: 'Houdini',
+    subtitle: 'Procedural Graphics & VFX Pipelines',
+    bodyHtml: `
+      <p class="about-panel__body">Procedural geometry generation, particle dynamics, and simulation pipelines created with SideFX Houdini.</p>
+      <br/>
+      <p class="about-panel__body">Building procedural assets, custom digital assets (HDAs), VAT export workflows, and automated graphics pipelines for real-time engines and web applications.</p>
+    `
+  });
   // ==========================================
   // Three.js WebGL Setup
   // ==========================================
@@ -1250,6 +1513,7 @@ function init() {
   const staticRotatedLocalPivot = new THREE.Vector3();
   const staticPivotShift = new THREE.Vector3();
 
+  const staticGodRayUp = new THREE.Vector3(0, 1, 0);
   const staticGodRayGlobeCenterWorld = new THREE.Vector3();
   const staticGodRayGlobeCenterScene = new THREE.Vector3();
   const staticGodRayRayWorldPos = new THREE.Vector3();
@@ -1494,6 +1758,21 @@ function init() {
   let regrowQuestionBoxAfterAboutClose = false;
   let aboutOverlayVisible = false;
   let aboutOverlayAnimating = false;
+  let arOverlayVisible = false;
+  let arOverlayAnimating = false;
+  let gamesOverlayVisible = false;
+  let gamesOverlayAnimating = false;
+  let webOverlayVisible = false;
+  let webOverlayAnimating = false;
+  let houdiniOverlayVisible = false;
+  let houdiniOverlayAnimating = false;
+
+  let pendingArOverlayAfterClick = false;
+  let pendingGamesOverlayAfterPop = false;
+  let pendingWebOverlayAfterClick = false;
+  let pendingHoudiniOverlayAfterPop = false;
+  let pendingArOverlayAfterAboutClose = false;
+  let pendingAboutOverlayAfterArClose = false;
   let sparkleTexture = null;
   let lastFrameTime = performance.now();
   let isBugModelLoaded = false;
@@ -3430,208 +3709,15 @@ function init() {
 
 
 
-  const arHomeButton = document.getElementById('mobileartraybuttonhome');
-  const arLastButton = document.getElementById('mobileartraybuttonlast');
-  const arNextButton = document.getElementById('mobileartraybuttonnext');
-  const arInfoMobileLastAnim = document.getElementById("arinfopanelmobilelastanim");
-  const arInfoMobileLastButton = document.getElementById("arinfopanelmobilelastbutton");
-  const arInfoMobileCloseAnim = document.getElementById("arinfopanelmobilecloseanim");
-  const arInfoMobileCloseButton = document.getElementById("arinfopanelmobileclosebutton");
-  const arInfoMobileNextAnim = document.getElementById("arinfopanelmobilenextanim");
-  const arInfoMobileNextButton = document.getElementById("arinfopanelmobilenextbutton");
-
-  let arGamesButton = null;
-  let socialArButton = null;
-
-  // ==========================================
-  // 1.5 Populate Phone Screen Scroll Contents
-  // ==========================================
-  const phoneScreenContents = `
-    <div class="mobilearprojectsdiv">
-      <div class="mobilearprojectsdivtitle"> AR Games </div>
-      <div class="mobilearprojectsdivsubtitlewrapper"> <div class="mobilearprojectsdivsubtitle"> Game Code </div> </div>
-      <div class="mobilearprojectsdivsubtitlespacer"></div>
-      <div class="mobilearprojectsdivsubtitlewrapper"> <div class="mobilearprojectsdivsubtitle"> Technical Art </div> </div>
-      <div class="mobilearprojectsdivsubtitlespacer"></div>
-      <div class="mobilearprojectsdivsubtitlewrapper"> <div class="mobilearprojectsdivsubtitle"> Networking </div> </div>
-      <div class="mobilearprojectsdivcontent"> Multiplayer games for video calling. I built games from prototype to public release. </div>
-      <div id="viewargamesbutton" class="mobilearprojectsdivbuttonwrapper">
-        <div class="mobilearprojectsdivbutton" style="background-color: #ffae21;"> View Project </div>
-      </div>
-      <div class="mobilearprojectsdivgradient"></div>
-      <div id="argamesdivback" class="mobilearprojectsdivback"></div>
-    </div>
-    <div style="height: 2%;"></div>
-    <div class="mobilearprojectsdiv">
-      <div class="mobilearprojectsdivtitle"> Social AR </div>
-      <div class="mobilearprojectsdivsubtitlewrapper"> <div class="mobilearprojectsdivsubtitle"> AR Code </div> </div>
-      <div class="mobilearprojectsdivsubtitlespacer"></div>
-      <div class="mobilearprojectsdivsubtitlewrapper"> <div class="mobilearprojectsdivsubtitle"> Technical Art </div> </div>
-      <div class="mobilearprojectsdivsubtitlespacer"></div>
-      <div class="mobilearprojectsdivsubtitlewrapper"> <div class="mobilearprojectsdivsubtitle"> Networking </div> </div>
-      <div class="mobilearprojectsdivcontent"> Social experiences for video calling. I led Technical Art and development. </div>
-      <div id="viewsocialarbutton" class="mobilearprojectsdivbuttonwrapper">
-        <div class="mobilearprojectsdivbutton" style="background-color: #ff21a6;"> View Project </div>
-      </div>
-      <div class="mobilearprojectsdivgradient"></div>
-      <div id="socialardivback" class="mobilearprojectsdivback"></div>
-    </div>
-    <div class="mobilearprojectsdiv" style="height: 2%; background: none;"></div>
-  `;
-  phoneScreenScrollWrapper.innerHTML = phoneScreenContents;
-
-
-  arGamesButton = document.getElementById('viewargamesbutton');
-  socialArButton = document.getElementById('viewsocialarbutton');
-  const arInfoCloseButton = document.getElementById("arinfopanelclosebutton");
-
   // ==========================================
   // 2. State & Data Setup
   // ==========================================
   var loadingComplete = false;
-
-  var arProjectContext = 'main'; // 'main', 'arGames', 'socialAr'
-  var arInfoPanelVisible = false;
-  var arInfoPanelHorizontalLayout = true;
-
-  var metaSocialArCapturesIndex = 0;
-  var metaArGamesCapturesIndex = 0;
-  var phoneScreenLoadingIndex = -1;
   var mobileNavMenuVisible = false;
-
-  // AR Videos mapping
-  const metaSocialArCaptures = [
-    document.getElementById('friendsspacewalk'),
-    document.getElementById('groupselfie'),
-    document.getElementById('costumeselector'),
-    document.getElementById('reshape'),
-    document.getElementById('wintercoaster'),
-    document.getElementById('abstractlove'),
-    document.getElementById('angelsanddemons'),
-    document.getElementById('poolfloaty'),
-    document.getElementById('candycottage')
-  ];
-
-  const metaArGamesCaptures = [
-    document.getElementById('alienattack'),
-    document.getElementById('bumperroyale'),
-    document.getElementById('charades'),
-    document.getElementById('desertofdoom'),
-    document.getElementById('dontfall'),
-    document.getElementById('haveyouever'),
-    document.getElementById('hotpotato'),
-    document.getElementById('jumpwave'),
-    document.getElementById('kawaiisushi'),
-    document.getElementById('mazeofmystery'),
-    document.getElementById('pestcontrol'),
-    document.getElementById('sk8erz'),
-    document.getElementById('snackup'),
-    document.getElementById('snapnsnack'),
-    document.getElementById('speedrush'),
-    document.getElementById('trivia')
-  ];
-
-  // Video thumbnails mapping
-  const metaSocialArThumbnails = [
-    document.getElementById('friendsspacewalkthumb'),
-    document.getElementById('groupselfiethumb'),
-    document.getElementById('costumeselectorthumb'),
-    document.getElementById('reshapethumb'),
-    document.getElementById('wintercoasterthumb'),
-    document.getElementById('abstractlovethumb'),
-    document.getElementById('angelsanddemonsthumb'),
-    document.getElementById('poolfloatythumb'),
-    document.getElementById('candycottagethumb')
-  ];
-
-  const metaArGamesThumbnails = [
-    document.getElementById('alienattackthumb'),
-    document.getElementById('bumperroyalethumb'),
-    document.getElementById('charadesthumb'),
-    document.getElementById('desertofdoomthumb'),
-    document.getElementById('dontfallthumb'),
-    document.getElementById('haveyoueverthumb'),
-    document.getElementById('hotpotatothumb'),
-    document.getElementById('jumpwavethumb'),
-    document.getElementById('kawaiisushithumb'),
-    document.getElementById('mazeofmysterythumb'),
-    document.getElementById('pestcontrolthumb'),
-    document.getElementById('sk8erzthumb'),
-    document.getElementById('snackupthumb'),
-    document.getElementById('snapnsnackthumb'),
-    document.getElementById('speedrushthumb'),
-    document.getElementById('triviathumb')
-  ];
-
-  // AR metadata
-  const metaSocialArTitles = ['Friends Spacewalk', 'Group Selfie', 'Costume Selector', 'Reshape Face', 'Winter Coaster', 'Abstract Love', 'Angels and Demons', 'Pool Floaty', 'Candy Cottage'];
-  const metaArGamesTitles = ['Alien Attack', 'Bumper Royale', 'Charades', 'Desert of Doom', "Don't Fall", 'Have You Ever?', 'Hot Potato', 'Jump Wave', 'Kawaii Sushi', 'Maze of Mystery', 'Pest Control', 'Sk8erz', 'Snack Up', 'Snap N Snack', 'Speed Rush', 'Trivia'];
-
-  const metaSocialArContents = [
-    'Composing the faces of all the present callers into the heads of a many-headed alien enjoying a stroll on its tiny planet, this AR experience takes over the whole phone screen and is consistent for each caller, using networking technology to allow callers to see others moving their heads around in space.',
-    'This AR experience is simple, but one of my favorites - callers are layered together using background segmentation into the same screen space, as if they were all in the same room. Ideal for taking virtual selfies together, callers can move to the front of the stack by shaking their phone. The possibilities for making funny scenes together are endless.',
-    'All callers remain in the standard video calling grid format, taking turns choosing between two ridiculous costume options. Whichever they pick, that costume element will be applied to all callers. If the callers choose all four options in a matching set (pirate, rockstar, cyborg, or princess), a special secret costume element is revealed.',
-    'No one is safe from having their face morphed into various shapes in this experience, in which callers can select shapes to morph the faces of everyone on the call.',
-    'All callers faces are composed into a winter wonderland riding a sleigh-themed roller coaster. The experience uses the full phone screen, and sends the extracted faces of the other callers over the video call using a custom shader packing and unpacking system, and the rotation of the heads is possible using networking technology to send a rotational vector between callers.',
-    'Callers are composed into a lovely scene full of hearts and pastel pinks. Want to capture a moment of love from far away, or create a valentines day AR photo? This is the experience for you!',
-    'The Devil on one shoulder and the Angel on the other in this AR experience will be randomly selected from the other participants in the call - be careful who you listen to! This effect uses a variety of custom screen space shader effects to give each character their unique glow.',
-    'Enjoy a relaxing trip to the pool on a hot summer day with this AR experience, which composes all callers into a scene complete with floaties, headwear, and a custom water shader. Each caller is given a unique set of accessories, synchronized over the network so everyone has a consistent experience.',
-    'Each caller is placed in a window of a lovely gingerbread home in this holiday themed AR experience. Tilt your phone around to see more of the scene and watch out for the gingerbread homeowner peeking out of the door.'
-  ];
-
-  const metaArGamesContents = [
-    'In this AR Game, callers work together to defend their fort from aliens by firing laser beams at them. As time goes on, stronger aliens arrive, making it harder and harder to keep them at bay. Callers are composed into the area at the bottom of the screen and each given a laser cannon, controlled by tapping on the screen.',
-    'A thrilling battle royale, this time with bumper cars! Using Cannon.js for physics, callers are each given a car to drive by tapping on the screen to build momentum. As time goes on, the stage shrinks, giving players less and less room to maneuver. All car positions and events are synchronized over the network.',
-    'Classic charades, with prompts only visible to the player taking their turn. Score points by guessing what the active player is acting out, and laugh as everyone tries to figure out how to act things out while holding their phone.',
-    'A turn-based cooperative game, where one player tries to navigate a field of dangerous cacti during sandstorm that prevents them from seeing in front of them. The other participants in the call CAN see the cacti, however, and yell at the player to go left or right based on what\'s ahead.',
-    'Players navigate a tightrope way up high, where fans suspended by balloons create gusty winds that threaten to blow players away if they don\'t lean in just right. The last player left walking the tightrope wins!',
-    'Participants are asked a series of yes or no questions, such as "Have you ever seen a ghost?" If they answer yes, they get a badge corresponding to that answer. Build up a halo of badges to impress your friends with all your experiences!',
-    'Hot potato! But this time it\'s alive, and clinging to your face! Shake it off to send it to someone else, and be ever wary of the heat - it might just pop into a delicious potato-based treat at any second.',
-    'Jump up and up and up, as high as you can go, in this endless platform jumping game. Watch your friends above or below you with off-screen indicators showing their position - if you fall, you can spectate the current leader until everyone has fallen and the players are ranked.',
-    'Catch as much sushi as you can in the limited amount of time available, competing with the other players in the call. Whoever catches the most sushi wins - just be careful that you don\'t swallow the wasabi, which will subtract a point!',
-    'This AR game procedurally generates a random haunted house maze each time it\'s played. Avoid ghosts, dead ends, and arguments with your friends as you take turns steering the characters to try and find the hidden magic goal in this mysterious maze.',
-    'Just like whack-a-mole, but with a sly twist - in this game, players take turns trying to hit as many moles as they can with their mallets. However, they need to be careful that they don\'t accidentally whack one of their friends by mistake; you never know whose head is going to pop up next.',
-    'Skate forever down this city street, if you can, but be careful of the many hazards that you\'ll encounter, including manholes, garbage cans, street signs and even pizza delivery drones. Kickflip and duck your way past more obstacles than your friends to win this game.',
-    'Match the snack on your face with one floating down through the air in this object matching game, but be careful of nabbing the wrong one, especially as things move faster and faster. Get the most matches without being knocked out to score a victory and also be the fullest.',
-    'Guide your hungry pet turtle to catch leaves, fruit, or, even better, falling stars that triple the points you receive from catching any of these. The most satisfied turtle when time runs out wins, and you and your turtle both get a leaf crown to celebrate.',
-    'A good old classic racing game, compete with your friends to be the first to the finish. Steer your car by tilting your phone, and be careful that you don\'t crash, slowing you down and giving your competition a chance to pull ahead.',
-    'Who knows more stuff? A classic question for a group of people on a video call, answered by playing a round of AR trivia! That\'s trivia in AR, not about AR. Try and answer as many of these obscure questions correctly to win and be officially recognized as the smartest person on the video call.'
-  ];
 
   // ==========================================
   // 3. Layout & Transition Functions
   // ==========================================
-  function updateArInfoPanelLayout() {
-    let arInfoPanelX;
-    let arInfoPanelXMin;
-
-    if (window.innerWidth - window.innerHeight * 0.33 > window.innerHeight) {
-      if (arInfoPanelVisible) {
-        arInfoPanelCloseButton.style.visibility = 'visible';
-      } else {
-        arInfoPanelCloseButton.style.visibility = 'hidden';
-      }
-      arInfoPanelBackgroundBlur.style.visibility = 'hidden';
-      arInfoPanelMobileButtons.style.visibility = 'hidden';
-      arInfoPanelX = 46;
-      arInfoPanelXMin = 340;
-      arInfoPanelHorizontalLayout = true;
-    } else {
-      arInfoPanelCloseButton.style.visibility = 'hidden';
-      if (arInfoPanelVisible) {
-        arInfoPanelBackgroundBlur.style.visibility = 'visible';
-        arInfoPanelMobileButtons.style.visibility = 'visible';
-      } else {
-        arInfoPanelBackgroundBlur.style.visibility = 'hidden';
-        arInfoPanelMobileButtons.style.visibility = 'hidden';
-      }
-      arInfoPanelX = 0;
-      arInfoPanelXMin = 0;
-      arInfoPanelHorizontalLayout = false;
-    }
-    arInfoPanelParent.style.setProperty('left', 'calc(50% + max(' + arInfoPanelX + 'vh, ' + arInfoPanelXMin + 'px))');
-  }
-
   function updateMainNavLinksLayout() {
     const linkedinDesktop = document.getElementById("linkedin-desktop-wrapper");
     const plainTextLink = document.getElementById("plaintext-link");
@@ -3653,39 +3739,6 @@ function init() {
     }
   }
 
-  function updateArInfoPanel() {
-    if (arProjectContext == 'socialAr' && arInfoPanelVisible) {
-      arInfoPanelSubject.innerHTML = "Social AR";
-      arInfoPanelTitle.innerHTML = metaSocialArTitles[metaSocialArCapturesIndex];
-      arInfoPanelContent.innerHTML = metaSocialArContents[metaSocialArCapturesIndex];
-
-      metaSocialArThumbnails.forEach(el => { el.style.visibility = 'hidden'; });
-      metaSocialArThumbnails[metaSocialArCapturesIndex].style.visibility = 'visible';
-    } else if (arProjectContext == 'arGames' && arInfoPanelVisible) {
-      arInfoPanelSubject.innerHTML = "AR Games";
-      arInfoPanelTitle.innerHTML = metaArGamesTitles[metaArGamesCapturesIndex];
-      arInfoPanelContent.innerHTML = metaArGamesContents[metaArGamesCapturesIndex];
-
-      metaArGamesThumbnails.forEach(el => { el.style.visibility = 'hidden'; });
-      metaArGamesThumbnails[metaArGamesCapturesIndex].style.visibility = 'visible';
-    } else {
-      metaSocialArThumbnails.forEach(el => { el.style.visibility = 'hidden'; });
-      metaArGamesThumbnails.forEach(el => { el.style.visibility = 'hidden'; });
-    }
-  }
-
-  function stopCurrentArVideo() {
-    if (arProjectContext == 'socialAr') {
-      metaSocialArCaptures[metaSocialArCapturesIndex].style = 'display: none';
-      metaSocialArCaptures[metaSocialArCapturesIndex].pause();
-      metaSocialArCaptures[metaSocialArCapturesIndex].currentTime = 0;
-    } else if (arProjectContext == 'arGames') {
-      metaArGamesCaptures[metaArGamesCapturesIndex].style = 'display: none';
-      metaArGamesCaptures[metaArGamesCapturesIndex].pause();
-      metaArGamesCaptures[metaArGamesCapturesIndex].currentTime = 0;
-    }
-  }
-
   function showPhoneUI() {
     if (currentTarget == "ar") {
       phoneScreenPanel.style.visibility = 'visible';
@@ -3698,74 +3751,8 @@ function init() {
       requestTimeout(() => { phoneScreenScrollWrapper.style.setProperty('animation', ''); }, 1000);
     } else {
       phoneScreenPanel.style.visibility = 'hidden';
-      stopCurrentArVideo();
-
       phoneScreenHeader.style.visibility = 'hidden';
       phoneScreenScrollWrapper.style.visibility = 'hidden';
-      phoneScreenTray.style.visibility = 'hidden';
-      phoneScreenInfoButton.style.visibility = 'hidden';
-      arLoading.style.visibility = 'hidden';
-      phoneScreenLoading.forEach(el => { el.style.visibility = 'hidden'; });
-
-      arInfoPanelVisible = false;
-      updateArInfoPanel();
-
-      arInfoPanel.style.setProperty('animation', '');
-      arInfoPanelBackgroundBlur.style.setProperty('animation', '');
-      arInfoPanelIcon.style.setProperty('animation', '');
-      arInfoPanelCloseButton.style.setProperty('animation', '');
-      arInfoPanelText.style.setProperty('animation', '');
-      arInfoPanel.style.visibility = 'hidden';
-
-      updateArInfoPanelLayout();
-      arProjectContext = 'main';
-    }
-  }
-
-  function showArInfoPanel(animate) {
-    canInteract = false;
-    if (animate) {
-      requestTimeout(() => {
-        if (arInfoPanelVisible) {
-          arInfoPanelVisible = false;
-          arInfoPanel.style.setProperty('animation', 'arInfoPanelOut 0.3s, forwards');
-          arInfoPanelBackgroundBlur.style.setProperty('animation', 'arInfoPanelBackgroundBlurOut 0.3s, forwards');
-          arInfoPanelIcon.style.setProperty('animation', 'arInfoIconOut 0.3s, forwards');
-          arInfoPanelCloseButton.style.setProperty('animation', 'arInfoCloseButtonOut 0.3s, forwards');
-          arInfoPanelText.style.setProperty('animation', 'arInfoTextOut 0.3s, forwards');
-
-          requestTimeout(() => {
-            arInfoPanel.style.visibility = 'hidden';
-            updateArInfoPanel();
-            updateArInfoPanelLayout();
-          }, 300);
-        } else {
-          arInfoPanelVisible = true;
-          arInfoPanel.style.setProperty('animation', 'arInfoPanelIn 0.7s, forwards');
-          arInfoPanelBackgroundBlur.style.setProperty('animation', 'arInfoPanelBackgroundBlurIn 0.7s, forwards');
-          arInfoPanelIcon.style.setProperty('animation', 'arInfoIconIn 0.7s, forwards');
-          arInfoPanelCloseButton.style.setProperty('animation', 'arInfoCloseButtonIn 0.7s, forwards');
-          arInfoPanelText.style.setProperty('animation', 'arInfoTextIn 0.7s, forwards');
-
-          arInfoPanel.style.visibility = 'visible';
-          updateArInfoPanelLayout();
-          updateArInfoPanel();
-        }
-        requestTimeout(() => { canInteract = true; }, 400);
-      }, 100);
-    } else {
-      if (arInfoPanelVisible) {
-        arInfoPanelVisible = false;
-        arInfoPanel.style.setProperty('animation', '');
-        arInfoPanelBackgroundBlur.style.setProperty('animation', '');
-        arInfoPanelIcon.style.setProperty('animation', '');
-        arInfoPanelCloseButton.style.setProperty('animation', '');
-        arInfoPanelText.style.setProperty('animation', '');
-        arInfoPanel.style.visibility = 'hidden';
-        updateArInfoPanel();
-        updateArInfoPanelLayout();
-      }
-      canInteract = true;
     }
   }
 
@@ -3788,9 +3775,9 @@ function init() {
         mobileNavMenu.style.visibility = 'hidden';
       }, 200);
     } else {
-      // Dismiss About panel if active when opening the mobile navigation menu
-      if (aboutOverlayVisible || aboutOverlayAnimating || currentTarget === 'about') {
-        hideAboutOverlay();
+      // Dismiss any active panel when opening the mobile navigation menu
+      if (isAnyOverlayActive()) {
+        hideAnyActiveOverlay();
         if (aboutMePanel) {
           aboutMePanel.style.visibility = 'hidden';
         }
@@ -3815,7 +3802,7 @@ function init() {
       }
 
       requestTimeout(() => {
-        if (!isAboutOverlayActive()) {
+        if (!isAnyOverlayActive()) {
           canInteract = true;
         }
       }, 300);
@@ -3835,8 +3822,23 @@ function init() {
     return aboutOverlayVisible || aboutOverlayAnimating;
   }
 
+  function setArPanelDrawn(isDrawn) {
+    arPanel.classList.toggle('is-drawn', isDrawn);
+  }
+
+  function setArPanelTransitionDirection(isOpening) {
+    arPanel.classList.toggle('is-opening', isOpening);
+    arPanel.classList.toggle('is-closing', !isOpening);
+  }
+
+  function isArOverlayActive() {
+    return arOverlayVisible || arOverlayAnimating;
+  }
+
+  let panelOpenLockout = false;
+
   function canUse2DMenu() {
-    return canInteract || isAboutOverlayActive();
+    return !panelOpenLockout && (canInteract || isAnyOverlayActive());
   }
 
   function playElementAnimation(el, animation) {
@@ -3860,22 +3862,67 @@ function init() {
   }
 
 
-  function startQuestionBoxRespawn() {
+  function startQuestionBoxRespawn(silent = false) {
     if (questionBoxGroup) {
-      isQBoxRegrowingSoundPlayed = false;
+      isQBoxRegrowingSoundPlayed = silent;
       respawnStartTime = performance.now();
     } else {
       canInteract = true;
     }
   }
 
+
+  function setPanelDrawnState(panelEl, isDrawn) {
+    if (panelEl) panelEl.classList.toggle('is-drawn', isDrawn);
+  }
+
+  function setPanelTransitionDirection(panelEl, isOpening) {
+    if (!panelEl) return;
+    panelEl.classList.toggle('is-opening', isOpening);
+    panelEl.classList.toggle('is-closing', !isOpening);
+    if (isOpening) {
+      panelEl.style.setProperty('--panel-enter-translate', 'translate3d(0, 0px, 0)');
+      panelEl.style.setProperty('--panel-exit-translate', 'translate3d(0, 24px, 0)');
+    } else {
+      panelEl.style.setProperty('--panel-enter-translate', 'translate3d(0, 24px, 0)');
+      panelEl.style.setProperty('--panel-exit-translate', 'translate3d(0, 24px, 0)');
+    }
+  }
+
+  function isAnyOverlayActive() {
+    return aboutOverlayVisible || aboutOverlayAnimating ||
+           arOverlayVisible || arOverlayAnimating ||
+           gamesOverlayVisible || gamesOverlayAnimating ||
+           webOverlayVisible || webOverlayAnimating ||
+           houdiniOverlayVisible || houdiniOverlayAnimating;
+  }
+
+  function hideAnyActiveOverlay(options = {}) {
+    if (aboutOverlayVisible) hideAboutOverlay(options);
+    if (arOverlayVisible) hideArOverlay(options);
+    if (gamesOverlayVisible) hideGamesOverlay(options);
+    if (webOverlayVisible) hideWebOverlay(options);
+    if (houdiniOverlayVisible) hideHoudiniOverlay(options);
+  }
+
   function showAboutOverlay(options = {}) {
     if (aboutOverlayVisible || aboutOverlayAnimating) return;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
 
     aboutOverlayVisible = true;
     aboutOverlayAnimating = true;
     regrowQuestionBoxAfterAboutClose = !!options.regrowQuestionBox;
     canInteract = false;
+    linkHoveredAbout = false;
+    [aboutLink, aboutLinkMobile].forEach(el => {
+      if (el) {
+        el._hoverActive = false;
+        el.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+      }
+    });
     body.style.setProperty('cursor', 'default');
     clearOutlines();
 
@@ -3887,10 +3934,9 @@ function init() {
     }
 
     aboutOverlay.classList.add('is-visible');
-    setAboutPanelTransitionDirection(true);
-    setAboutPanelDrawn(false);
+    setPanelTransitionDirection(aboutPanel, true);
+    setPanelDrawnState(aboutPanel, false);
 
-    // Mark the About link as non-interactable while panel is open
     aboutLink.classList.add('is-panel-open');
     aboutLinkMobile.classList.add('is-panel-open');
 
@@ -3898,29 +3944,28 @@ function init() {
       updateBorderPaths();
       updateAboutPanelScrollIndicators();
       aboutOverlay.classList.add('is-active');
-      setAboutPanelDrawn(true);
+      setPanelDrawnState(aboutPanel, true);
       setTimeout(updateAboutPanelScrollIndicators, 120);
       setTimeout(updateAboutPanelScrollIndicators, 320);
     });
 
     requestTimeout(() => {
       aboutOverlayAnimating = false;
+      panelOpenLockout = false;
     }, 480);
   }
 
-  function hideAboutOverlay() {
+  function hideAboutOverlay(options = {}) {
     if (!aboutOverlayVisible && !aboutOverlayAnimating) return;
 
     aboutOverlayAnimating = true;
     aboutOverlayVisible = false;
     body.style.setProperty('cursor', 'default');
 
-    setAboutPanelTransitionDirection(false);
-    setAboutPanelDrawn(false);
+    setPanelTransitionDirection(aboutPanel, false);
+    setPanelDrawnState(aboutPanel, false);
     aboutOverlay.classList.remove('is-active');
 
-    // The about link had pointer-events:none while the panel was open, so
-    // mouseout never fired. Explicitly clear the hover state now.
     linkHoveredAbout = false;
     clearOutlines();
 
@@ -3935,14 +3980,15 @@ function init() {
 
     const shouldRespawnQuestionBox = regrowQuestionBoxAfterAboutClose;
     regrowQuestionBoxAfterAboutClose = false;
+    const isSilentSwitch = !!(options && options.silentRespawn);
 
     requestTimeout(() => {
       aboutOverlay.classList.remove('is-visible');
       aboutOverlayAnimating = false;
 
       if (shouldRespawnQuestionBox) {
-        startQuestionBoxRespawn();
-      } else {
+        startQuestionBoxRespawn(isSilentSwitch);
+      } else if (!isSilentSwitch) {
         canInteract = true;
       }
     }, 360);
@@ -3953,6 +3999,310 @@ function init() {
   aboutPanel.onclick = (event) => {
     event.stopPropagation();
   };
+
+  function showArOverlay() {
+    if (arOverlayVisible || arOverlayAnimating) return;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
+
+    arOverlayVisible = true;
+    arOverlayAnimating = true;
+    canInteract = false;
+    linkHoveredAR = false;
+    lastArPhoneHoveredState = false;
+    [arLink, arLinkMobile].forEach(el => {
+      if (el) {
+        el._hoverActive = false;
+        el.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+      }
+    });
+    body.style.setProperty('cursor', 'default');
+    clearOutlines();
+
+    arOverlay.classList.add('is-visible');
+    setPanelTransitionDirection(arPanel, true);
+    setPanelDrawnState(arPanel, false);
+
+    arLink.classList.add('is-panel-open');
+    arLinkMobile.classList.add('is-panel-open');
+
+    requestAnimationFrame(() => {
+      updateArBorderPaths();
+      updateArPanelScrollIndicators();
+      arOverlay.classList.add('is-active');
+      setPanelDrawnState(arPanel, true);
+      setTimeout(updateArPanelScrollIndicators, 120);
+      setTimeout(updateArPanelScrollIndicators, 320);
+    });
+
+    requestTimeout(() => {
+      arOverlayAnimating = false;
+      panelOpenLockout = false;
+    }, 480);
+  }
+
+  function hideArOverlay(options = {}) {
+    if (!arOverlayVisible && !arOverlayAnimating) return;
+
+    arOverlayAnimating = true;
+    arOverlayVisible = false;
+    body.style.setProperty('cursor', 'default');
+
+    setPanelTransitionDirection(arPanel, false);
+    setPanelDrawnState(arPanel, false);
+    arOverlay.classList.remove('is-active');
+
+    linkHoveredAR = false;
+    clearOutlines();
+
+    arLink.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+    arLink.classList.remove('is-panel-open');
+    arLinkMobile.style.setProperty('animation', '');
+    arLinkMobile.classList.remove('is-panel-open');
+    if (homeLink) {
+      homeLink._hoverActive = false;
+      homeLink.style.setProperty('animation', 'shrink 0.25s forwards');
+    }
+
+    const isSilentSwitch = !!(options && options.silentRespawn);
+
+    requestTimeout(() => {
+      arOverlay.classList.remove('is-visible');
+      arOverlayAnimating = false;
+
+      startArPhoneRespawn(isSilentSwitch);
+    }, 360);
+  }
+
+  arBlur.onclick = hideArOverlay;
+  arCloseButton.onclick = hideArOverlay;
+  arPanel.onclick = (event) => {
+    event.stopPropagation();
+  };
+
+  function showGamesOverlay() {
+    if (gamesOverlayVisible || gamesOverlayAnimating) return;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
+
+    gamesOverlayVisible = true;
+    gamesOverlayAnimating = true;
+    canInteract = false;
+    linkHoveredGames = false;
+    [gamesLink, gamesLinkMobile].forEach(el => {
+      if (el) {
+        el._hoverActive = false;
+        el.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+      }
+    });
+    body.style.setProperty('cursor', 'default');
+    clearOutlines();
+
+    gamesOverlayData.overlay.classList.add('is-visible');
+    setPanelTransitionDirection(gamesOverlayData.panel, true);
+    setPanelDrawnState(gamesOverlayData.panel, false);
+
+    gamesLink.classList.add('is-panel-open');
+    gamesLinkMobile.classList.add('is-panel-open');
+
+    requestAnimationFrame(() => {
+      gamesOverlayData.updateBorderPaths();
+      gamesOverlayData.updateScrollIndicators();
+      gamesOverlayData.overlay.classList.add('is-active');
+      setPanelDrawnState(gamesOverlayData.panel, true);
+      setTimeout(gamesOverlayData.updateScrollIndicators, 120);
+      setTimeout(gamesOverlayData.updateScrollIndicators, 320);
+    });
+
+    requestTimeout(() => {
+      gamesOverlayAnimating = false;
+      panelOpenLockout = false;
+    }, 480);
+  }
+
+  function hideGamesOverlay(options = {}) {
+    if (!gamesOverlayVisible && !gamesOverlayAnimating) return;
+
+    gamesOverlayAnimating = true;
+    gamesOverlayVisible = false;
+    body.style.setProperty('cursor', 'default');
+
+    setPanelTransitionDirection(gamesOverlayData.panel, false);
+    setPanelDrawnState(gamesOverlayData.panel, false);
+    gamesOverlayData.overlay.classList.remove('is-active');
+
+    linkHoveredGames = false;
+    clearOutlines();
+
+    gamesLink.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+    gamesLink.classList.remove('is-panel-open');
+    gamesLinkMobile.style.setProperty('animation', '');
+    gamesLinkMobile.classList.remove('is-panel-open');
+
+    const isSilentSwitch = !!(options && options.silentRespawn);
+
+    requestTimeout(() => {
+      gamesOverlayData.overlay.classList.remove('is-visible');
+      gamesOverlayAnimating = false;
+      startGamesAlienRespawn(isSilentSwitch);
+    }, 360);
+  }
+
+  gamesOverlayData.blur.onclick = hideGamesOverlay;
+  gamesOverlayData.closeButton.onclick = hideGamesOverlay;
+  gamesOverlayData.panel.onclick = (event) => { event.stopPropagation(); };
+
+  function showWebOverlay() {
+    if (webOverlayVisible || webOverlayAnimating) return;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
+
+    webOverlayVisible = true;
+    webOverlayAnimating = true;
+    canInteract = false;
+    linkHoveredWeb = false;
+    [webLink, webLinkMobile].forEach(el => {
+      if (el) {
+        el._hoverActive = false;
+        el.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+      }
+    });
+    body.style.setProperty('cursor', 'default');
+    clearOutlines();
+
+    webOverlayData.overlay.classList.add('is-visible');
+    setPanelTransitionDirection(webOverlayData.panel, true);
+    setPanelDrawnState(webOverlayData.panel, false);
+
+    webLink.classList.add('is-panel-open');
+    webLinkMobile.classList.add('is-panel-open');
+
+    requestAnimationFrame(() => {
+      webOverlayData.updateBorderPaths();
+      webOverlayData.updateScrollIndicators();
+      webOverlayData.overlay.classList.add('is-active');
+      setPanelDrawnState(webOverlayData.panel, true);
+      setTimeout(webOverlayData.updateScrollIndicators, 120);
+      setTimeout(webOverlayData.updateScrollIndicators, 320);
+    });
+
+    requestTimeout(() => {
+      webOverlayAnimating = false;
+      panelOpenLockout = false;
+    }, 480);
+  }
+
+  function hideWebOverlay(options = {}) {
+    if (!webOverlayVisible && !webOverlayAnimating) return;
+
+    webOverlayAnimating = true;
+    webOverlayVisible = false;
+    body.style.setProperty('cursor', 'default');
+
+    setPanelTransitionDirection(webOverlayData.panel, false);
+    setPanelDrawnState(webOverlayData.panel, false);
+    webOverlayData.overlay.classList.remove('is-active');
+
+    linkHoveredWeb = false;
+    clearOutlines();
+
+    webLink.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+    webLink.classList.remove('is-panel-open');
+    webLinkMobile.style.setProperty('animation', '');
+    webLinkMobile.classList.remove('is-panel-open');
+
+    const isSilentSwitch = !!(options && options.silentRespawn);
+
+    requestTimeout(() => {
+      webOverlayData.overlay.classList.remove('is-visible');
+      webOverlayAnimating = false;
+      startWebGlobeRespawn(isSilentSwitch);
+    }, 360);
+  }
+
+  webOverlayData.blur.onclick = hideWebOverlay;
+  webOverlayData.closeButton.onclick = hideWebOverlay;
+  webOverlayData.panel.onclick = (event) => { event.stopPropagation(); };
+
+  function showHoudiniOverlay() {
+    if (houdiniOverlayVisible || houdiniOverlayAnimating) return;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
+
+    houdiniOverlayVisible = true;
+    houdiniOverlayAnimating = true;
+    canInteract = false;
+    linkHoveredHoudini = false;
+    [houdiniLink, houdiniLinkMobile].forEach(el => {
+      if (el) {
+        el._hoverActive = false;
+        el.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+      }
+    });
+    body.style.setProperty('cursor', 'default');
+    clearOutlines();
+
+    houdiniOverlayData.overlay.classList.add('is-visible');
+    setPanelTransitionDirection(houdiniOverlayData.panel, true);
+    setPanelDrawnState(houdiniOverlayData.panel, false);
+
+    houdiniLink.classList.add('is-panel-open');
+    houdiniLinkMobile.classList.add('is-panel-open');
+
+    requestAnimationFrame(() => {
+      houdiniOverlayData.updateBorderPaths();
+      houdiniOverlayData.updateScrollIndicators();
+      houdiniOverlayData.overlay.classList.add('is-active');
+      setPanelDrawnState(houdiniOverlayData.panel, true);
+      setTimeout(houdiniOverlayData.updateScrollIndicators, 120);
+      setTimeout(houdiniOverlayData.updateScrollIndicators, 320);
+    });
+
+    requestTimeout(() => {
+      houdiniOverlayAnimating = false;
+      panelOpenLockout = false;
+    }, 480);
+  }
+
+  function hideHoudiniOverlay(options = {}) {
+    if (!houdiniOverlayVisible && !houdiniOverlayAnimating) return;
+
+    houdiniOverlayAnimating = true;
+    houdiniOverlayVisible = false;
+    body.style.setProperty('cursor', 'default');
+
+    setPanelTransitionDirection(houdiniOverlayData.panel, false);
+    setPanelDrawnState(houdiniOverlayData.panel, false);
+    houdiniOverlayData.overlay.classList.remove('is-active');
+
+    linkHoveredHoudini = false;
+    clearOutlines();
+
+    houdiniLink.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
+    houdiniLink.classList.remove('is-panel-open');
+    houdiniLinkMobile.style.setProperty('animation', '');
+    houdiniLinkMobile.classList.remove('is-panel-open');
+
+    const isSilentSwitch = !!(options && options.silentRespawn);
+
+    requestTimeout(() => {
+      houdiniOverlayData.overlay.classList.remove('is-visible');
+      houdiniOverlayAnimating = false;
+      startHoudiniToyRespawn(isSilentSwitch);
+    }, 360);
+  }
+
+  houdiniOverlayData.blur.onclick = hideHoudiniOverlay;
+  houdiniOverlayData.closeButton.onclick = hideHoudiniOverlay;
+  houdiniOverlayData.panel.onclick = (event) => { event.stopPropagation(); };
 
   // ==========================================
   // 4. State Transition Actions
@@ -4001,14 +4351,10 @@ function init() {
   function homeLinkClicked() {
     if (!homeLink._hoverActive) body.style.setProperty('cursor', 'default');
 
-    if (aboutOverlayVisible || aboutOverlayAnimating || currentTarget == "about") {
-      hideAboutOverlay();
-      if (aboutMePanel) {
-        aboutMePanel.style.visibility = 'hidden';
-      }
-      if (downArrow) {
-        downArrow.style.visibility = 'hidden';
-      }
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay();
+      if (aboutMePanel) aboutMePanel.style.visibility = 'hidden';
+      if (downArrow) downArrow.style.visibility = 'hidden';
       currentTarget = "main";
       return;
     }
@@ -4018,167 +4364,124 @@ function init() {
       return;
     }
 
-    // Cycle through render style modes: default -> multiBit -> oneBit -> toon -> default
     cycleRenderStyleMode();
-
-    if (currentTarget == "ar") {
-      arLink.style.setProperty('animation', 'resetScaleBorder 0.25s forwards');
-      arLinkMobile.style.setProperty('animation', '');
-
-      showPhoneUI();
-      leftArrow.style.visibility = 'hidden';
-
-      currentTarget = "main";
-      canInteract = true;
-    } else {
-      canInteract = true;
-    }
+    canInteract = true;
   }
 
   function aboutLinkClicked() {
+    if (aboutOverlayVisible || aboutOverlayAnimating || panelOpenLockout) return;
     if (mobileNavMenuVisible) showMobileNavMenu();
 
     playMenuSelect(aboutLink, aboutLinkMobile);
     body.style.setProperty('cursor', 'default');
 
+    panelOpenLockout = true;
     canInteract = false;
-    if (aboutMePanel) {
-      aboutMePanel.style.visibility = 'hidden';
-    }
-    if (downArrow) {
-      downArrow.style.visibility = 'hidden';
+    if (aboutMePanel) aboutMePanel.style.visibility = 'hidden';
+    if (downArrow) downArrow.style.visibility = 'hidden';
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
     }
 
     const sCfg = SCENE_CONFIG.questionBox.shatter;
     if (questionBoxGroup && questionBoxGroup.visible && sCfg && sCfg.enabled !== false) {
-      if (triggerQuestionBoxShatter(true)) {
-        return;
-      }
+      if (triggerQuestionBoxShatter(true)) return;
     }
 
     showAboutOverlay();
   }
 
   function arLinkClicked() {
+    if (arOverlayVisible || arOverlayAnimating || panelOpenLockout) return;
     if (mobileNavMenuVisible) showMobileNavMenu();
 
     playMenuSelect(arLink, arLinkMobile);
     body.style.setProperty('cursor', 'default');
+    panelOpenLockout = true;
+    canInteract = false;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
 
     const cCfg = SCENE_CONFIG.ar3D ? SCENE_CONFIG.ar3D.clickAnimation : null;
-    if (cCfg && cCfg.enabled !== false) {
-      triggerArPhoneClickAnimation();
+    if (!cCfg || cCfg.enabled !== false) {
+      if (!triggerArPhoneClickAnimation(true)) {
+        showArOverlay();
+      }
     } else {
-      canInteract = false;
-      currentTarget = "ar";
-      showPhoneUI();
-      leftArrow.style.visibility = 'visible';
-      canInteract = true;
+      showArOverlay();
     }
   }
 
   function gamesLinkClicked() {
+    if (gamesOverlayVisible || gamesOverlayAnimating || panelOpenLockout) return;
     if (mobileNavMenuVisible) showMobileNavMenu();
+
     playMenuSelect(gamesLink, gamesLinkMobile);
     body.style.setProperty('cursor', 'default');
+    panelOpenLockout = true;
+    canInteract = false;
 
-    if (isGamesPopping || gamesRespawnStartTime > 0) return;
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
 
     const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
-    if (pCfg && pCfg.enabled !== false) {
-      triggerGamesAlienPop();
+    if (!pCfg || pCfg.enabled !== false) {
+      if (!triggerGamesAlienPop(true)) {
+        showGamesOverlay();
+      }
+    } else {
+      showGamesOverlay();
     }
   }
 
   function webLinkClicked() {
+    if (webOverlayVisible || webOverlayAnimating || panelOpenLockout) return;
     if (mobileNavMenuVisible) showMobileNavMenu();
+
     playMenuSelect(webLink, webLinkMobile);
     body.style.setProperty('cursor', 'default');
+    panelOpenLockout = true;
+    canInteract = false;
+
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
 
     const cCfg = SCENE_CONFIG.web3D ? SCENE_CONFIG.web3D.clickAnimation : null;
-    if (cCfg && cCfg.enabled !== false) {
-      triggerWebGlobeClickAnimation();
+    if (!cCfg || cCfg.enabled !== false) {
+      if (!triggerWebGlobeClickAnimation(true)) {
+        showWebOverlay();
+      }
     } else {
-      canInteract = false;
-      body.style.transition = 'opacity 0.8s ease';
-      body.style.opacity = 0;
-      requestTimeout(() => {
-        window.open("https://noahgunther.com/web", "_top");
-      }, 800);
+      showWebOverlay();
     }
   }
 
   function houdiniLinkClicked() {
+    if (houdiniOverlayVisible || houdiniOverlayAnimating || panelOpenLockout) return;
     if (mobileNavMenuVisible) showMobileNavMenu();
+
     playMenuSelect(houdiniLink, houdiniLinkMobile);
     body.style.setProperty('cursor', 'default');
+    panelOpenLockout = true;
+    canInteract = false;
 
-    if (isHoudiniPopping || houdiniRespawnStartTime > 0) return;
+    if (isAnyOverlayActive()) {
+      hideAnyActiveOverlay({ silentRespawn: true });
+    }
 
     const pCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.pop : null;
-    if (pCfg && pCfg.enabled !== false) {
-      triggerHoudiniToyPop();
+    if (!pCfg || pCfg.enabled !== false) {
+      if (!triggerHoudiniToyPop(true)) {
+        showHoudiniOverlay();
+      }
+    } else {
+      showHoudiniOverlay();
     }
-  }
-
-  function arLastButtonFunction() {
-    canInteract = false;
-    requestTimeout(() => {
-      stopCurrentArVideo();
-      if (arProjectContext == 'socialAr') {
-        metaSocialArCapturesIndex--;
-        metaSocialArCapturesIndex = ((metaSocialArCapturesIndex % metaSocialArCaptures.length) + metaSocialArCaptures.length) % metaSocialArCaptures.length;
-        metaSocialArCaptures[metaSocialArCapturesIndex].style = '';
-        metaSocialArCaptures[metaSocialArCapturesIndex].play();
-      } else if (arProjectContext == 'arGames') {
-        metaArGamesCapturesIndex--;
-        metaArGamesCapturesIndex = ((metaArGamesCapturesIndex % metaArGamesCaptures.length) + metaArGamesCaptures.length) % metaArGamesCaptures.length;
-        metaArGamesCaptures[metaArGamesCapturesIndex].style = '';
-        metaArGamesCaptures[metaArGamesCapturesIndex].play();
-      }
-
-      updateArInfoPanel();
-      if (!arInfoPanelVisible && arInfoPanelHorizontalLayout) {
-        showArInfoPanel(true);
-      } else {
-        canInteract = true;
-      }
-    }, 100);
-
-    requestTimeout(() => {
-      arLastButton.style.setProperty('animation', '');
-      arInfoMobileLastAnim.style.setProperty('animation', '');
-    }, 500);
-  }
-
-  function arNextButtonFunction() {
-    canInteract = false;
-    requestTimeout(() => {
-      stopCurrentArVideo();
-      if (arProjectContext == 'socialAr') {
-        metaSocialArCapturesIndex++;
-        metaSocialArCapturesIndex %= metaSocialArCaptures.length;
-        metaSocialArCaptures[metaSocialArCapturesIndex].style = '';
-        metaSocialArCaptures[metaSocialArCapturesIndex].play();
-      } else if (arProjectContext == 'arGames') {
-        metaArGamesCapturesIndex++;
-        metaArGamesCapturesIndex %= metaArGamesCaptures.length;
-        metaArGamesCaptures[metaArGamesCapturesIndex].style = '';
-        metaArGamesCaptures[metaArGamesCapturesIndex].play();
-      }
-
-      updateArInfoPanel();
-      if (!arInfoPanelVisible && arInfoPanelHorizontalLayout) {
-        showArInfoPanel(true);
-      } else {
-        canInteract = true;
-      }
-    }, 100);
-
-    requestTimeout(() => {
-      arNextButton.style.setProperty('animation', '');
-      arInfoMobileNextAnim.style.setProperty('animation', '');
-    }, 500);
   }
 
   // Phone clock loop
@@ -4192,21 +4495,6 @@ function init() {
     setTimeout(updatePhoneClock, 10000);
   }
 
-  // Mobile AR projects loading indicators loop
-  function updateArLoadingScreen() {
-    if (phoneScreenLoadingIndex >= 0 && phoneScreenLoading[phoneScreenLoadingIndex]) {
-      phoneScreenLoading[phoneScreenLoadingIndex].style.visibility = 'hidden';
-    }
-    phoneScreenLoadingIndex++;
-    phoneScreenLoadingIndex %= phoneScreenLoading.length;
-    if (currentTarget == 'ar' && arProjectContext != 'main') {
-      if (phoneScreenLoading[phoneScreenLoadingIndex]) {
-        phoneScreenLoading[phoneScreenLoadingIndex].style.visibility = 'visible';
-      }
-    }
-    setTimeout(updateArLoadingScreen, 500);
-  }
-
   // ==========================================
   // 5. Synchronous Initialization Calls
   // ==========================================
@@ -4214,7 +4502,6 @@ function init() {
     phoneScreenPanel.style.setProperty('width', window.innerHeight * 0.3 + 'px');
     phoneScreenPanel.style.setProperty('height', window.innerHeight * 0.65 + 'px');
     updateMainNavLinksLayout();
-    updateArInfoPanelLayout();
 
     // Responsive Three.js Viewport sizing
     const width = window.innerWidth;
@@ -4244,7 +4531,6 @@ function init() {
   window.onresize = handleResize;
 
   updatePhoneClock();
-  updateArLoadingScreen();
   handleResize();
 
   // (Loading animation runs via CSS — no JS frame loop needed)
@@ -4352,241 +4638,10 @@ function init() {
   downArrowFront.onmouseout = null;
   downArrowFront.onclick = null;
 
-  // AR Games / Social AR buttons click inside phone scroll view
-  arGamesButton.onmouseover = () => {
-    arGamesButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  };
-  arGamesButton.onmouseout = () => {
-    arGamesButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  };
-  arGamesButton.onclick = () => {
-    if (canInteract) {
-      canInteract = false;
-      arGamesButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      requestTimeout(() => {
-        arProjectContext = 'arGames';
-        phoneScreenHeader.style.visibility = 'hidden';
-        phoneScreenScrollWrapper.style.visibility = 'hidden';
 
-        phoneScreenTray.style.setProperty('animation', 'mobileArTrayIn 1.0s forwards');
-        phoneScreenTray.style.visibility = 'visible';
-        requestTimeout(() => { phoneScreenTray.style.setProperty('animation', ''); }, 1000);
-
-        phoneScreenInfoButton.style.setProperty('animation', 'mobileArInfoButtonIn 0.5s forwards');
-        phoneScreenInfoButton.style.visibility = 'visible';
-        requestTimeout(() => { phoneScreenInfoButton.style.setProperty('animation', ''); }, 500);
-
-        arLoading.style.visibility = 'visible';
-        phoneScreenLoading[phoneScreenLoadingIndex].style.visibility = 'visible';
-
-        metaArGamesCaptures[metaArGamesCapturesIndex].style = '';
-        metaArGamesCaptures[metaArGamesCapturesIndex].play();
-
-        updateArInfoPanel();
-        if (arInfoPanelHorizontalLayout) {
-          showArInfoPanel(true);
-        } else {
-          canInteract = true;
-        }
-      }, 100);
-    }
-  };
-
-  socialArButton.onmouseover = () => {
-    socialArButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  };
-  socialArButton.onmouseout = () => {
-    socialArButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  };
-  socialArButton.onclick = () => {
-    if (canInteract) {
-      canInteract = false;
-      socialArButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      requestTimeout(() => {
-        arProjectContext = 'socialAr';
-        phoneScreenHeader.style.visibility = 'hidden';
-        phoneScreenScrollWrapper.style.visibility = 'hidden';
-
-        phoneScreenTray.style.setProperty('animation', 'mobileArTrayIn 1.0s forwards');
-        phoneScreenTray.style.visibility = 'visible';
-        requestTimeout(() => { phoneScreenTray.style.setProperty('animation', ''); }, 1000);
-
-        phoneScreenInfoButton.style.setProperty('animation', 'mobileArInfoButtonIn 0.5s forwards');
-        phoneScreenInfoButton.style.visibility = 'visible';
-        requestTimeout(() => { phoneScreenInfoButton.style.setProperty('animation', ''); }, 500);
-
-        arLoading.style.visibility = 'visible';
-        phoneScreenLoading[phoneScreenLoadingIndex].style.visibility = 'visible';
-
-        metaSocialArCaptures[metaSocialArCapturesIndex].style = '';
-        metaSocialArCaptures[metaSocialArCapturesIndex].play();
-
-        updateArInfoPanel();
-        if (arInfoPanelHorizontalLayout) {
-          showArInfoPanel(true);
-        } else {
-          canInteract = true;
-        }
-      }, 100);
-    }
-  };
 
   // AR Phone Tray buttons
-  arHomeButton.onmouseover = () => {
-    arHomeButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  }
-  arHomeButton.onmouseout = () => {
-    arHomeButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  }
-  arHomeButton.onclick = () => {
-    if (canInteract) {
-      canInteract = false;
-      arHomeButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      requestTimeout(() => {
-        showArInfoPanel(false);
-        phoneScreenHeader.style.visibility = 'visible';
-        phoneScreenScrollWrapper.style.visibility = 'visible';
 
-        phoneScreenTray.style.visibility = 'hidden';
-        phoneScreenInfoButton.style.visibility = 'hidden';
-        arLoading.style.visibility = 'hidden';
-        phoneScreenLoading.forEach(el => { el.style.visibility = 'hidden'; });
-
-        stopCurrentArVideo();
-        arProjectContext = 'main';
-        canInteract = true;
-      }, 100);
-    }
-  };
-
-  arLastButton.onmouseover = () => {
-    arLastButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  }
-  arLastButton.onmouseout = () => {
-    arLastButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  }
-  arLastButton.onclick = () => {
-    if (canInteract) {
-      arLastButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      arLastButtonFunction();
-    }
-  };
-
-  arNextButton.onmouseover = () => {
-    arNextButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  }
-  arNextButton.onmouseout = () => {
-    arNextButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  }
-  arNextButton.onclick = () => {
-    if (canInteract) {
-      arNextButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      arNextButtonFunction();
-    }
-  };
-
-  // AR Phone Info panel triggers
-  // AR Phone Info panel triggers
-  phoneScreenInfoButton.onmouseover = () => {
-    if (isMobileBrowser) return;
-    phoneScreenInfoButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  };
-  phoneScreenInfoButton.onmouseout = () => {
-    if (isMobileBrowser) return;
-    phoneScreenInfoButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  };
-  phoneScreenInfoButton.onclick = () => {
-    if (canInteract) {
-      phoneScreenInfoButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      requestTimeout(() => { phoneScreenInfoButton.style.setProperty('animation', ''); }, 500);
-      showArInfoPanel(true);
-    }
-  };
-
-  arInfoCloseButton.onmouseover = () => {
-    if (isMobileBrowser) return;
-    arInfoCloseButton.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  };
-  arInfoCloseButton.onmouseout = () => {
-    if (isMobileBrowser) return;
-    arInfoCloseButton.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  };
-  arInfoCloseButton.onclick = () => {
-    if (canInteract) {
-      arInfoCloseButton.style.setProperty('animation', 'bounce 0.5s forwards');
-      showArInfoPanel(true);
-    }
-  };
-
-  arInfoPanelBackgroundBlur.onclick = () => {
-    if (canInteract) showArInfoPanel(true);
-  };
-
-  // AR Info Mobile popup buttons
-  arInfoMobileLastButton.onmouseover = () => {
-    if (isMobileBrowser) return;
-    arInfoMobileLastAnim.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  }
-  arInfoMobileLastButton.onmouseout = () => {
-    if (isMobileBrowser) return;
-    arInfoMobileLastAnim.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  }
-  arInfoMobileLastButton.onclick = () => {
-    if (canInteract) {
-      arInfoMobileLastAnim.style.setProperty('animation', 'bounce 0.5s forwards');
-      arLastButtonFunction();
-    }
-  };
-
-  arInfoMobileCloseButton.onmouseover = () => {
-    if (isMobileBrowser) return;
-    arInfoMobileCloseAnim.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  }
-  arInfoMobileCloseButton.onmouseout = () => {
-    if (isMobileBrowser) return;
-    arInfoMobileCloseAnim.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  }
-  arInfoMobileCloseButton.onclick = () => {
-    if (canInteract) {
-      arInfoMobileCloseAnim.style.setProperty('animation', 'bounce 0.5s forwards');
-      showArInfoPanel(true);
-    }
-  };
-
-  arInfoMobileNextButton.onmouseover = () => {
-    if (isMobileBrowser) return;
-    arInfoMobileNextAnim.style.setProperty('animation', 'grow 0.25s forwards');
-    body.style.setProperty('cursor', 'pointer');
-  }
-  arInfoMobileNextButton.onmouseout = () => {
-    if (isMobileBrowser) return;
-    arInfoMobileNextAnim.style.setProperty('animation', 'shrink 0.25s forwards');
-    body.style.setProperty('cursor', 'default');
-  }
-  arInfoMobileNextButton.onclick = () => {
-    if (canInteract) {
-      arInfoMobileNextAnim.style.setProperty('animation', 'bounce 0.5s forwards');
-      arNextButtonFunction();
-    }
-  };
 
   // Hamburger mobile menu click button
   mobileNavLinksButton.onmouseover = () => { if (!isMobileBrowser && canUse2DMenu()) body.style.setProperty('cursor', 'pointer'); }
@@ -4625,7 +4680,7 @@ function init() {
     }
   };
   homeLink.onclick = () => {
-    if (isAboutOverlayActive() || canInteract) {
+    if (isAnyOverlayActive() || canInteract) {
       homeLinkClicked();
     }
   };
@@ -4686,7 +4741,8 @@ function init() {
       }
     };
 
-    el.onclick = () => {
+    el.onclick = (e) => {
+      if (e) e.stopPropagation();
       if (canClickLink()) {
         cfg.onClick();
       }
@@ -4848,7 +4904,8 @@ function init() {
 
     const isHovered = (isArPhoneHovered || linkHoveredAR) && !isArPhoneClickAnimating && arRespawnStartTime === 0;
     const isClickingOrRespawning = isArPhoneClickAnimating || arRespawnStartTime > 0;
-    const isPriorityBusy = isHovered || isClickingOrRespawning;
+    const isOverlayOpen = (typeof isArOverlayActive === 'function' && isArOverlayActive()) || arOverlayVisible || arOverlayAnimating;
+    const isPriorityBusy = isHovered || isClickingOrRespawning || isOverlayOpen;
 
     const baseRadY = ((aCfg.rotation && aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
     const initialFacingRotY = baseRadY + Math.PI;
@@ -4883,13 +4940,13 @@ function init() {
     arCurrentSpeedFactor += (targetSpeedFactor - arCurrentSpeedFactor) * speedLerpRate;
     if (arCurrentSpeedFactor < 0.001) arCurrentSpeedFactor = 0;
 
-    // 1. HOVER & CLICK / RESPAWN (Priority Fast Camera Alignment)
+    // 1. HOVER & CLICK / RESPAWN / OVERLAY OPEN (Priority Fast Camera Alignment)
     if (isPriorityBusy) {
       if (arBehaviorState === 'walking') {
         arBehaviorState = 'inspecting';
       }
-      if (isClickingOrRespawning) {
-        // Instantly face camera when clicked or respawning
+      if (isClickingOrRespawning || isOverlayOpen) {
+        // Instantly face camera when clicked, respawning, or overlay is open
         arPhoneGroup.rotation.y = targetCamFacingRotY;
         isArPhoneHoverTurning = false;
       } else if (isHovered && Math.abs(diffCamY) > 0.01) {
@@ -6054,8 +6111,10 @@ function init() {
 
     const isPointerOverUI = isPointerOver2DUI(lastClientX, lastClientY);
 
-    // Raycast for hover state (only active on non-mobile devices when interaction is enabled, on main page, once loaded, and when about panel is closed)
-    if (!isMobileBrowser && canInteract && currentTarget === 'main' && loadingComplete && !aboutOverlayVisible && !aboutOverlayAnimating) {
+    const isOverlayOpen = isAnyOverlayActive();
+
+    // Raycast & 2D link hover state updates (active even when overlay panel is open for top-right 2D links)
+    if (!isMobileBrowser && loadingComplete && (canInteract || isOverlayOpen)) {
       let hoverTargetType = null;
 
       if (linkHoveredAbout && questionBoxGroup && respawnStartTime === 0) {
@@ -6070,7 +6129,7 @@ function init() {
         hoverTargetType = 'gamesAlien';
       } else if (linkHoveredLinkedin && bugCubeGroup) {
         hoverTargetType = 'bug';
-      } else if (!isPointerOverUI) {
+      } else if (!isOverlayOpen && !isPointerOverUI && canInteract && currentTarget === 'main') {
         raycaster.setFromCamera(mouse, camera);
 
         // Priority is intentional: the small moving insect should win over the larger central/menu targets.
@@ -6162,6 +6221,11 @@ function init() {
       isGamesAlienHovered = hoverTargetType === 'gamesAlien';
       isBugCubeHovered = hoverTargetType === 'bug';
       applyHoverTarget(hoverTargetType);
+      if (hoverTargetType) {
+        body.style.setProperty('cursor', 'pointer');
+      } else {
+        body.style.setProperty('cursor', 'default');
+      }
     } else {
       isQBoxHovered = false;
       isArPhoneHovered = false;
@@ -6333,6 +6397,7 @@ function init() {
               el.style.setProperty('animation', 'grow 0.25s forwards');
               body.style.setProperty('cursor', 'pointer');
               if (cfg.hoverType === 'about') linkHoveredAbout = true;
+              else if (cfg.hoverType === 'ar') linkHoveredAR = true;
               else if (cfg.hoverType === 'houdini') linkHoveredHoudini = true;
               else if (cfg.hoverType === 'web') linkHoveredWeb = true;
               else if (cfg.hoverType === 'games') linkHoveredGames = true;
@@ -6986,7 +7051,12 @@ function init() {
           houdiniPopSparkles = [];
         }
         isHoudiniPopping = false;
-        startHoudiniToyRespawn();
+        if (pendingHoudiniOverlayAfterPop) {
+          pendingHoudiniOverlayAfterPop = false;
+          showHoudiniOverlay();
+        } else {
+          startHoudiniToyRespawn();
+        }
       }
     }
 
@@ -7132,7 +7202,12 @@ function init() {
         if (gamesShadowMesh) gamesShadowMesh.visible = false;
 
         isGamesPopping = false;
-        startGamesAlienRespawn();
+        if (pendingGamesOverlayAfterPop) {
+          pendingGamesOverlayAfterPop = false;
+          showGamesOverlay();
+        } else {
+          startGamesAlienRespawn();
+        }
       }
     }
 
@@ -7572,8 +7647,8 @@ function init() {
             webRespawnStartTime = 0;
           }
         }
-      } else if (isWebGlobeClickAnimating) {
-        // Lock scale at full hover scale AND lock position Y at elevated hover height + floatOffset during click animation
+      } else if (isWebGlobeClickAnimating || webOverlayVisible || webOverlayAnimating) {
+        // Lock scale at full hover scale AND lock position Y at elevated hover height + floatOffset during click animation or while overlay panel is open
         const webBaseScale = wCfg.scale || 0.0055;
         const hoverScaleMult = wCfg.hoverScale !== undefined ? wCfg.hoverScale : 1.15;
         const webClickScale = webBaseScale * hoverScaleMult * targetScale;
@@ -7695,7 +7770,7 @@ function init() {
     // 3D AR Phone float, hover scaling, and animation updates
     if (arPhoneGroup && SCENE_CONFIG.ar3D && SCENE_CONFIG.ar3D.enabled !== false) {
       const aCfg = SCENE_CONFIG.ar3D;
-      const isHovered = (isArPhoneHovered || linkHoveredAR) && !isArPhoneClickAnimating && arRespawnStartTime === 0;
+      const isHovered = (isArPhoneHovered || linkHoveredAR) && !isArPhoneClickAnimating && arRespawnStartTime === 0 && !isArOverlayActive() && !arOverlayVisible && !arOverlayAnimating;
 
       if (!isArPhoneClickAnimating && arRespawnStartTime === 0) {
         if (isHovered && !lastArPhoneHoveredState) {
@@ -7728,7 +7803,19 @@ function init() {
       const floatOffset = Math.sin(performance.now() * freq) * amp;
       const baseY = (arPhoneGroup.userData.baseY !== undefined) ? arPhoneGroup.userData.baseY : (aCfg.desktop ? aCfg.desktop.position.y : 1.3);
 
-      if (arRespawnStartTime > 0) {
+      if (isArOverlayActive() || arOverlayVisible || arOverlayAnimating) {
+        const targetScaleVal = baseScale * hoverScaleMult * targetScale;
+        arPhoneGroup.scale.set(targetScaleVal, targetScaleVal, targetScaleVal);
+        arPhoneGroup.position.y = baseY + hoverYOffsetVal;
+        arPhoneGroup.userData.currentHoverY = hoverYOffsetVal;
+
+        const baseRadY = ((aCfg.rotation && aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
+        arPhoneGroup.rotation.y = baseRadY + Math.PI - sceneGroup.rotation.y;
+
+        if (screenHoverEmissiveTexture) {
+          setArScreenEmissiveTexture(screenHoverEmissiveTexture);
+        }
+      } else if (arRespawnStartTime > 0) {
         const cCfg = aCfg.clickAnimation || {};
         const delay = cCfg.respawnDelay !== undefined ? cCfg.respawnDelay : 50;
         const duration = cCfg.respawnDuration !== undefined ? cCfg.respawnDuration : 400;
@@ -7782,11 +7869,15 @@ function init() {
 
         if (pct >= 1.0) {
           isArPhoneClickAnimating = false;
-          // Swap texture back to emojiface.webp
-          if (screenEmissiveTexture) {
-            setArScreenEmissiveTexture(screenEmissiveTexture);
+          if (pendingArOverlayAfterClick) {
+            pendingArOverlayAfterClick = false;
+            showArOverlay();
+          } else {
+            if (screenEmissiveTexture) {
+              setArScreenEmissiveTexture(screenEmissiveTexture);
+            }
+            startArPhoneRespawn();
           }
-          startArPhoneRespawn();
         }
       } else {
         const arActiveScale = isHovered ? hoverScaleMult : 1.0;
@@ -7990,7 +8081,12 @@ function init() {
           webGodRays = [];
         }
         // Trigger independent respawn transition back to normal scale
-        startWebGlobeRespawn();
+        if (pendingWebOverlayAfterClick) {
+          pendingWebOverlayAfterClick = false;
+          showWebOverlay();
+        } else {
+          startWebGlobeRespawn();
+        }
       }
     }
 
@@ -8096,8 +8192,8 @@ function init() {
 
     // Contact shadow updates for Web 3D Globe
     if (webShadowMesh && webShadowMaterial && webGlobeGroup && SCENE_CONFIG.web3D) {
-      webShadowMesh.visible = !shouldHideShadows;
-      if (!shouldHideShadows) {
+      webShadowMesh.visible = !shouldHideShadows && webGlobeGroup.visible;
+      if (webShadowMesh.visible) {
         const wCfg = SCENE_CONFIG.web3D;
         const shadowBaseY = wCfg.shadowY !== undefined ? wCfg.shadowY : 0.33;
         webShadowMesh.position.set(webGlobeGroup.position.x, shadowBaseY, webGlobeGroup.position.z);
@@ -8113,6 +8209,8 @@ function init() {
     if (gamesShadowMesh && gamesShadowMaterial && gamesAlienGroup && SCENE_CONFIG.games3D) {
       if (isGamesPopping || gamesRespawnStartTime > 0) {
         // Bypassed completely during pop and regrow (handled by regrow loop)
+      } else if (!gamesAlienGroup.visible || gamesOverlayVisible || gamesOverlayAnimating) {
+        gamesShadowMesh.visible = false;
       } else {
         gamesShadowMesh.visible = !shouldHideShadows;
         if (!shouldHideShadows) {
@@ -8133,8 +8231,8 @@ function init() {
 
     // Contact shadow updates for 3D AR Phone
     if (arShadowMesh && arShadowMaterial && arPhoneGroup && SCENE_CONFIG.ar3D) {
-      arShadowMesh.visible = !shouldHideShadows;
-      if (!shouldHideShadows) {
+      arShadowMesh.visible = !shouldHideShadows && arPhoneGroup.visible;
+      if (arShadowMesh.visible) {
         const aCfg = SCENE_CONFIG.ar3D;
         const shadowBaseY = aCfg.shadowY !== undefined ? aCfg.shadowY : 0.335;
         arShadowMesh.position.x = arPhoneGroup.position.x;
@@ -8184,6 +8282,8 @@ function init() {
     if (houdiniShadowMesh && houdiniShadowMaterial && houdiniToyGroup && SCENE_CONFIG.houdini3D) {
       if (isHoudiniPopping || houdiniRespawnStartTime > 0) {
         // Bypassed completely during pop and regrow
+      } else if (!houdiniToyGroup.visible || houdiniOverlayVisible || houdiniOverlayAnimating) {
+        houdiniShadowMesh.visible = false;
       } else {
         houdiniShadowMesh.visible = !shouldHideShadows;
         if (!shouldHideShadows) {
@@ -8392,7 +8492,6 @@ function init() {
   // Helper to check if pointer is over 2D UI elements
   function isPointerOver2DUI(clientX, clientY) {
     if (typeof mobileNavMenuVisible !== 'undefined' && mobileNavMenuVisible) return true;
-    if (typeof aboutOverlayVisible !== 'undefined' && aboutOverlayVisible) return true;
     if (clientX === undefined || clientY === undefined) return false;
 
     if (clientX === cachedPointerX && clientY === cachedPointerY) {
@@ -8409,7 +8508,8 @@ function init() {
     cachedIsPointerOver2DUI = !!target.closest(
       '#mainnavlinks, #home, #linkedin-desktop-wrapper, #linkedin-desktop, #linkedin-mobile, ' +
       '#mobilenavmenu, #mobilenavlinksbutton, #plaintext-link, .link, .mobilelink, .logolink, ' +
-      '#aboutmepanel, #aboutmepanelwrapper, .logo-tint-mask'
+      '#aboutmepanel, #aboutmepanelwrapper, .logo-tint-mask, .about-overlay, .ar-overlay, .games-overlay, .web-overlay, .houdini-overlay, ' +
+      '.about-panel, .ar-panel, .games-panel, .web-panel, .houdini-panel'
     );
     return cachedIsPointerOver2DUI;
   }
@@ -8417,7 +8517,7 @@ function init() {
   const staticWorldHitPos = new THREE.Vector3();
 
   function get3DHitTarget(clientX, clientY) {
-    if (!canInteract || currentTarget !== 'main' || aboutOverlayVisible || aboutOverlayAnimating || mobileNavMenuVisible) return null;
+    if (!canInteract || currentTarget !== 'main' || isAnyOverlayActive() || mobileNavMenuVisible) return null;
     if (isPointerOver2DUI(clientX, clientY)) return null;
 
     staticHitMouse.set(
@@ -8445,7 +8545,7 @@ function init() {
       }
     }
 
-    if (bugCubeGroup) {
+    if (bugCubeGroup && bugBehaviorState !== 'falling') {
       bugCubeGroup.getWorldPosition(staticWorldHitPos);
       if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
         const bugIntersects = raycaster.intersectObject(bugCubeGroup, true);
@@ -8453,7 +8553,7 @@ function init() {
       }
     }
 
-    if (webGlobeGroup) {
+    if (webGlobeGroup && !isWebGlobeClickAnimating && webRespawnStartTime === 0) {
       webGlobeGroup.getWorldPosition(staticWorldHitPos);
       if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
         const webIntersects = raycaster.intersectObject(webGlobeGroup, true);
@@ -8461,7 +8561,7 @@ function init() {
       }
     }
 
-    if (gamesAlienGroup) {
+    if (gamesAlienGroup && !isGamesPopping && gamesRespawnStartTime === 0) {
       gamesAlienGroup.getWorldPosition(staticWorldHitPos);
       if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
         const gamesIntersects = raycaster.intersectObject(gamesAlienGroup, true);
@@ -8469,7 +8569,7 @@ function init() {
       }
     }
 
-    if (arPhoneGroup) {
+    if (arPhoneGroup && !isArPhoneClickAnimating && arRespawnStartTime === 0) {
       arPhoneGroup.getWorldPosition(staticWorldHitPos);
       if (raycaster.ray.distanceToPoint(staticWorldHitPos) < hitDistThreshold) {
         const arIntersects = raycaster.intersectObject(arPhoneGroup, true);
@@ -8511,7 +8611,7 @@ function init() {
 
   const handlePointerDown = (event) => {
     pointerDownPos = { x: event.clientX, y: event.clientY };
-    if (mobileNavMenuVisible || aboutOverlayVisible || isPointerOver2DUI(event.clientX, event.clientY)) {
+    if (mobileNavMenuVisible || isAnyOverlayActive() || isPointerOver2DUI(event.clientX, event.clientY)) {
       active3DPointerDownTarget = null;
       return;
     }
@@ -8718,6 +8818,16 @@ function init() {
   window.addEventListener('click', unlockAudioContext, { passive: true });
   window.addEventListener('keydown', unlockAudioContext, { passive: true });
   window.addEventListener('touchstart', unlockAudioContext, { passive: true });
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' || event.key === 'Esc') {
+      if (typeof mobileNavMenuVisible !== 'undefined' && mobileNavMenuVisible) {
+        showMobileNavMenu();
+      } else if (isAnyOverlayActive()) {
+        hideAnyActiveOverlay();
+      }
+    }
+  });
 
   function playWebAudioSound(url, volume = 0.8) {
     const targetVol = Math.max(0.0, Math.min(1.0, volume));
@@ -8991,14 +9101,15 @@ function init() {
   }
   preloadRenderModeSounds();
 
-  function startGamesAlienRespawn() {
-    isGamesRegrowingSoundPlayed = false;
+  function startGamesAlienRespawn(silent = false) {
+    isGamesRegrowingSoundPlayed = silent;
     gamesRespawnStartTime = performance.now();
     canInteract = false;
   }
 
-  function triggerGamesAlienPop() {
+  function triggerGamesAlienPop(showGamesAfter = false) {
     if (isGamesPopping || !gamesAlienGroup) return false;
+    if (!canInteract && !showGamesAfter) return false;
 
     const gCfg = SCENE_CONFIG.games3D;
     const pCfg = gCfg ? gCfg.pop : null;
@@ -9006,6 +9117,7 @@ function init() {
 
     isGamesExplodeSoundPlayed = false;
     playGamesLaserSound();
+    pendingGamesOverlayAfterPop = showGamesAfter;
 
     // 1. Traverse gamesAlienGroup and set ONLY gamesAlienPop0Mesh to visible BEFORE updating rotation!
     gamesAlienGroup.traverse((child) => {
@@ -9044,26 +9156,28 @@ function init() {
     return true;
   }
 
-  function startHoudiniToyRespawn() {
-    isHoudiniRegrowingSoundPlayed = false;
+  function startHoudiniToyRespawn(silent = false) {
+    isHoudiniRegrowingSoundPlayed = silent;
     houdiniRespawnStartTime = performance.now();
     canInteract = false;
   }
 
-  function startWebGlobeRespawn() {
-    isWebRespawnSoundPlayed = false;
+  function startWebGlobeRespawn(silent = false) {
+    isWebRespawnSoundPlayed = silent;
     webRespawnStartTime = performance.now();
     canInteract = false;
   }
 
-  function triggerHoudiniToyPop() {
+  function triggerHoudiniToyPop(showHoudiniAfter = false) {
     if (isHoudiniPopping || !houdiniToyGroup) return false;
+    if (!canInteract && !showHoudiniAfter) return false;
 
     const pCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.pop : null;
     if (!pCfg || pCfg.enabled === false) return false;
 
     isHoudiniPopping = true;
     canInteract = false;
+    pendingHoudiniOverlayAfterPop = showHoudiniAfter;
     houdiniPopStartTime = performance.now();
     houdiniRespawnStartTime = 0;
 
@@ -9133,14 +9247,18 @@ function init() {
     return true;
   }
 
-  function startArPhoneRespawn() {
-    isArRespawnSoundPlayed = false;
+  function startArPhoneRespawn(silent = false) {
+    isArRespawnSoundPlayed = silent;
     arRespawnStartTime = performance.now();
     canInteract = false;
+    if (screenEmissiveTexture) {
+      setArScreenEmissiveTexture(screenEmissiveTexture);
+    }
   }
 
-  function triggerArPhoneClickAnimation() {
-    if (!canInteract || isArPhoneClickAnimating || arRespawnStartTime > 0 || !arPhoneGroup) return false;
+  function triggerArPhoneClickAnimation(showArAfter = false) {
+    if (isArPhoneClickAnimating || arRespawnStartTime > 0 || !arPhoneGroup) return false;
+    if (!canInteract && !showArAfter) return false;
 
     const aCfg = SCENE_CONFIG.ar3D;
     const cCfg = aCfg ? aCfg.clickAnimation : null;
@@ -9148,6 +9266,7 @@ function init() {
 
     isArPhoneClickAnimating = true;
     canInteract = false;
+    pendingArOverlayAfterClick = showArAfter;
     clearOutlines();
     body.style.setProperty('cursor', 'default');
 
@@ -9171,15 +9290,19 @@ function init() {
     return true;
   }
 
-  function triggerWebGlobeClickAnimation() {
-    if (!canInteract || isWebGlobeClickAnimating || !webGlobeGroup) return false;
+  function triggerWebGlobeClickAnimation(showWebAfter = false) {
+    if (isWebGlobeClickAnimating || !webGlobeGroup) return false;
+    if (!canInteract && !showWebAfter) return false;
 
     const wCfg = SCENE_CONFIG.web3D;
     const cCfg = wCfg ? wCfg.clickAnimation : null;
     if (cCfg && cCfg.enabled === false) return false;
 
     isWebGlobeClickAnimating = true;
+    isWebGlobeHovered = false;
+    linkHoveredWeb = false;
     canInteract = false;
+    pendingWebOverlayAfterClick = showWebAfter;
     clearOutlines();
     body.style.setProperty('cursor', 'default');
 
@@ -9221,50 +9344,50 @@ function init() {
     const godRayTex = createGodRayTexture();
 
     for (let i = 0; i < count; i++) {
-      const len = minLen + Math.random() * (maxLen - minLen);
-      const w = minW + Math.random() * (maxW - minW);
+      const rayLen = minLen + Math.random() * (maxLen - minLen);
+      const rayW = minW + Math.random() * (maxW - minW);
+      const geom = new THREE.PlaneGeometry(rayW, rayLen);
 
-      const geom = new THREE.PlaneGeometry(w, len);
-      geom.translate(0, len * 0.5, 0); // Anchor origin at bottom of ray so it grows outward from center
+      geom.translate(0, rayLen / 2, 0);
 
-      const hexColor = colors[i % colors.length];
+      const colorHex = colors[Math.floor(Math.random() * colors.length)];
       const mat = new THREE.MeshBasicMaterial({
         map: godRayTex,
-        color: new THREE.Color(hexColor),
+        color: new THREE.Color(colorHex),
         transparent: true,
-        opacity: 0.9,
-        blending: THREE.AdditiveBlending,
+        opacity: 0.0,
         depthWrite: false,
-        depthTest: false,
+        blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide
       });
 
-      const rayMesh = new THREE.Mesh(geom, mat);
-      rayMesh.position.set(0, 0, 0);
+      const mesh = new THREE.Mesh(geom, mat);
 
-      // Uniform 3D spherical direction (Y spans -1 to +1)
       const u = Math.random();
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
       const phi = Math.acos(2.0 * v - 1.0);
+
       const dir = new THREE.Vector3(
         Math.sin(phi) * Math.cos(theta),
         Math.cos(phi),
         Math.sin(phi) * Math.sin(theta)
-      ).normalize();
+      );
 
-      const expSpeed = ((cCfg && cCfg.raySpeed !== undefined) ? cCfg.raySpeed : 1.8) * (0.75 + Math.random() * 0.5);
+      mesh.quaternion.setFromUnitVectors(staticGodRayUp, dir);
 
-      rayMesh.userData = {
+      mesh.userData = {
         direction: dir,
         distance: 0,
-        expSpeed: expSpeed,
-        initialLength: len,
-        initialWidth: w
+        expSpeed: 3.5 * (0.8 + Math.random() * 0.4),
+        maxOpacity: 0.75 + Math.random() * 0.25,
+        targetLength: rayLen,
+        targetWidth: rayW,
+        rotSpeed: (Math.random() - 0.5) * 0.4
       };
 
-      webGodRayGroup.add(rayMesh);
-      webGodRays.push(rayMesh);
+      webGodRayGroup.add(mesh);
+      webGodRays.push(mesh);
     }
 
     return true;
@@ -9489,28 +9612,28 @@ function init() {
     } else if (target.type === 'houdiniToy') {
       const pCfg = SCENE_CONFIG.houdini3D ? SCENE_CONFIG.houdini3D.pop : null;
       if (pCfg && pCfg.enabled !== false) {
-        triggerHoudiniToyPop();
+        triggerHoudiniToyPop(true);
       } else {
         houdiniLinkClicked();
       }
     } else if (target.type === 'webGlobe') {
       const cCfg = SCENE_CONFIG.web3D ? SCENE_CONFIG.web3D.clickAnimation : null;
       if (cCfg && cCfg.enabled !== false) {
-        triggerWebGlobeClickAnimation();
+        triggerWebGlobeClickAnimation(true);
       } else {
         webLinkClicked();
       }
     } else if (target.type === 'gamesAlien') {
       const pCfg = SCENE_CONFIG.games3D ? SCENE_CONFIG.games3D.pop : null;
       if (pCfg && pCfg.enabled !== false) {
-        triggerGamesAlienPop();
+        triggerGamesAlienPop(true);
       } else {
         gamesLinkClicked();
       }
     } else if (target.type === 'arPhone') {
       const cCfg = SCENE_CONFIG.ar3D ? SCENE_CONFIG.ar3D.clickAnimation : null;
-      if (cCfg && cCfg.enabled !== false) {
-        triggerArPhoneClickAnimation();
+      if (!cCfg || cCfg.enabled !== false) {
+        triggerArPhoneClickAnimation(true);
       } else {
         arLinkClicked();
       }
