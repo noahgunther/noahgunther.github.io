@@ -420,6 +420,15 @@ ul {
   height: min(920px, 80vh);
 }
 
+@media (min-width: 769px) and (max-height: 1400px) {
+  .ar-panel,
+  .games-panel,
+  .web-panel,
+  .houdini-panel {
+    top: max(calc(50% - 28px), calc(78px + (min(920px, 80vh) / 2)));
+  }
+}
+
 @media (max-width: 768px) {
   .about-panel {
     top: max(50%, calc(92px + (min(880px, 72vh) / 2)));
@@ -436,7 +445,7 @@ ul {
     --about-panel-border-inset: clamp(14px, 2.5vh, 22px);
   }
   .about-panel__content {
-    padding: clamp(10px, 1.8vh, 20px) clamp(18px, 5vw, 30px);
+    padding: clamp(10px, 1.8vh, 20px) clamp(26px, 7.5vw, 40px);
   }
 }
 
@@ -626,6 +635,11 @@ ul {
   display: block;
   object-fit: contain;
   border-radius: 6px;
+}
+
+.about-panel__portrait--logo,
+.about-panel__portrait--houdini {
+  width: clamp(56px, 8.6vh, 96px);
 }
 
 .about-panel__close {

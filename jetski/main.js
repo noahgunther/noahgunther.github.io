@@ -946,6 +946,10 @@ function preloadLogoImages() {
 }
 preloadLogoImages();
 preloadImage('./graphics/portrait.webp');
+preloadImage('./graphics/games_logo.webp');
+preloadImage('./graphics/web_logo.webp');
+preloadImage('./graphics/houdini_logo.webp');
+preloadImage('./graphics/ar_logo.webp');
 
 document.getElementById("title").innerHTML = 'Noah Gunther | Portfolio';
 
@@ -1319,7 +1323,10 @@ function init() {
 
   arPanelContent.innerHTML = `
     <h1 class="about-panel__title">AR</h1>
-    <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">Augmented Reality &amp; Spatial Computing</p>
+    <div class="about-panel__portrait-wrapper">
+      <img src="./graphics/ar_logo.webp" alt="AR Logo" class="about-panel__portrait about-panel__portrait--logo" />
+    </div>
+    <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">Augmented Reality Social Experiences & Games</p>
     <p class="about-panel__body">Interactive mobile AR filters, real-time spatial computing prototypes, and WebAR applications created for mobile, web, and headset platforms.</p>
     <br/>
     <p class="about-panel__body">This section features custom real-time shaders, computer vision pipelines, face tracking filters, and 3D spatial experiences built with Three.js, Spark AR, and WebXR.</p>
@@ -1343,7 +1350,7 @@ function init() {
 
   // Helper factory for creating panel overlays (Games, Web, Houdini)
   function createGenericOverlay(config) {
-    const { name, title, subtitle, bodyHtml } = config;
+    const { name, title, subtitle, headerImageSrc, headerImageAlt, headerImageClass, bodyHtml } = config;
     const overlay = document.createElement('div');
     const blur = document.createElement('div');
     const panel = document.createElement('section');
@@ -1437,8 +1444,19 @@ function init() {
       resizeObserver.observe(panel);
     }
 
+    let headerImageHtml = '';
+    if (headerImageSrc) {
+      const imgClass = headerImageClass ? `about-panel__portrait ${headerImageClass}` : 'about-panel__portrait';
+      headerImageHtml = `
+        <div class="about-panel__portrait-wrapper">
+          <img src="${headerImageSrc}" alt="${headerImageAlt || title}" class="${imgClass}" />
+        </div>
+      `;
+    }
+
     panelContent.innerHTML = `
       <h1 class="about-panel__title">${title}</h1>
+      ${headerImageHtml}
       <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">${subtitle}</p>
       ${bodyHtml}
     `;
@@ -1469,6 +1487,9 @@ function init() {
     name: 'games',
     title: 'Games',
     subtitle: 'Real-Time Interactive & Game Development',
+    headerImageSrc: './graphics/games_logo.webp',
+    headerImageAlt: 'Games Logo Placeholder',
+    headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
       <p class="about-panel__body">Interactive gameplay experiences, real-time shaders, and custom game mechanics built for desktop, web, and mobile environments.</p>
       <br/>
@@ -1480,6 +1501,9 @@ function init() {
     name: 'web',
     title: 'Web',
     subtitle: 'Interactive Web & 3D Experiences',
+    headerImageSrc: './graphics/web_logo.webp',
+    headerImageAlt: 'Web Logo Placeholder',
+    headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
       <p class="about-panel__body">High-performance web applications, custom WebGL graphics, and interactive 3D web experiences built with modern web technologies.</p>
       <br/>
@@ -1490,7 +1514,10 @@ function init() {
   const houdiniOverlayData = createGenericOverlay({
     name: 'houdini',
     title: 'Houdini',
-    subtitle: 'Procedural Graphics & VFX Pipelines',
+    subtitle: 'Procedural Graphics, Tools, & VFX Pipelines',
+    headerImageSrc: './graphics/houdini_logo.webp',
+    headerImageAlt: 'Houdini Logo',
+    headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
       <p class="about-panel__body">Procedural geometry generation, particle dynamics, and simulation pipelines created with SideFX Houdini.</p>
       <br/>
