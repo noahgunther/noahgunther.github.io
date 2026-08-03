@@ -1423,7 +1423,7 @@ function init() {
         <img src="./graphics/social_ar_icon.webp" alt="Social AR" class="about-panel__project-icon" />
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Social AR</h2>
-          <p class="about-panel__project-desc">Real-time face tracking filters, interactive multi-user AR video effects, and camera spatial computing experiences built for social platforms.</p>
+          <p class="about-panel__project-desc">Real-time social experiences built to enhance and experiment with the group video calling format.</p>
           <a href="#" class="about-panel__project-link">View Project &gt;</a>
         </div>
       </div>
@@ -1434,7 +1434,7 @@ function init() {
         <img src="./graphics/ar_games_icon.webp" alt="AR Games" class="about-panel__project-icon" />
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">AR Games</h2>
-          <p class="about-panel__project-desc">Interactive augmented reality minigames, custom physics-driven game mechanics, gesture tracking controls, and real-time WebAR gameplay.</p>
+          <p class="about-panel__project-desc">Networked AR minigames, uniquely designed and developed for group video calls.</p>
           <a href="#" class="about-panel__project-link">View Project &gt;</a>
         </div>
       </div>
