@@ -476,8 +476,11 @@ ul {
   overflow-y: auto;
   overflow-x: hidden;
   padding: clamp(10px, 1.8vh, 22px) clamp(12px, 2vw, 24px);
+  background: #0a0e12;
+  border-radius: 8px;
   opacity: 0;
   transform: translateY(8px);
+  z-index: 3;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
@@ -647,13 +650,14 @@ ul {
   position: absolute;
   top: calc(var(--about-panel-border-inset) - (var(--about-panel-close-size) / 2));
   right: calc(var(--about-panel-border-inset) - (var(--about-panel-close-size) / 2));
-  z-index: 10;
+  z-index: 12;
   width: var(--about-panel-close-size);
   height: var(--about-panel-close-size);
   padding: 0;
   border: 0;
-  border-radius: 0;
-  background: transparent;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(10, 14, 18, 0.85) 0%, rgba(10, 14, 18, 0.5) 55%, rgba(10, 14, 18, 0) 100%);
+  box-shadow: 0 0 12px 6px rgba(10, 14, 18, 0.55);
   cursor: pointer;
   opacity: 0;
   display: flex;
@@ -703,6 +707,86 @@ ul {
   height: calc(100% - 2 * var(--about-panel-border-inset));
   overflow: visible;
   pointer-events: none;
+  z-index: 10;
+}
+
+/* Header Video Background for Template Panels */
+.about-panel__header-video-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.about-panel.is-opening .about-panel__header-video-wrapper {
+  transition: opacity 180ms ease 120ms;
+}
+
+.about-panel.is-closing .about-panel__header-video-wrapper {
+  transition: opacity 120ms ease;
+}
+
+.about-panel.is-drawn .about-panel__header-video-wrapper {
+  opacity: 1;
+}
+
+.about-panel__header-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-panel__header-video-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 85%;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 14, 18, 0) 0%,
+    rgba(10, 14, 18, 0.3) 20%,
+    rgba(10, 14, 18, 0.75) 50%,
+    rgba(10, 14, 18, 0.95) 75%,
+    rgba(10, 14, 18, 1.0) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+.ar-panel .about-panel__title,
+.games-panel .about-panel__title,
+.web-panel .about-panel__title,
+.houdini-panel .about-panel__title {
+  margin-top: calc(42.5% - 8px);
+  position: relative;
+  z-index: 2;
+}
+
+.ar-panel .about-panel__email,
+.games-panel .about-panel__email,
+.web-panel .about-panel__email,
+.houdini-panel .about-panel__email,
+.ar-panel .about-panel__portrait-wrapper,
+.games-panel .about-panel__portrait-wrapper,
+.web-panel .about-panel__portrait-wrapper,
+.houdini-panel .about-panel__portrait-wrapper,
+.ar-panel .about-panel__body,
+.games-panel .about-panel__body,
+.web-panel .about-panel__body,
+.houdini-panel .about-panel__body {
+  position: relative;
+  z-index: 2;
 }
 
 .about-panel__border-path {

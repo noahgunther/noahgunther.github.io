@@ -1225,132 +1225,9 @@ function init() {
   aboutOverlay.appendChild(aboutPanel);
   document.body.appendChild(aboutOverlay);
 
-  // Dynamic AR Overlay Panel
-  const arOverlay = document.createElement('div');
-  const arBlur = document.createElement('div');
-  const arPanel = document.createElement('section');
-  const arPanelSurface = document.createElement('div');
-  const arPanelContent = document.createElement('div');
-  const arCloseButton = document.createElement('button');
-  arOverlay.className = 'about-overlay ar-overlay';
-  arBlur.className = 'about-overlay__blur';
-  arPanel.className = 'about-panel ar-panel';
-  arPanelSurface.className = 'about-panel__surface';
-  arPanelContent.className = 'about-panel__content';
-  arCloseButton.className = 'about-panel__close';
-
-  const arBorderSvg      = document.createElementNS(NS, 'svg');
-  const arBorderTopLeft  = document.createElementNS(NS, 'path');
-  const arBorderTopRight = document.createElementNS(NS, 'path');
-  const arBorderBotLeft  = document.createElementNS(NS, 'path');
-  const arBorderBotRight = document.createElementNS(NS, 'path');
-
-  arBorderSvg.setAttribute('class', 'about-panel__border-svg');
-  arBorderSvg.setAttribute('aria-hidden', 'true');
-
-  [arBorderTopLeft, arBorderTopRight, arBorderBotLeft, arBorderBotRight].forEach(path => {
-    path.setAttribute('class', 'about-panel__border-path');
-    path.setAttribute('pathLength', '1');
-    arBorderSvg.appendChild(path);
-  });
-
-  function updateArBorderPaths() {
-    const W  = arBorderSvg.clientWidth;
-    const H  = arBorderSvg.clientHeight;
-    if (!W || !H) return;
-    const rx = 8;
-    const s  = 0.5;
-    const gap = 26;
-
-    arBorderTopLeft.setAttribute('d', [
-      `M ${W/2},${s}`,
-      `L ${rx+s},${s}`,
-      `A ${rx},${rx} 0 0 0 ${s},${rx+s}`,
-      `L ${s},${H/2}`
-    ].join(' '));
-
-    arBorderTopRight.setAttribute('d', [
-      `M ${W/2},${s}`,
-      `L ${W - gap},${s}`
-    ].join(' '));
-
-    arBorderBotLeft.setAttribute('d', [
-      `M ${W/2},${H-s}`,
-      `L ${rx+s},${H-s}`,
-      `A ${rx},${rx} 0 0 1 ${s},${H-rx-s}`,
-      `L ${s},${H/2}`
-    ].join(' '));
-
-    arBorderBotRight.setAttribute('d', [
-      `M ${W/2},${H-s}`,
-      `L ${W-rx-s},${H-s}`,
-      `A ${rx},${rx} 0 0 0 ${W-s},${H-rx-s}`,
-      `L ${W-s},${gap}`
-    ].join(' '));
-  }
-
-  const arScrollFade = document.createElement('div');
-  const arScrollArrow = document.createElement('div');
-  arScrollFade.className = 'about-panel__scroll-fade';
-  arScrollArrow.className = 'about-panel__scroll-arrow';
-  arScrollArrow.setAttribute('aria-hidden', 'true');
-  arScrollArrow.innerHTML = `
-    <svg width="18" height="10" viewBox="0 0 18 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 2L9 8L16 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  `;
-
-  function updateArPanelScrollIndicators() {
-    if (!arPanelContent) return;
-    const { scrollTop, scrollHeight, clientHeight } = arPanelContent;
-    const hasMoreContent = scrollHeight > clientHeight + 4 && (scrollHeight - clientHeight - scrollTop > 8);
-
-    arScrollFade.classList.toggle('is-visible', hasMoreContent);
-    arScrollArrow.classList.toggle('is-visible', hasMoreContent);
-  }
-
-  arPanelContent.addEventListener('scroll', updateArPanelScrollIndicators, { passive: true });
-
-  if (window.ResizeObserver && arPanel) {
-    const arResizeObserver = new ResizeObserver(() => {
-      if (typeof arOverlayVisible !== 'undefined' && (arOverlayVisible || arOverlayAnimating)) {
-        updateArBorderPaths();
-        updateArPanelScrollIndicators();
-      }
-    });
-    arResizeObserver.observe(arPanel);
-  }
-
-  arPanelContent.innerHTML = `
-    <h1 class="about-panel__title">AR</h1>
-    <div class="about-panel__portrait-wrapper">
-      <img src="./graphics/ar_logo.webp" alt="AR Logo" class="about-panel__portrait about-panel__portrait--logo" />
-    </div>
-    <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">Augmented Reality Social Experiences & Games</p>
-    <p class="about-panel__body">Interactive mobile AR filters, real-time spatial computing prototypes, and WebAR applications created for mobile, web, and headset platforms.</p>
-    <br/>
-    <p class="about-panel__body">This section features custom real-time shaders, computer vision pipelines, face tracking filters, and 3D spatial experiences built with Three.js, Spark AR, and WebXR.</p>
-  `;
-  arCloseButton.type = 'button';
-  arCloseButton.setAttribute('aria-label', 'Close AR panel');
-  arCloseButton.innerHTML = `
-    <span class="about-panel__close-bar about-panel__close-bar--top"></span>
-    <span class="about-panel__close-bar about-panel__close-bar--bottom"></span>
-  `;
-
-  arPanel.appendChild(arPanelSurface);
-  arPanel.appendChild(arBorderSvg);
-  arPanel.appendChild(arCloseButton);
-  arPanel.appendChild(arPanelContent);
-  arPanel.appendChild(arScrollFade);
-  arPanel.appendChild(arScrollArrow);
-  arOverlay.appendChild(arBlur);
-  arOverlay.appendChild(arPanel);
-  document.body.appendChild(arOverlay);
-
-  // Helper factory for creating panel overlays (Games, Web, Houdini)
+  // Helper factory for creating panel overlays (AR, Games, Web, Houdini)
   function createGenericOverlay(config) {
-    const { name, title, subtitle, headerImageSrc, headerImageAlt, headerImageClass, bodyHtml } = config;
+    const { name, title, subtitle, headerImageSrc, headerImageAlt, headerImageClass, videoSrc, bodyHtml } = config;
     const overlay = document.createElement('div');
     const blur = document.createElement('div');
     const panel = document.createElement('section');
@@ -1364,6 +1241,20 @@ function init() {
     panelSurface.className = 'about-panel__surface';
     panelContent.className = 'about-panel__content';
     closeButton.className = 'about-panel__close';
+
+    // Header video background inside panel border lines
+    let videoWrapper = null;
+    let videoEl = null;
+    const activeVideoSrc = videoSrc !== undefined ? videoSrc : './reels/ar.webm';
+    if (activeVideoSrc) {
+      videoWrapper = document.createElement('div');
+      videoWrapper.className = 'about-panel__header-video-wrapper';
+      videoWrapper.innerHTML = `
+        <video src="${activeVideoSrc}" autoplay loop muted playsinline class="about-panel__header-video"></video>
+        <div class="about-panel__header-video-fade"></div>
+      `;
+      videoEl = videoWrapper.querySelector('video');
+    }
 
     const borderSvg = document.createElementNS(NS, 'svg');
     const borderTopLeft = document.createElementNS(NS, 'path');
@@ -1456,8 +1347,8 @@ function init() {
 
     panelContent.innerHTML = `
       <h1 class="about-panel__title">${title}</h1>
+      <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-top: 6px; margin-bottom: 12px; font-weight: 500;">${subtitle}</p>
       ${headerImageHtml}
-      <p class="about-panel__email" style="color: var(--hover-color, #ffae21); margin-bottom: 20px; font-weight: 500;">${subtitle}</p>
       ${bodyHtml}
     `;
 
@@ -1471,6 +1362,9 @@ function init() {
     panel.appendChild(panelSurface);
     panel.appendChild(borderSvg);
     panel.appendChild(closeButton);
+    if (videoWrapper) {
+      panelContent.insertBefore(videoWrapper, panelContent.firstChild);
+    }
     panel.appendChild(panelContent);
     panel.appendChild(scrollFade);
     panel.appendChild(scrollArrow);
@@ -1479,14 +1373,31 @@ function init() {
     document.body.appendChild(overlay);
 
     return {
-      overlay, blur, panel, panelContent, closeButton, updateBorderPaths, updateScrollIndicators
+      overlay, blur, panel, panelContent, closeButton, updateBorderPaths, updateScrollIndicators, videoEl
     };
   }
+
+  const arOverlayData = createGenericOverlay({
+    name: 'ar',
+    title: 'AR',
+    subtitle: 'Augmented Reality Social Experiences & Games',
+    videoSrc: './reels/ar.webm',
+    headerImageSrc: './graphics/ar_logo.webp',
+    headerImageAlt: 'AR Logo',
+    headerImageClass: 'about-panel__portrait--logo',
+    bodyHtml: `
+      <p class="about-panel__body">Interactive mobile AR filters, real-time spatial computing prototypes, and WebAR applications created for mobile, web, and headset platforms.</p>
+      <br/>
+      <p class="about-panel__body">This section features custom real-time shaders, computer vision pipelines, face tracking filters, and 3D spatial experiences built with Three.js, Spark AR, and WebXR.</p>
+    `
+  });
+  const { overlay: arOverlay, blur: arBlur, panel: arPanel, closeButton: arCloseButton, updateBorderPaths: updateArBorderPaths, updateScrollIndicators: updateArPanelScrollIndicators } = arOverlayData;
 
   const gamesOverlayData = createGenericOverlay({
     name: 'games',
     title: 'Games',
     subtitle: 'Real-Time Interactive & Game Development',
+    videoSrc: './reels/ar.webm',
     headerImageSrc: './graphics/games_logo.webp',
     headerImageAlt: 'Games Logo Placeholder',
     headerImageClass: 'about-panel__portrait--logo',
@@ -1501,6 +1412,7 @@ function init() {
     name: 'web',
     title: 'Web',
     subtitle: 'Interactive Web & 3D Experiences',
+    videoSrc: './reels/ar.webm',
     headerImageSrc: './graphics/web_logo.webp',
     headerImageAlt: 'Web Logo Placeholder',
     headerImageClass: 'about-panel__portrait--logo',
@@ -1515,6 +1427,7 @@ function init() {
     name: 'houdini',
     title: 'Houdini',
     subtitle: 'Procedural Graphics, Tools, & VFX Pipelines',
+    videoSrc: './reels/ar.webm',
     headerImageSrc: './graphics/houdini_logo.webp',
     headerImageAlt: 'Houdini Logo',
     headerImageClass: 'about-panel__portrait--logo',
