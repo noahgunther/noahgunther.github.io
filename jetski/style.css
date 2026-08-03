@@ -593,6 +593,78 @@ ul {
   user-select: none;
 }
 
+/* Dotted section divider */
+.about-panel__dotted-divider {
+  width: 100%;
+  border: none;
+  border-top: 1.5px dotted rgba(255, 255, 255, 0.4);
+  margin: clamp(22px, 3vh, 32px) 0;
+  opacity: 0.85;
+}
+
+/* Project section block for panel items */
+.about-panel__project-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(16px, 2.5vw, 24px);
+  margin: 12px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.about-panel__project-icon {
+  width: clamp(48px, 7.5vw, 69px);
+  height: clamp(48px, 7.5vw, 69px);
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: transparent;
+}
+
+.about-panel__project-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.about-panel__project-title {
+  margin: 0 0 6px 0;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: clamp(18px, 2.4vh, 24px);
+  font-weight: 500;
+  line-height: 1.2;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+}
+
+.about-panel__project-desc {
+  margin: 0;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: clamp(12.5px, 1.9vh, 15px);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 400;
+}
+
+.about-panel__project-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: clamp(12.5px, 1.9vh, 15px);
+  font-style: italic;
+  text-decoration: underline;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.about-panel__project-link:hover {
+  color: #ffffff;
+}
+
 .about-panel__email {
   text-align: center;
   margin: 0 auto clamp(8px, 1.8vh, 20px);
@@ -616,12 +688,14 @@ ul {
 
 .about-panel__body {
   margin: 0;
-  max-width: 65ch;
+  width: 100%;
+  max-width: 100%;
   font-size: clamp(12px, 2.1vh, 16px);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.82);
   font-weight: 400;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .about-panel__portrait-wrapper {
@@ -642,7 +716,7 @@ ul {
 
 .about-panel__portrait--logo,
 .about-panel__portrait--houdini {
-  width: clamp(56px, 8.6vh, 96px);
+  width: clamp(42px, 6.45vh, 72px);
 }
 
 .about-panel__close {
@@ -718,6 +792,7 @@ ul {
   right: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
+  max-height: 48%;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   overflow: hidden;
@@ -751,13 +826,13 @@ ul {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 85%;
+  height: 52%;
   background: linear-gradient(
     to bottom,
     rgba(10, 14, 18, 0) 0%,
-    rgba(10, 14, 18, 0.3) 20%,
-    rgba(10, 14, 18, 0.75) 50%,
-    rgba(10, 14, 18, 0.95) 75%,
+    rgba(10, 14, 18, 0.15) 25%,
+    rgba(10, 14, 18, 0.65) 60%,
+    rgba(10, 14, 18, 0.94) 85%,
     rgba(10, 14, 18, 1.0) 100%
   );
   pointer-events: none;
@@ -768,7 +843,7 @@ ul {
 .games-panel .about-panel__title,
 .web-panel .about-panel__title,
 .houdini-panel .about-panel__title {
-  margin-top: calc(42.5% - 8px);
+  margin-top: min(calc(42.5% - 8px), calc(44% - 24px));
   position: relative;
   z-index: 2;
 }

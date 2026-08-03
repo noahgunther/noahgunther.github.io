@@ -950,6 +950,7 @@ preloadImage('./graphics/games_logo.webp');
 preloadImage('./graphics/web_logo.webp');
 preloadImage('./graphics/houdini_logo.webp');
 preloadImage('./graphics/ar_logo.webp');
+preloadImage('./graphics/ar_games_icon.webp');
 
 document.getElementById("title").innerHTML = 'Noah Gunther | Portfolio';
 
@@ -1250,10 +1251,38 @@ function init() {
       videoWrapper = document.createElement('div');
       videoWrapper.className = 'about-panel__header-video-wrapper';
       videoWrapper.innerHTML = `
-        <video src="${activeVideoSrc}" autoplay loop muted playsinline class="about-panel__header-video"></video>
+        <video src="${activeVideoSrc}" autoplay loop muted playsinline preload="auto" class="about-panel__header-video"></video>
         <div class="about-panel__header-video-fade"></div>
       `;
       videoEl = videoWrapper.querySelector('video');
+      if (videoEl) {
+        videoEl.preload = 'auto';
+        try { videoEl.load(); } catch (e) {}
+        const playPromise = videoEl.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      }
+    }
+
+    function ensureVideoPlaying() {
+      if (videoEl) {
+        const playPromise = videoEl.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      }
+    }
+
+    if (videoEl && window.MutationObserver) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class' && overlay.classList.contains('is-visible')) {
+            ensureVideoPlaying();
+          }
+        });
+      });
+      observer.observe(overlay, { attributes: true });
     }
 
     const borderSvg = document.createElementNS(NS, 'svg');
@@ -1386,9 +1415,29 @@ function init() {
     headerImageAlt: 'AR Logo',
     headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
-      <p class="about-panel__body">Interactive mobile AR filters, real-time spatial computing prototypes, and WebAR applications created for mobile, web, and headset platforms.</p>
-      <br/>
-      <p class="about-panel__body">This section features custom real-time shaders, computer vision pipelines, face tracking filters, and 3D spatial experiences built with Three.js, Spark AR, and WebXR.</p>
+      <p class="about-panel__body">A selection of my work on social AR experiences and games. I led technical development for these experiences, writing interaction code, shaders, and developing render pipelines.</p>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/social_ar_icon.webp" alt="Social AR" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Social AR</h2>
+          <p class="about-panel__project-desc">Real-time face tracking filters, interactive multi-user AR video effects, and camera spatial computing experiences built for social platforms.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="AR Games" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">AR Games</h2>
+          <p class="about-panel__project-desc">Interactive augmented reality minigames, custom physics-driven game mechanics, gesture tracking controls, and real-time WebAR gameplay.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
     `
   });
   const { overlay: arOverlay, blur: arBlur, panel: arPanel, closeButton: arCloseButton, updateBorderPaths: updateArBorderPaths, updateScrollIndicators: updateArPanelScrollIndicators } = arOverlayData;
