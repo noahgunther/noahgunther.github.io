@@ -447,6 +447,19 @@ ul {
   .about-panel__content {
     padding: clamp(10px, 1.8vh, 20px) clamp(26px, 7.5vw, 40px);
   }
+  .about-panel__header-video-wrapper {
+    margin-top: calc(-1 * clamp(10px, 1.8vh, 20px));
+    margin-left: calc(-1 * clamp(26px, 7.5vw, 40px));
+    margin-right: calc(-1 * (clamp(26px, 7.5vw, 40px) + 16px));
+    width: calc(100% + clamp(26px, 7.5vw, 40px) + clamp(26px, 7.5vw, 40px) + 16px);
+    height: clamp(150px, 28vh, 220px);
+  }
+  .ar-panel .about-panel__title,
+  .games-panel .about-panel__title,
+  .web-panel .about-panel__title,
+  .houdini-panel .about-panel__title {
+    margin-top: clamp(8px, 1.5vh, 16px);
+  }
 }
 
 .about-panel__surface {
@@ -786,11 +799,12 @@ ul {
 
 /* Header Video Background for Template Panels */
 .about-panel__header-video-wrapper {
-  position: absolute;
-  top: calc(-1 * clamp(10px, 1.8vh, 22px));
-  left: calc(-1 * clamp(12px, 2vw, 24px));
-  right: calc(-1 * (clamp(12px, 2vw, 24px) + 16px));
-  height: clamp(200px, 44%, 380px);
+  position: relative;
+  margin-top: calc(-1 * clamp(10px, 1.8vh, 22px));
+  margin-left: calc(-1 * clamp(12px, 2vw, 24px));
+  margin-right: calc(-1 * (clamp(12px, 2vw, 24px) + 16px));
+  width: calc(100% + clamp(12px, 2vw, 24px) + clamp(12px, 2vw, 24px) + 16px);
+  height: clamp(200px, 32vh, 320px);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   overflow: hidden;
@@ -855,7 +869,7 @@ ul {
 .games-panel .about-panel__title,
 .web-panel .about-panel__title,
 .houdini-panel .about-panel__title {
-  margin-top: min(calc(42.5% - 8px), calc(44% - 24px));
+  margin-top: clamp(10px, 1.8vh, 18px);
   position: relative;
   z-index: 6;
   -webkit-transform: translateZ(2px);
