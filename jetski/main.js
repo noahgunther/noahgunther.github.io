@@ -1461,14 +1461,89 @@ function init() {
     name: 'web',
     title: 'Web',
     subtitle: 'Interactive Web & 3D Experiences',
-    videoSrc: './reels/ar.webm',
+    videoSrc: './reels/web.webm',
     headerImageSrc: './graphics/web_logo.webp',
     headerImageAlt: 'Web Logo Placeholder',
     headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
-      <p class="about-panel__body">High-performance web applications, custom WebGL graphics, and interactive 3D web experiences built with modern web technologies.</p>
-      <br/>
-      <p class="about-panel__body">Focusing on rich visual aesthetics, custom post-processing pipelines, micro-animations, and seamless user interaction design.</p>
+      <p class="about-panel__body">Web projects, primarily focused on interactive threejs experiences, webgl shaders, and data visualization projects.</p>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Grid City" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Grid City</h2>
+          <p class="about-panel__project-desc">Breakdown of a 3D raymarching shader on Shadertoy.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Lately on the MTA" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Lately on the MTA</h2>
+          <p class="about-panel__project-desc">My entry in the 2024 MTA Open Data Challenge, winning "most visually appealing."</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Threejs Jetski Portfolio" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Threejs Jetski Portfolio</h2>
+          <p class="about-panel__project-desc">Info on my previous portfolio site built with threejs. 3D art, animation created in collaboration with Cody Drake.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Shadertoy" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Shadertoy</h2>
+          <p class="about-panel__project-desc">My Shadertoy profile, featuring a collection of my GLSL shaders.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Interactive Fireworks</h2>
+          <p class="about-panel__project-desc">An interactive tool for creating and sharing threejs firework displays.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Horse Corpse Adventure Game</h2>
+          <p class="about-panel__project-desc">A text-based adventure game created with Twine in 2017, based on the Horse Corpse Rock Opera by Kip Hathaway.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+      
+      <hr class="about-panel__dotted-divider" />
+      
+      <div class="about-panel__project-section">
+        <img src="./graphics/ar_games_icon.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Wordpress Gallery</h2>
+          <p class="about-panel__project-desc">A gallery of smaller projects and older work.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
     `
   });
 
