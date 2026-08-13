@@ -1206,8 +1206,6 @@ function init() {
     <p class="about-panel__body">I'm a Technical Artist and Creative Coder with a focus on 3D graphics and rendering. I've worked in web development, VR, mobile AR, game development, and offline rendered video.</p>
     <br/>
     <p class="about-panel__body">My work involves writing code and creating graphics for immersive media, as well as creating tools for artists and building more experimental projects such as AI-driven gameplay and Gaussian Splat pipelines.</p>
-    <br/>
-    <p class="about-panel__body">This site was created with threejs. To learn more about this site and techniques I used, click here.</p>
   `;
   aboutCloseButton.type = 'button';
   aboutCloseButton.setAttribute('aria-label', 'Close about panel');
@@ -1420,7 +1418,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/social_ar_icon.webp" alt="Social AR" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/social_ar_icon.webp" alt="Social AR" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Social AR</h2>
           <p class="about-panel__project-desc">Real-time social experiences built to enhance and experiment with the group video calling format.</p>
@@ -1431,7 +1431,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="AR Games" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="AR Games" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">AR Games</h2>
           <p class="about-panel__project-desc">Networked AR minigames, uniquely designed and developed for group video calls.</p>
@@ -1471,7 +1473,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Grid City" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/gridcity.webp" alt="Grid City" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Grid City</h2>
           <p class="about-panel__project-desc">Breakdown of a 3D raymarching shader on Shadertoy.</p>
@@ -1482,7 +1486,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Lately on the MTA" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/mta.webp" alt="Lately on the MTA" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Lately on the MTA</h2>
           <p class="about-panel__project-desc">My entry in the 2024 MTA Open Data Challenge, winning "most visually appealing."</p>
@@ -1493,18 +1499,23 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Threejs Jetski Portfolio" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Threejs Jetski Portfolio" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Threejs Jetski Portfolio</h2>
           <p class="about-panel__project-desc">Info on my previous portfolio site built with threejs. 3D art, animation created in collaboration with Cody Drake.</p>
           <a href="#" class="about-panel__project-link">View Project &gt;</a>
+          <a href="#" class="about-panel__project-link">Project Breakdown &gt;</a>
         </div>
       </div>
       
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Shadertoy" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Shadertoy" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Shadertoy</h2>
           <p class="about-panel__project-desc">My Shadertoy profile, featuring a collection of my GLSL shaders.</p>
@@ -1515,7 +1526,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Interactive Fireworks</h2>
           <p class="about-panel__project-desc">An interactive tool for creating and sharing threejs firework displays.</p>
@@ -1526,7 +1539,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Horse Corpse Adventure Game</h2>
           <p class="about-panel__project-desc">A text-based adventure game created with Twine in 2017, based on the Horse Corpse Rock Opera by Kip Hathaway.</p>
@@ -1537,7 +1552,9 @@ function init() {
       <hr class="about-panel__dotted-divider" />
       
       <div class="about-panel__project-section">
-        <img src="./graphics/ar_games_icon.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
+        </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Wordpress Gallery</h2>
           <p class="about-panel__project-desc">A gallery of smaller projects and older work.</p>

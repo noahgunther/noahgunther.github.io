@@ -462,6 +462,19 @@ ul {
   }
 }
 
+@media (max-width: 560px) {
+  .about-panel__project-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .about-panel__project-icon {
+    width: min(100%, 180px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+}
+
 .about-panel__surface {
   position: absolute;
   inset: 0;
@@ -619,28 +632,46 @@ ul {
 .about-panel__project-section {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  gap: clamp(16px, 2.5vw, 24px);
-  margin: 12px 0;
+  align-items: flex-start;
+  gap: clamp(16px, 2.5vw, 28px);
+  margin: clamp(16px, 2.5vh, 24px) 0;
   width: 100%;
   box-sizing: border-box;
 }
 
+.about-panel__project-icon-link {
+  display: block;
+  flex-shrink: 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .about-panel__project-icon {
-  width: clamp(48px, 7.5vw, 69px);
-  height: clamp(48px, 7.5vw, 69px);
+  width: clamp(105px, 15vh, 220px);
+  height: clamp(105px, 15vh, 220px);
   aspect-ratio: 1 / 1;
   object-fit: contain;
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 4px;
+  overflow: hidden;
   background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.about-panel__project-section:hover .about-panel__project-icon,
+.about-panel__project-icon-link:hover .about-panel__project-icon {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
 .about-panel__project-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .about-panel__project-title {
