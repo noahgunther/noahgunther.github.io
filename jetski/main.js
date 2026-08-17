@@ -1453,9 +1453,72 @@ function init() {
     headerImageAlt: 'Games Logo Placeholder',
     headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
-      <p class="about-panel__body">Interactive gameplay experiences, real-time shaders, and custom game mechanics built for desktop, web, and mobile environments.</p>
-      <br/>
-      <p class="about-panel__body">This section features game design prototypes, procedural mesh generation, physics integration, and WebGL rendering shaders built with Three.js and custom engine tech.</p>
+      <p class="about-panel__body">Interactive gameplay experiences, real-time shaders, and custom game mechanics built for VR, desktop, web, and mobile environments.</p>
+      
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Drone Delivery" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Drone Delivery</h2>
+          <p class="about-panel__project-desc">Breakdown of a slice of a delivery drone flying game.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Meta Reality Labs | Horizon" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Meta Reality Labs | Horizon</h2>
+          <p class="about-panel__project-desc">My work on graphics, gameplay, avatars, and more at Meta RL.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="AR Games" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">AR Games</h2>
+          <p class="about-panel__project-desc">Multiplayer networked AR games built for mobile.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Tokenmon" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Tokenmon</h2>
+          <p class="about-panel__project-desc">A card game where players generate and battle cards by describing them using AI.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Horse Corpse Adventure Game</h2>
+          <p class="about-panel__project-desc">One of my first game projects, a text based adventure game for web.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
     `
   });
 
@@ -1468,7 +1531,7 @@ function init() {
     headerImageAlt: 'Web Logo Placeholder',
     headerImageClass: 'about-panel__portrait--logo',
     bodyHtml: `
-      <p class="about-panel__body">Web projects, primarily focused on interactive threejs experiences, webgl shaders, and data visualization projects.</p>
+      <p class="about-panel__body">Web projects, primarily focused on interactive threejs experiences, webgl shaders, and data visualization.</p>
       
       <hr class="about-panel__dotted-divider" />
       
@@ -1500,7 +1563,7 @@ function init() {
       
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Threejs Jetski Portfolio" class="about-panel__project-icon" />
+          <img src="./graphics/jetski.webp" alt="Threejs Jetski Portfolio" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Threejs Jetski Portfolio</h2>
@@ -1514,7 +1577,7 @@ function init() {
       
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Shadertoy" class="about-panel__project-icon" />
+          <img src="./graphics/shadertoy.webp" alt="Shadertoy" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Shadertoy</h2>
@@ -1527,7 +1590,7 @@ function init() {
       
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
+          <img src="./graphics/fireworks.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Interactive Fireworks</h2>
@@ -1540,7 +1603,7 @@ function init() {
       
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
+          <img src="./graphics/horsecorpse.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Horse Corpse Adventure Game</h2>
@@ -1553,7 +1616,7 @@ function init() {
       
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
+          <img src="./graphics/wordpress.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Wordpress Gallery</h2>
@@ -1575,7 +1638,111 @@ function init() {
     bodyHtml: `
       <p class="about-panel__body">Procedural geometry generation, particle dynamics, and simulation pipelines created with SideFX Houdini.</p>
       <br/>
-      <p class="about-panel__body">Building procedural assets, custom digital assets (HDAs), VAT export workflows, and automated graphics pipelines for real-time engines and web applications.</p>
+      <p class="about-panel__body">Building procedural assets, custom digital assets (HDAs), and automated graphics pipelines for real-time graphics and offline rendered sequences. My more recent work in Houdini has focused on pipelines for creating Gaussian Splatting (GSplats) assets.</p>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Droplets Tool" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Droplets Tool</h2>
+          <p class="about-panel__project-desc">SOP-based tool without fluid simulation that dynamically creates droplet geometry and a wetmap texture on any geometry surface.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Vines Tool" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Vines Tool</h2>
+          <p class="about-panel__project-desc">An HDA for procedurally growing vines on any input geometry, that grow based on paramters such as light orientation and surface attraction.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Robot Artist" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Robot Artist</h2>
+          <p class="about-panel__project-desc">A virtual robot that procedurally draws 2D images of 3D meshes, and sometimes gets abstract.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Pipe Dream Houdini" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Pipe Dream Houdini</h2>
+          <p class="about-panel__project-desc">A procedural animation project recreating the classic Microsoft "Pipe Dream" screensaver using VEX and Python.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Volcanic Eruption" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Volcanic Eruption</h2>
+          <p class="about-panel__project-desc">A volcanic eruption animation using pyro and fluid simulation, and a custom lightning tool created with VEX.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Stained Glass Tool" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Stained Glass Tool</h2>
+          <p class="about-panel__project-desc">An HDA that created stained glass geometry from image inputs.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Interactive Fireworks</h2>
+          <p class="about-panel__project-desc">A Python/VEX based tool to interactively create animated fireworks.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
+
+      <hr class="about-panel__dotted-divider" />
+
+      <div class="about-panel__project-section">
+        <a href="#" class="about-panel__project-icon-link">
+          <img src="./graphics/ar_games_icon.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
+        </a>
+        <div class="about-panel__project-info">
+          <h2 class="about-panel__project-title">Wordpress Gallery</h2>
+          <p class="about-panel__project-desc">A gallery of smaller projects and older work largely created with Houdini.</p>
+          <a href="#" class="about-panel__project-link">View Project &gt;</a>
+        </div>
+      </div>
     `
   });
   // ==========================================
