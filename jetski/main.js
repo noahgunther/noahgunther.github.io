@@ -1459,7 +1459,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Drone Delivery" class="about-panel__project-icon" />
+          <img src="./graphics/dronedelivery.webp" alt="Drone Delivery" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Drone Delivery</h2>
@@ -1472,7 +1472,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Meta Reality Labs | Horizon" class="about-panel__project-icon" />
+          <img src="./graphics/metahorizon.webp" alt="Meta Reality Labs | Horizon" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Meta Reality Labs | Horizon</h2>
@@ -1498,7 +1498,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Tokenmon" class="about-panel__project-icon" />
+          <img src="./graphics/tokenmon.webp" alt="Tokenmon" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Tokenmon</h2>
@@ -1511,7 +1511,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
+          <img src="./graphics/horsecorpse.webp" alt="Horse Corpse Adventure Game" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Horse Corpse Adventure Game</h2>
@@ -1752,6 +1752,9 @@ function init() {
 
   // Outer scope declarations to resolve Temporal Dead Zone (TDZ) ReferenceErrors and prevent GC pressure in animate()
   const staticBoidUpVector = new THREE.Vector3(0, 1, 0);
+  const BOID_GRID_SIZE = 32;
+  const boidGridHead = new Int32Array(BOID_GRID_SIZE * BOID_GRID_SIZE);
+  let boidGridNext = new Int32Array(512);
   const staticBaseEuler = new THREE.Euler(0, 0, 0, 'YXZ');
   const staticBaseQuat = new THREE.Quaternion();
   const staticSwayEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -5884,8 +5887,25 @@ function init() {
 
     const obsWeight = bCfg.obstacleAvoidanceWeight !== undefined ? bCfg.obstacleAvoidanceWeight : 2.5;
     const obsRad = bCfg.obstacleAvoidRadius !== undefined ? bCfg.obstacleAvoidRadius : 1.5;
+    const obsRadSq = obsRad * obsRad;
 
     const { rx: walkRx, rz: walkRz } = getBoidsWalkRadius();
+
+    // Hoist material override check outside the loop
+    const boidMatOv = curModeCfg.boidMaterialOverride;
+    const boidColorOv = curModeCfg.boidColorOverride || curModeCfg.boidsColorOverride;
+    const boidColorSimple = curModeCfg.boidColor || curModeCfg.boidsColor;
+
+    const isBoidUnlit = (boidMatOv && boidMatOv.override && boidMatOv.type === 'unlit') ||
+                        (boidColorOv && boidColorOv.override && (boidColorOv.type === 'unlit' || boidColorOv.unlit === true)) ||
+                        (curModeCfg.boidUnlit === true || curModeCfg.boidsUnlit === true);
+
+    if (boidsInstancedMesh && boidsStandardMaterial && boidsBasicMaterial) {
+      const targetBoidMat = isBoidUnlit ? boidsBasicMaterial : boidsStandardMaterial;
+      if (boidsInstancedMesh.material !== targetBoidMat) {
+        boidsInstancedMesh.material = targetBoidMat;
+      }
+    }
 
     // Mouse Cursor World Position Raycasting
     let isCursorValid = false;
@@ -5901,7 +5921,7 @@ function init() {
       }
     }
 
-    // Collect obstacle positions for avoidance (including LinkedIn bug)
+    // Collect obstacle positions for avoidance
     const obstacles = [];
     const qBoxPos = questionBoxGroup ? questionBoxGroup.position : (isMobileInitial && SCENE_CONFIG.questionBox.mobile ? SCENE_CONFIG.questionBox.mobile.position : SCENE_CONFIG.questionBox.position);
     if (qBoxPos) obstacles.push(qBoxPos);
@@ -5909,10 +5929,38 @@ function init() {
     if (webGlobeGroup) obstacles.push(webGlobeGroup.position);
     if (gamesAlienGroup) obstacles.push(gamesAlienGroup.position);
     if (arPhoneGroup) obstacles.push(arPhoneGroup.position);
-    if (bugCubeGroup) obstacles.push(bugCubeGroup.position); // Avoid LinkedIn bug
+    if (bugCubeGroup) obstacles.push(bugCubeGroup.position);
 
     const dtScale = Math.min(2.0, dt * 60.0);
+    const colorSmoothingParam = bCfg.colorSmoothing !== undefined ? bCfg.colorSmoothing : 0.1;
+    const colorLerpFactor = Math.min(1.0, colorSmoothingParam * 60.0 * dt);
+    const rotSmoothingParam = bCfg.rotationSmoothing !== undefined ? bCfg.rotationSmoothing : 0.15;
+    const rotSlerpFactor = Math.min(1.0, rotSmoothingParam * 60.0 * dt);
+    const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
 
+    // ----------------------------------------------------
+    // Spatial Binning Grid Setup (O(N) vs O(N^2))
+    // ----------------------------------------------------
+    if (boidGridNext.length < count) {
+      boidGridNext = new Int32Array(count * 2);
+    }
+    boidGridHead.fill(-1);
+
+    const gridCellSize = Math.max(0.5, neighRad);
+    const halfGrid = BOID_GRID_SIZE / 2;
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      let cx = Math.floor(boidsPositions[i3 + 0] / gridCellSize) + halfGrid;
+      let cz = Math.floor(boidsPositions[i3 + 2] / gridCellSize) + halfGrid;
+      if (cx < 0) cx = 0; else if (cx >= BOID_GRID_SIZE) cx = BOID_GRID_SIZE - 1;
+      if (cz < 0) cz = 0; else if (cz >= BOID_GRID_SIZE) cz = BOID_GRID_SIZE - 1;
+      const cellIdx = cx + cz * BOID_GRID_SIZE;
+      boidGridNext[i] = boidGridHead[cellIdx];
+      boidGridHead[cellIdx] = i;
+    }
+
+    // Main Boids Simulation & Render Matrix Update Loop
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       const px = boidsPositions[i3 + 0];
@@ -5936,31 +5984,48 @@ function init() {
       let cohCenterX = 0;
       let cohCenterZ = 0;
 
-      // 1. Classic Flocking Loop over other boids
-      for (let j = 0; j < count; j++) {
-        if (i === j) continue;
-        const j3 = j * 3;
-        const dx = px - boidsPositions[j3 + 0];
-        const dz = pz - boidsPositions[j3 + 2];
-        const distSq = dx * dx + dz * dz;
+      // 1. Spatial Grid Flocking Neighborhood Query
+      let cx = Math.floor(px / gridCellSize) + halfGrid;
+      let cz = Math.floor(pz / gridCellSize) + halfGrid;
+      if (cx < 0) cx = 0; else if (cx >= BOID_GRID_SIZE) cx = BOID_GRID_SIZE - 1;
+      if (cz < 0) cz = 0; else if (cz >= BOID_GRID_SIZE) cz = BOID_GRID_SIZE - 1;
 
-        // Separation
-        if (distSq > 0.00001 && distSq < sepRadSq) {
-          const dist = Math.sqrt(distSq);
-          tmpBoidSep.x += (dx / dist) / dist;
-          tmpBoidSep.z += (dz / dist) / dist;
-          sepCount++;
-        }
+      const minX = cx > 0 ? cx - 1 : 0;
+      const maxX = cx < BOID_GRID_SIZE - 1 ? cx + 1 : BOID_GRID_SIZE - 1;
+      const minZ = cz > 0 ? cz - 1 : 0;
+      const maxZ = cz < BOID_GRID_SIZE - 1 ? cz + 1 : BOID_GRID_SIZE - 1;
 
-        // Alignment & Cohesion
-        if (distSq > 0.00001 && distSq < neighRadSq) {
-          tmpBoidAlign.x += boidsVelocities[j3 + 0];
-          tmpBoidAlign.z += boidsVelocities[j3 + 2];
-          alignCount++;
+      for (let ncx = minX; ncx <= maxX; ncx++) {
+        for (let ncz = minZ; ncz <= maxZ; ncz++) {
+          const cellIdx = ncx + ncz * BOID_GRID_SIZE;
+          let j = boidGridHead[cellIdx];
+          while (j !== -1) {
+            if (i !== j) {
+              const j3 = j * 3;
+              const dx = px - boidsPositions[j3 + 0];
+              const dz = pz - boidsPositions[j3 + 2];
+              const distSq = dx * dx + dz * dz;
 
-          cohCenterX += boidsPositions[j3 + 0];
-          cohCenterZ += boidsPositions[j3 + 2];
-          cohCount++;
+              // Separation (No Math.sqrt needed: (dx / dist) / dist = dx / distSq)
+              if (distSq > 0.00001 && distSq < sepRadSq) {
+                tmpBoidSep.x += dx / distSq;
+                tmpBoidSep.z += dz / distSq;
+                sepCount++;
+              }
+
+              // Alignment & Cohesion
+              if (distSq > 0.00001 && distSq < neighRadSq) {
+                tmpBoidAlign.x += boidsVelocities[j3 + 0];
+                tmpBoidAlign.z += boidsVelocities[j3 + 2];
+                alignCount++;
+
+                cohCenterX += boidsPositions[j3 + 0];
+                cohCenterZ += boidsPositions[j3 + 2];
+                cohCount++;
+              }
+            }
+            j = boidGridNext[j];
+          }
         }
       }
 
@@ -6008,22 +6073,20 @@ function init() {
       for (let o = 0; o < obstacles.length; o++) {
         const obs = obstacles[o];
 
-        // 1. Current distance to obstacle
         const dxCurr = px - obs.x;
         const dzCurr = pz - obs.z;
-        const distCurr = Math.sqrt(dxCurr * dxCurr + dzCurr * dzCurr);
+        const distCurrSq = dxCurr * dxCurr + dzCurr * dzCurr;
 
-        // 2. Future projected distance along velocity vector
         const dxFut = (px + fwdX) - obs.x;
         const dzFut = (pz + fwdZ) - obs.z;
-        const distFut = Math.sqrt(dxFut * dxFut + dzFut * dzFut);
+        const distFutSq = dxFut * dxFut + dzFut * dzFut;
 
-        // Take closest distance along projected path
-        const effectiveDist = Math.min(distCurr, distFut);
+        const effectiveDistSq = Math.min(distCurrSq, distFutSq);
 
-        if (effectiveDist < obsRad) {
+        if (effectiveDistSq < obsRadSq) {
+          const effectiveDist = Math.sqrt(effectiveDistSq);
+          const distCurr = Math.sqrt(distCurrSq);
           const normDist = Math.max(0.001, distCurr);
-          // Smooth non-linear falloff curve for early gradual steering
           const pushFactor = Math.pow((obsRad - effectiveDist) / obsRad, 1.2);
           tmpBoidObs.x += (dxCurr / normDist) * pushFactor;
           tmpBoidObs.z += (dzCurr / normDist) * pushFactor;
@@ -6036,19 +6099,22 @@ function init() {
       const mouseAvoidEnabled = bCfg.mouseAvoidanceEnabled !== false;
       const cursorAvoidWeight = bCfg.cursorAvoidanceWeight !== undefined ? bCfg.cursorAvoidanceWeight : 3.0;
       const cursorAvoidRad = bCfg.cursorAvoidRadius !== undefined ? bCfg.cursorAvoidRadius : 2.2;
+      const cursorAvoidRadSq = cursorAvoidRad * cursorAvoidRad;
 
       if (isCursorValid && mouseAvoidEnabled) {
         const dxCurr = px - tmpCursorWorldPos.x;
         const dzCurr = pz - tmpCursorWorldPos.z;
-        const distCurr = Math.sqrt(dxCurr * dxCurr + dzCurr * dzCurr);
+        const distCurrSq = dxCurr * dxCurr + dzCurr * dzCurr;
 
         const dxFut = (px + fwdX) - tmpCursorWorldPos.x;
         const dzFut = (pz + fwdZ) - tmpCursorWorldPos.z;
-        const distFut = Math.sqrt(dxFut * dxFut + dzFut * dzFut);
+        const distFutSq = dxFut * dxFut + dzFut * dzFut;
 
-        const effectiveDist = Math.min(distCurr, distFut);
+        const effectiveDistSq = Math.min(distCurrSq, distFutSq);
 
-        if (effectiveDist < cursorAvoidRad) {
+        if (effectiveDistSq < cursorAvoidRadSq) {
+          const effectiveDist = Math.sqrt(effectiveDistSq);
+          const distCurr = Math.sqrt(distCurrSq);
           const normDist = Math.max(0.001, distCurr);
           const pushFactor = Math.pow((cursorAvoidRad - effectiveDist) / cursorAvoidRad, 1.2);
           const cWeightRatio = cursorAvoidWeight / Math.max(0.01, obsWeight);
@@ -6092,7 +6158,6 @@ function init() {
         vx = (vx / curSpeed) * maxSpeed;
         vz = (vz / curSpeed) * maxSpeed;
       } else if (curSpeed < maxSpeed * 0.3) {
-        // Maintain minimum cruise speed so boids don't stall
         const minSpeed = maxSpeed * 0.3;
         if (curSpeed > 0.00001) {
           vx = (vx / curSpeed) * minSpeed;
@@ -6126,25 +6191,7 @@ function init() {
       boidsVelocities[i3 + 1] = 0;
       boidsVelocities[i3 + 2] = vz;
 
-      // Target Color calculation based on per-mode override or directional movement & avoidance:
-      // Z-axis movement creates warm, rich Orange-Red (R: 1.0, G: 0.28, B: 0.08)
-      // X-axis movement creates cool Electric Teal (R: 0.08, G: 0.85, B: 0.95)
-      // Avoidance shifts color towards bright Red alert (R: 1.0, G: 0.0, B: 0.0)
-      const boidMatOv = curModeCfg.boidMaterialOverride;
-      const boidColorOv = curModeCfg.boidColorOverride || curModeCfg.boidsColorOverride;
-      const boidColorSimple = curModeCfg.boidColor || curModeCfg.boidsColor;
-
-      const isBoidUnlit = (boidMatOv && boidMatOv.override && boidMatOv.type === 'unlit') ||
-                          (boidColorOv && boidColorOv.override && (boidColorOv.type === 'unlit' || boidColorOv.unlit === true)) ||
-                          (curModeCfg.boidUnlit === true || curModeCfg.boidsUnlit === true);
-
-      if (boidsInstancedMesh && boidsStandardMaterial && boidsBasicMaterial) {
-        const targetBoidMat = isBoidUnlit ? boidsBasicMaterial : boidsStandardMaterial;
-        if (boidsInstancedMesh.material !== targetBoidMat) {
-          boidsInstancedMesh.material = targetBoidMat;
-        }
-      }
-
+      // Target Color calculation
       let rTarget = 0.5;
       let gTarget = 0.3;
       let bTarget = 0.3;
@@ -6163,28 +6210,24 @@ function init() {
         const finalSpeedMag = Math.sqrt(vx * vx + vz * vz);
 
         if (finalSpeedMag > 0.0001) {
-          const tz = Math.abs(vz) / finalSpeedMag; // Z-axis proportion
-          const tx = Math.abs(vx) / finalSpeedMag; // X-axis proportion
+          const tz = Math.abs(vz) / finalSpeedMag;
+          const tx = Math.abs(vx) / finalSpeedMag;
 
           rTarget = tz * 1.0 + tx * 0.08;
           gTarget = tz * 0.28 + tx * 0.85;
           bTarget = tz * 0.08 + tx * 0.95;
         }
 
-        // Avoidance blending: as avoidanceIntensity increases (0 to 1), shift towards pure Red alert
         const avoid = Math.max(0.0, Math.min(1.0, avoidanceIntensity));
         rTarget = rTarget * (1.0 - avoid) + 1.0 * avoid;
         gTarget = gTarget * (1.0 - avoid) + 0.0 * avoid;
         bTarget = bTarget * (1.0 - avoid) + 0.0 * avoid;
       }
 
-      const colorIntensity = bCfg.colorIntensity !== undefined ? bCfg.colorIntensity : 0.5;
       rTarget *= colorIntensity;
       gTarget *= colorIntensity;
       const bFinalTarget = bTarget * colorIntensity;
 
-      // Smooth color LERP interpolation to filter out color flickering
-      const colorLerpFactor = Math.min(1.0, (bCfg.colorSmoothing !== undefined ? bCfg.colorSmoothing : 0.1) * 60.0 * dt);
       let curR = boidsColors[i3 + 0];
       let curG = boidsColors[i3 + 1];
       let curB = boidsColors[i3 + 2];
@@ -6217,7 +6260,6 @@ function init() {
         boidsQuaternions[i4 + 3]
       );
 
-      const rotSlerpFactor = Math.min(1.0, (bCfg.rotationSmoothing !== undefined ? bCfg.rotationSmoothing : 0.15) * 60.0 * dt);
       tmpBoidCurQuat.slerp(tmpBoidTargetQuat, rotSlerpFactor);
 
       boidsQuaternions[i4 + 0] = tmpBoidCurQuat.x;
