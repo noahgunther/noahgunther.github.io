@@ -1644,7 +1644,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Droplets Tool" class="about-panel__project-icon" />
+          <img src="./graphics/droplets.webp" alt="Droplets Tool" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Droplets Tool</h2>
@@ -1657,7 +1657,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Vines Tool" class="about-panel__project-icon" />
+          <img src="./graphics/vines.webp" alt="Vines Tool" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Vines Tool</h2>
@@ -1670,7 +1670,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Robot Artist" class="about-panel__project-icon" />
+          <img src="./graphics/robotartist.webp" alt="Robot Artist" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Robot Artist</h2>
@@ -1683,7 +1683,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Pipe Dream Houdini" class="about-panel__project-icon" />
+          <img src="./graphics/houdinipipes.webp" alt="Pipe Dream Houdini" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Pipe Dream Houdini</h2>
@@ -1696,7 +1696,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Volcanic Eruption" class="about-panel__project-icon" />
+          <img src="./graphics/volcano.webp" alt="Volcanic Eruption" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Volcanic Eruption</h2>
@@ -1709,7 +1709,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Stained Glass Tool" class="about-panel__project-icon" />
+          <img src="./graphics/stainedglass.webp" alt="Stained Glass Tool" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Stained Glass Tool</h2>
@@ -1722,7 +1722,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
+          <img src="./graphics/houdinifireworks.webp" alt="Interactive Fireworks" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Interactive Fireworks</h2>
@@ -1735,7 +1735,7 @@ function init() {
 
       <div class="about-panel__project-section">
         <a href="#" class="about-panel__project-icon-link">
-          <img src="./graphics/ar_games_icon.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
+          <img src="./graphics/wordpress.webp" alt="Wordpress Gallery" class="about-panel__project-icon" />
         </a>
         <div class="about-panel__project-info">
           <h2 class="about-panel__project-title">Wordpress Gallery</h2>
