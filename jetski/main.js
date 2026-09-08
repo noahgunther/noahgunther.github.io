@@ -1631,7 +1631,7 @@ function init() {
     name: 'houdini',
     title: 'Houdini',
     subtitle: 'Procedural Graphics, Tools, & VFX Pipelines',
-    videoSrc: './reels/ar.webm',
+    videoSrc: './reels/houdini.webm',
     headerImageSrc: './graphics/houdini_logo.webp',
     headerImageAlt: 'Houdini Logo',
     headerImageClass: 'about-panel__portrait--logo',
