@@ -5,20 +5,60 @@ import { ShaderPass } from 'https://unpkg.com/three@0.128.0/examples/jsm/postpro
 import { OutlinePass } from 'https://unpkg.com/three@0.128.0/examples/jsm/postprocessing/OutlinePass.js';
 import { FXAAShader } from 'https://unpkg.com/three@0.128.0/examples/jsm/shaders/FXAAShader.js';
 import { RGBELoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/RGBELoader.js';
-import { OBJLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/OBJLoader.js';
 import { BufferGeometryUtils } from 'https://unpkg.com/three@0.128.0/examples/jsm/utils/BufferGeometryUtils.js';
-import { FBXLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/DRACOLoader.js';
 
 // Global Three.js LoadingManager to track all 3D geometries, textures, HDR maps, and preloaded images
 const loadingManager = new THREE.LoadingManager();
+const loadStartTime = performance.now();
+const assetTimings = new Map();
+const loadedAssetsReport = [];
+
 loadingManager.setURLModifier((url) => {
   if (url && typeof url === 'string' && url.toLowerCase().endsWith('.png')) {
     return url.replace(/\.png$/i, '.webp');
   }
   return url;
 });
+
+// Debug Logger: Track item start times to measure individual asset download duration
+const originalItemStart = loadingManager.itemStart;
+loadingManager.itemStart = function (url) {
+  if (url) assetTimings.set(url, performance.now());
+  if (originalItemStart) originalItemStart.call(loadingManager, url);
+};
+
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  const now = performance.now();
+  const startTime = assetTimings.get(url) || loadStartTime;
+  const durationMs = Math.round(now - startTime);
+  const cleanName = url ? url.split('/').pop().split('?')[0] : 'Asset';
+  
+  const existingIdx = loadedAssetsReport.findIndex(r => r['Full URL'] === url);
+  const reportObj = {
+    'Asset': cleanName,
+    'Duration': `${durationMs} ms`,
+    'DurationMs': durationMs,
+    'Progress': `${itemsLoaded}/${itemsTotal}`,
+    'Full URL': url
+  };
+  if (existingIdx >= 0) {
+    loadedAssetsReport[existingIdx] = reportObj;
+  } else {
+    loadedAssetsReport.push(reportObj);
+  }
+
+  const durationStyle = durationMs > 500 ? 'color: #ff5555; font-weight: bold;' : (durationMs > 200 ? 'color: #ffae21;' : 'color: #55ff55;');
+  console.log(
+    `%c[Asset Loader] %c${cleanName}%c loaded in %c${durationMs}ms%c (${itemsLoaded}/${itemsTotal})`,
+    'color: #91bfff; font-weight: bold;',
+    'color: #ffffff; font-weight: bold;',
+    'color: #aaaaaa;',
+    durationStyle,
+    'color: #888888;'
+  );
+};
 
 /* ==========================================
    WebGL & Layout Customization Config (`SCENE_CONFIG`)
@@ -162,7 +202,7 @@ const SCENE_CONFIG = {
       position: { x: 0.0, y: 1.3, z: -3.2 } // Mobile 3D position (closer, slightly lower)
     },
     position: { x: 0.0, y: 1.3, z: 0.0 },   // Fallback 3D position
-    scale: 0.005,                           // Model scale factor
+    scale: 0.5,                             // Model scale factor (updated for question_box.glb)
     hoverSpinMultiplier: 2.0,               // Spin speed multiplier when hovered
     glass: {
       color: 0xffffff,                      // Glass shell color
@@ -186,12 +226,12 @@ const SCENE_CONFIG = {
     billboardRotationX: 0,
     billboardRotationY: -90,
     billboardRotationZ: 0,
-    planeScale: 82.0,                       // Scale of inner question mark graphic
+    planeScale: 0.82,                       // Scale of inner question mark graphic (updated for question_box.glb)
     floatFrequency: 0.003,                  // Bobbing float frequency
     floatAmplitude: 0.1,                    // Bobbing float amplitude
     shadowY: 0.335,                         // Height of shadow plane
     shadowScale: 1.6,                       // Shadow scale factor
-    shadowOpacity: 0.85,                    // Shadow opacity factor
+    shadowOpacity: 0.65,                    // Shadow opacity factor
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
       hoverInVolume: 0.5,                    // Volume for aboutHover.ogg (0.0 to 1.0)
@@ -228,7 +268,7 @@ const SCENE_CONFIG = {
     rotation: { x: 0, y: 226, z: 0 },       // Initial rotation in degrees
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 2.0,                       // Shadow plane scale factor
-    shadowOpacity: 0.66,                    // Shadow opacity factor
+    shadowOpacity: 0.36,                    // Shadow opacity factor
     hoverYOffset: 0.15,                     // Vertical lift offset when hovered
     hover: {
       soundEnabled: true,                    // Enable hover audio effects
@@ -293,9 +333,9 @@ const SCENE_CONFIG = {
   web3D: {
     enabled: true,                          // Toggle to enable/disable Web 3D Globe
     unloadedColor: 0x2c427e,                    // Per-entity fallback color when texture not loaded (null = use global textures.unloadedColor)
-    scale: 0.0062,                             // Model scale factor
+    scale: 0.62,                             // Model scale factor (updated for globe.glb)
     rotation: { x: 0, y: 0, z: 0 },        // Initial base rotation in degrees
-    rotationAxis: 'z',                     // Globe rotation axis: 'x' | 'y' | 'z' or vector object { x: 0, y: 1, z: 0 }
+    rotationAxis: 'y',                     // Globe rotation axis: 'x' | 'y' | 'z' or vector object { x: 0, y: 1, z: 0 }
     rotationSpeedY: 0.01,                 // Continuous rotation speed for the globe
     floatFrequency: 0.001,                 // Bobbing float frequency
     floatAmplitude: 0.05,                   // Bobbing float amplitude
@@ -303,7 +343,7 @@ const SCENE_CONFIG = {
     hoverSpinMultiplier: 2.0,              // Spin speed multiplier when hovered
     hoverYOffset: 0.0,                    // Vertical lift offset when hovered
     moon: {
-      rotationAxis: 'z',                    // Moon rotation axis: 'x' | 'y' | 'z' or vector object { x: 0, y: 1, z: 0 }
+      rotationAxis: 'y',                    // Moon rotation axis: 'x' | 'y' | 'z' or vector object { x: 0, y: 1, z: 0 }
       rotationSpeed: -0.01                  // Moon rotation speed
     },
     signal: {
@@ -312,7 +352,7 @@ const SCENE_CONFIG = {
       hoverSpeedMultiplier: 3.5,             // Speed multiplier when hovered (faster)
       clickSpeedMultiplier: 12.0,            // Speed multiplier on click burst (really fast)
       billboard: true,                       // Billboard signal meshes to always face camera
-      billboardRotationX: 0,                 // Optional rotation offset X (deg)
+      billboardRotationX: 90,                // Rotation offset X to align GLB plane face to camera (deg)
       billboardRotationY: 0,                 // Optional rotation offset Y (deg)
       billboardRotationZ: 0                  // Optional rotation offset Z (deg)
     },
@@ -324,7 +364,7 @@ const SCENE_CONFIG = {
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.4,                       // Shadow plane scale factor
-    shadowOpacity: 0.66,                    // Shadow opacity factor
+    shadowOpacity: 0.36,                    // Shadow opacity factor
     materials: {
       grid: {
         color: 0x000000,                    // Diffuse color tint
@@ -385,7 +425,7 @@ const SCENE_CONFIG = {
   // ==========================================
   games3D: {
     enabled: true,                          // Toggle to enable/disable Games 3D Alien
-    scale: 0.00086,                           // Model scale factor
+    scale: 0.086,                           // Model scale factor (updated for alien.glb)
     rotation: { x: 0, y: 90, z: 20 },         // Initial base rotation in degrees
     lookAtCamera: {
       enabled: true,                         // Smoothly rotate alien to look towards camera when scene is rotated
@@ -406,7 +446,7 @@ const SCENE_CONFIG = {
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 2.0,                       // Shadow plane scale factor
-    shadowOpacity: 0.85,                    // Shadow opacity factor
+    shadowOpacity: 0.55,                    // Shadow opacity factor
     material: {
       color: 0x28aebd,                      // Metallic blue/green color tint
       metalness: 0.8,
@@ -451,7 +491,7 @@ const SCENE_CONFIG = {
     enabled: true,                          // Toggle to enable/disable 3D AR Phone
     clickAnimation: { enabled: true, duration: 1200, respawnDelay: 50, respawnDuration: 400 },
     unloadedColor: 0xddddff,                // Fallback flat color when textures unloaded
-    scale: 0.0044,                           // Model scale factor
+    scale: 0.44,                             // Model scale factor
     rotation: { x: 0, y: -90, z: 0 },        // Initial base rotation in degrees
     walkRadiusX: 2.2,                       // Max walk wander radius X
     walkRadiusZ: 2.2,                       // Max walk wander radius Z
@@ -487,7 +527,7 @@ const SCENE_CONFIG = {
     },
     shadowY: 0.335,                         // Shadow plane height
     shadowScale: 1.4,                       // Shadow plane scale factor
-    shadowOpacity: 1.2,                    // Shadow opacity factor
+    shadowOpacity: 0.8,                    // Shadow opacity factor
     materials: {
       phone: {
         color: 0x59606d,                    // Phone body metal tint
@@ -578,7 +618,7 @@ const SCENE_CONFIG = {
       minObstacleDist: 0.75                   // Minimum avoidance distance from obstacles (Mobile)
     },
     position: { x: -3.6, y: 0.63, z: -4.6 },   // Fallback starting position
-    scale: 0.00166,                         // Model scale
+    scale: 0.166,                           // Model scale
     walkRadiusX: 9.0,                       // Fallback max walk bound radius X
     walkRadiusZ: 9.0,                       // Fallback max walk bound radius Z
     minObstacleDist: 1.0,                   // Minimum avoidance distance from obstacles
@@ -586,7 +626,7 @@ const SCENE_CONFIG = {
     hoverDelay: 500,                        // Wait duration after hover ends (ms)
     showDebug: false,                       // Toggle red debug vector guides
     shadowY: 0.335,                         // Shadow plane height
-    shadowOpacity: 0.66,                    // Shadow opacity factor
+    shadowOpacity: 0.36,                    // Shadow opacity factor
     fallRotationSpeedThreshold: 2.0,        // Rotation speed threshold to trigger bug fall
     soundEnabled: true,                     // Toggle to enable/disable bug sound effects
     fallVolume: 0.8,                        // Fall sound volume (0.0 to 1.0)
@@ -605,7 +645,7 @@ const SCENE_CONFIG = {
     count: 750,                              // Total number of boid tetrahedra
     yHeight: 0.37,                          // Hard-coded gel surface height (matches LinkedIn bug)
     shadowY: 0.335,                         // Shadow plane height on gel surface
-    shadowOpacity: 0.45,                    // Soft contact shadow opacity
+    shadowOpacity: 0.25,                    // Soft contact shadow opacity
     shadowScale: 2.0,                       // Parameter to control contact shadow scale multiplier
     size: 0.04,                             // Base equilateral triangle radius
     length: 0.16,                           // Forward length of elongated tetrahedron
@@ -858,15 +898,38 @@ const SCENE_CONFIG = {
   }
 };
 
+const textureCache = new Map();
+function loadSharedTexture(url, onLoad, onProgress, onError) {
+  if (textureCache.has(url)) {
+    const cachedTex = textureCache.get(url);
+    if (onLoad) onLoad(cachedTex);
+    return cachedTex;
+  }
+  const texture = new THREE.TextureLoader(loadingManager).load(
+    url,
+    (tex) => {
+      if (typeof renderer !== 'undefined' && renderer && renderer.initTexture) {
+        try { renderer.initTexture(tex); } catch (e) {}
+      }
+      if (onLoad) onLoad(tex);
+    },
+    onProgress,
+    (err) => {
+      if (onError) onError(err);
+    }
+  );
+  textureCache.set(url, texture);
+  return texture;
+}
+
 // Texture loading helper: respects SCENE_CONFIG.textures.disabled and per-entity unloadedColor
 // When textures.disabled = true: returns null (no texture) and sets specified material color property ('color' or 'emissive') to unloadedColor
-// When textures.disabled = false: loads the texture normally; if texture loading fails (404/missing), falls back to unloadedColor
+// When textures.disabled = false: loads the texture normally via loadSharedTexture; handles error fallbacks
 function loadColorMap(loader, path, material, entityColor, colorProperty = 'color') {
   const tCfg = SCENE_CONFIG.textures || {};
   const unloadedColor = entityColor || tCfg.unloadedColor || '#888888';
 
   if (tCfg.disabled) {
-    // Textures globally disabled — apply unloaded color to target color property ('color' or 'emissive'), skip texture load entirely
     if (material && material[colorProperty] && unloadedColor !== null && unloadedColor !== undefined) {
       material[colorProperty].set(unloadedColor);
     }
@@ -875,12 +938,12 @@ function loadColorMap(loader, path, material, entityColor, colorProperty = 'colo
 
   const mapProp = colorProperty === 'color' ? 'map' : (colorProperty === 'emissive' ? 'emissiveMap' : colorProperty);
 
-  // Textures enabled — load texture normally and handle error fallbacks
-  return loader.load(
+  return loadSharedTexture(
     path,
     (tex) => {
-      if (typeof renderer !== 'undefined' && renderer && renderer.initTexture) {
-        try { renderer.initTexture(tex); } catch (e) {}
+      if (material && mapProp) {
+        material[mapProp] = tex;
+        material.needsUpdate = true;
       }
     },
     undefined,
@@ -921,13 +984,10 @@ function applyMaskToElement(el, src) {
 const logoEl = document.getElementById("logolink");
 applyMaskToElement(logoEl, noahLogoSrc);
 
-// Preload image helper to register non-Three.js DOM images with LoadingManager
+// Preload image helper to cache non-Three.js DOM images asynchronously without blocking 3D loadingManager
 function preloadImage(src) {
   if (!src) return;
-  loadingManager.itemStart(src);
   const img = new Image();
-  img.onload = () => loadingManager.itemEnd(src);
-  img.onerror = () => loadingManager.itemError(src);
   img.src = src;
 }
 
@@ -1249,34 +1309,58 @@ function init() {
       videoWrapper = document.createElement('div');
       videoWrapper.className = 'about-panel__header-video-wrapper';
       videoWrapper.innerHTML = `
-        <video src="${activeVideoSrc}" autoplay loop muted playsinline preload="auto" class="about-panel__header-video"></video>
+        <video src="${activeVideoSrc}" loop muted playsinline preload="none" class="about-panel__header-video"></video>
         <div class="about-panel__header-video-fade"></div>
       `;
       videoEl = videoWrapper.querySelector('video');
       if (videoEl) {
-        videoEl.preload = 'auto';
-        try { videoEl.load(); } catch (e) {}
-        const playPromise = videoEl.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {});
-        }
+        videoEl.preload = 'none';
+
+        videoEl.addEventListener('waiting', () => {
+          if (overlay.classList.contains('is-visible')) {
+            videoEl.play().catch(() => {});
+          }
+        });
+        videoEl.addEventListener('stalled', () => {
+          if (overlay.classList.contains('is-visible')) {
+            videoEl.load();
+            videoEl.play().catch(() => {});
+          }
+        });
       }
     }
 
-    function ensureVideoPlaying() {
-      if (videoEl) {
+    function playHeaderVideo() {
+      if (!videoEl) return;
+      try {
+        if (videoEl.readyState < 2) {
+          videoEl.load();
+        }
+        videoEl.currentTime = 0;
         const playPromise = videoEl.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {});
         }
-      }
+      } catch (e) {}
+    }
+
+    function pauseHeaderVideo() {
+      if (!videoEl) return;
+      try {
+        videoEl.pause();
+        videoEl.currentTime = 0;
+      } catch (e) {}
     }
 
     if (videoEl && window.MutationObserver) {
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class' && overlay.classList.contains('is-visible')) {
-            ensureVideoPlaying();
+          if (mutation.attributeName === 'class') {
+            if (overlay.classList.contains('is-visible')) {
+              playHeaderVideo();
+            } else {
+              pauseHeaderVideo();
+            }
           }
         });
       });
@@ -1400,7 +1484,7 @@ function init() {
     document.body.appendChild(overlay);
 
     return {
-      overlay, blur, panel, panelContent, closeButton, updateBorderPaths, updateScrollIndicators, videoEl
+      overlay, blur, panel, panelContent, closeButton, updateBorderPaths, updateScrollIndicators, videoEl, playHeaderVideo, pauseHeaderVideo
     };
   }
 
@@ -1442,13 +1526,13 @@ function init() {
       </div>
     `
   });
-  const { overlay: arOverlay, blur: arBlur, panel: arPanel, closeButton: arCloseButton, updateBorderPaths: updateArBorderPaths, updateScrollIndicators: updateArPanelScrollIndicators } = arOverlayData;
+  const { overlay: arOverlay, blur: arBlur, panel: arPanel, closeButton: arCloseButton, updateBorderPaths: updateArBorderPaths, updateScrollIndicators: updateArPanelScrollIndicators, playHeaderVideo: playArHeaderVideo, pauseHeaderVideo: pauseArHeaderVideo } = arOverlayData;
 
   const gamesOverlayData = createGenericOverlay({
     name: 'games',
     title: 'Games',
     subtitle: 'Real-Time Interactive & Game Development',
-    videoSrc: './reels/ar.webm',
+    videoSrc: './reels/games.webm',
     headerImageSrc: './graphics/games_logo.webp',
     headerImageAlt: 'Games Logo Placeholder',
     headerImageClass: 'about-panel__portrait--logo',
@@ -1779,6 +1863,7 @@ function init() {
   let plateTargetRot;
   let plate = null;
   let gel = null;
+  let dishGroup = null;
   let raycaster = new THREE.Raycaster();
   let mouse = new THREE.Vector2(-9999, -9999);
   let lastClientX = -9999;
@@ -2861,37 +2946,16 @@ function init() {
     );
   };
 
-  // Load dish.obj mesh to use as the plate
-  const objLoader = new OBJLoader(loadingManager);
-  objLoader.setResourcePath('graphics/');
-
-  if (SCENE_CONFIG.plate.enabled !== false) {
-    objLoader.load('geometry/dish.obj', (object) => {
-      object.traverse((child) => {
-        if (child.isMesh) {
-          child.material = plateMaterial;
-          child.renderOrder = 1;
-          // Merge duplicate vertices to calculate smooth shading normals on low-poly/unindexed meshes
-          if (typeof BufferGeometryUtils !== 'undefined') {
-            child.geometry = BufferGeometryUtils.mergeVertices(child.geometry);
-          }
-          child.geometry.computeVertexNormals();
-        }
-      });
-
-      plate = object;
-      plate.renderOrder = 1;
-      plate.position.copy(plateTargetPos);
-      plate.rotation.set(plateTargetRot.x, plateTargetRot.y, plateTargetRot.z);
-
-      const s = SCENE_CONFIG.plate.scale;
-      plate.scale.set(s, s, s);
-
-      sceneGroup.add(plate);
-    });
+  // Load dish.glb containing dish and gel geometries
+  const gltfLoader = new GLTFLoader(loadingManager);
+  gltfLoader.setResourcePath('graphics/');
+  if (typeof DRACOLoader !== 'undefined') {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    gltfLoader.setDRACOLoader(dracoLoader);
   }
 
-  // Load gel.obj mesh to use as transparent overlay
+  // Define gel material and shader
   const gelMaterial = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(SCENE_CONFIG.gel.glass.color),
     transmission: SCENE_CONFIG.gel.glass.transmission,
@@ -2946,23 +3010,47 @@ function init() {
     );
   };
 
-  if (SCENE_CONFIG.gel.enabled !== false) {
-    objLoader.load('geometry/gel.obj', (object) => {
-      object.traverse((child) => {
+  if (SCENE_CONFIG.plate.enabled !== false || SCENE_CONFIG.gel.enabled !== false) {
+    gltfLoader.load('geometry/dish.glb', (gltf) => {
+      const gltfScene = gltf.scene;
+
+      dishGroup = gltfScene;
+
+      dishGroup.traverse((child) => {
         if (child.isMesh) {
-          child.material = gelMaterial;
-          child.renderOrder = 2;
+          const nameLower = child.name.toLowerCase();
+          if (nameLower.includes('gel')) {
+            child.material = gelMaterial;
+            child.renderOrder = 2;
+            gel = child;
+          } else {
+            child.material = plateMaterial;
+            child.renderOrder = 1;
+            plate = child;
+          }
+
           if (typeof BufferGeometryUtils !== 'undefined') {
-            child.geometry = BufferGeometryUtils.mergeVertices(child.geometry);
+            try { child.geometry = BufferGeometryUtils.mergeVertices(child.geometry); } catch (e) {}
           }
           child.geometry.computeVertexNormals();
         }
       });
 
-      gel = object;
-      gel.renderOrder = 2;
-      // Add directly to sceneGroup without any transform adjustments
-      sceneGroup.add(gel);
+      if (plate && SCENE_CONFIG.plate.enabled === false) {
+        plate.visible = false;
+      }
+      if (gel && SCENE_CONFIG.gel.enabled === false) {
+        gel.visible = false;
+      }
+
+      if (dishGroup) {
+        dishGroup.position.copy(plateTargetPos);
+        dishGroup.rotation.set(plateTargetRot.x, plateTargetRot.y, plateTargetRot.z);
+        const s = SCENE_CONFIG.plate.scale;
+        dishGroup.scale.set(s, s, s);
+      }
+
+      sceneGroup.add(dishGroup);
     });
   }
 
@@ -3083,7 +3171,7 @@ function init() {
 
     sceneGroup.add(bugDebugSpawnGroup);
 
-    // Load bug_cube.obj for 3D LinkedIn link
+    // Load bug_cube.glb for 3D LinkedIn link
     const bugMaterial = new THREE.MeshStandardMaterial({
       roughness: 1.0,
       metalness: 0.0
@@ -3095,9 +3183,8 @@ function init() {
     bugCubeGroup = new THREE.Group();
     bugCubeGroup.renderOrder = 10;
 
-    const bugFbxLoader = new FBXLoader(loadingManager);
-    bugFbxLoader.setResourcePath('graphics/');
-    bugFbxLoader.load('geometry/bug_cube.fbx', (object) => {
+    gltfLoader.load('geometry/bug_cube.glb', (gltf) => {
+      const object = gltf.scene;
       object.traverse((child) => {
         if (child.isMesh) {
           if (child.isSkinnedMesh) {
@@ -3106,6 +3193,13 @@ function init() {
           } else {
             child.material = bugMaterial;
           }
+          if (child.geometry && child.geometry.attributes && child.geometry.attributes.uv) {
+            const uv = child.geometry.attributes.uv;
+            for (let i = 0; i < uv.count; i++) {
+              uv.setY(i, 1.0 - uv.getY(i));
+            }
+            uv.needsUpdate = true;
+          }
           child.geometry.computeVertexNormals();
         }
       });
@@ -3113,29 +3207,30 @@ function init() {
       bugCubeGroup.add(object);
 
       // Setup animation mixer
-      if (object.animations && object.animations.length > 0) {
+      const animations = gltf.animations || [];
+      if (animations && animations.length > 0) {
         bugMixer = new THREE.AnimationMixer(object);
 
-        const inspectClip = object.animations.find(clip => clip.name.toLowerCase().includes('inspect'));
+        const inspectClip = animations.find(clip => clip.name.toLowerCase().includes('inspect'));
         if (inspectClip) {
           bugInspectAction = bugMixer.clipAction(inspectClip);
           bugInspectAction.setLoop(THREE.LoopRepeat, Infinity);
         }
 
-        const walkClip = object.animations.find(clip => clip.name.toLowerCase().includes('walk'));
+        const walkClip = animations.find(clip => clip.name.toLowerCase().includes('walk'));
         if (walkClip) {
           bugWalkAction = bugMixer.clipAction(walkClip);
           bugWalkAction.setLoop(THREE.LoopRepeat, Infinity);
         }
 
-        const fallClip = object.animations.find(clip => clip.name.toLowerCase().includes('fall'));
+        const fallClip = animations.find(clip => clip.name.toLowerCase().includes('fall'));
         if (fallClip) {
           bugFallAction = bugMixer.clipAction(fallClip);
           bugFallAction.setLoop(THREE.LoopOnce, 1);
           bugFallAction.clampWhenFinished = true;
         }
 
-        const standClip = object.animations.find(clip => clip.name.toLowerCase().includes('stand'));
+        const standClip = animations.find(clip => clip.name.toLowerCase().includes('stand'));
         if (standClip) {
           bugStandAction = bugMixer.clipAction(standClip);
           bugStandAction.setLoop(THREE.LoopOnce, 1);
@@ -3167,7 +3262,7 @@ function init() {
         bugInitPos.y,
         bugInitPos.z
       );
-      const s = SCENE_CONFIG.linkedin3D.scale !== undefined ? SCENE_CONFIG.linkedin3D.scale : 0.4;
+      const s = SCENE_CONFIG.linkedin3D.scale !== undefined ? SCENE_CONFIG.linkedin3D.scale : 0.166;
       bugCubeGroup.scale.set(s, s, s);
 
       sceneGroup.add(bugCubeGroup);
@@ -3175,7 +3270,7 @@ function init() {
       // Create shadow under the LinkedIn block
       const lOpacity = SCENE_CONFIG.linkedin3D.shadowOpacity !== undefined ? SCENE_CONFIG.linkedin3D.shadowOpacity : 0.85;
       linkedinShadowMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader(loadingManager).load('graphics/shadow.webp'),
+        map: loadSharedTexture('graphics/shadow.webp'),
         transparent: true,
         opacity: lOpacity,
         depthWrite: false,
@@ -3204,21 +3299,19 @@ function init() {
         bugCurrentAnimState = 'walk';
       }
 
+    }, undefined, (error) => {
+      console.error('[GLTFLoader] Failed to load bug_cube.glb', error);
     });
   }
-
-  // Load question_box.fbx
-  const fbxLoader = new FBXLoader(loadingManager);
-  fbxLoader.setResourcePath('graphics/');
   const textureLoader = new THREE.TextureLoader(loadingManager);
-  const dotsNormalMap = textureLoader.load('graphics/dots_normals.webp');
+  const dotsNormalMap = loadSharedTexture('graphics/dots_normals.webp');
 
   // Set texture wrap and filtering for normal map
   dotsNormalMap.wrapS = THREE.RepeatWrapping;
   dotsNormalMap.wrapT = THREE.RepeatWrapping;
 
   // Load and construct contact shadow plane below the question box
-  const shadowTexture = textureLoader.load('graphics/shadow.webp');
+  const shadowTexture = loadSharedTexture('graphics/shadow.webp');
   const qOpacity = SCENE_CONFIG.questionBox.shadowOpacity !== undefined ? SCENE_CONFIG.questionBox.shadowOpacity : 0.85;
   shadowMaterial = new THREE.MeshBasicMaterial({
     map: shadowTexture,
@@ -3274,52 +3367,63 @@ function init() {
     });
     fbxPlaneMaterial.map = loadColorMap(textureLoader, 'graphics/question.webp', fbxPlaneMaterial, SCENE_CONFIG.questionBox.unloadedColor);
 
-    fbxLoader.load('geometry/question_box.fbx', (fbx) => {
-      fbx.traverse((child) => {
+    gltfLoader.load('geometry/question_box.glb', (gltf) => {
+      const model = gltf.scene;
+
+      // Ensure children order has Exterior last, matching FBX rendering sequence
+      model.children.sort((a, b) => {
+        const aExt = (a.name || '').toLowerCase().includes('exterior') ? 1 : 0;
+        const bExt = (b.name || '').toLowerCase().includes('exterior') ? 1 : 0;
+        return aExt - bExt;
+      });
+
+      model.traverse((child) => {
         if (child.isMesh) {
-          child.renderOrder = 10;
-          // Robust check of child name and parent name for flat/hierarchical FBX imports (case-insensitive)
+          // Robust check of child name and parent name for flat/hierarchical GLTF imports (case-insensitive)
           const fullName = (child.name + " " + (child.parent ? child.parent.name : "")).toLowerCase();
-          if (fullName.includes('exterior')) {
-            child.material = fbxExteriorMaterial;
-            child.userData.isQuestionBoxExterior = true;
-          } else if (fullName.includes('interior')) {
+          if (fullName.includes('interior')) {
             child.material = fbxInteriorMaterial;
+            child.renderOrder = 10;
           } else if (fullName.includes('plane')) {
             child.material = fbxPlaneMaterial;
+            child.renderOrder = 11;
             fbxPlane = child; // Reference for camera billboarding
+          } else if (fullName.includes('exterior')) {
+            child.material = fbxExteriorMaterial;
+            child.userData.isQuestionBoxExterior = true;
+            child.renderOrder = 12;
           } else {
             // Safeguard fallback: assign glass material to prevent null material crashes in Three.js renderer
             child.material = fbxExteriorMaterial;
             child.userData.isQuestionBoxExterior = true;
+            child.renderOrder = 12;
           }
         }
       });
 
-      questionBoxGroup = fbx;
+      questionBoxGroup = model;
       questionBoxGroup.renderOrder = 10;
 
       // Position and scale based on SCENE_CONFIG — pick mobile or desktop position
       if (SCENE_CONFIG.questionBox) {
         const qbCfg = SCENE_CONFIG.questionBox;
         const qbPosCfg = isMobileInitial && qbCfg.mobile ? qbCfg.mobile.position : (qbCfg.desktop ? qbCfg.desktop.position : qbCfg.position);
-        fbx.position.set(qbPosCfg.x, qbPosCfg.y, qbPosCfg.z);
-        fbx.userData.baseX = qbPosCfg.x;
-        fbx.userData.baseY = qbPosCfg.y;
-        fbx.userData.baseZ = qbPosCfg.z;
+        model.position.set(qbPosCfg.x, qbPosCfg.y, qbPosCfg.z);
+        model.userData.baseX = qbPosCfg.x;
+        model.userData.baseY = qbPosCfg.y;
+        model.userData.baseZ = qbPosCfg.z;
         const s = qbCfg.scale;
-        fbx.scale.set(s, s, s);
+        model.scale.set(s, s, s);
       }
 
-
-      sceneGroup.add(fbx);
+      sceneGroup.add(model);
     }, undefined, (error) => {
     });
   }
 
   // Load rubbertoy textures and FBX
   if (SCENE_CONFIG.houdini3D && SCENE_CONFIG.houdini3D.enabled !== false) {
-    const toySpecularMap = textureLoader.load('graphics/toyspeclowres.webp');
+    const toySpecularMap = loadSharedTexture('graphics/toyspeclowres.webp');
 
     const matCfg = SCENE_CONFIG.houdini3D.material || {};
     toyMaterial = new THREE.MeshPhongMaterial({
@@ -3335,7 +3439,7 @@ function init() {
     toyMaterial.map = toyBaseColorMap;
 
     // Create shadow plane for the rubber toy
-    const shadowTexture = textureLoader.load('graphics/shadow.webp');
+    const shadowTexture = loadSharedTexture('graphics/shadow.webp');
     const hOpacity = SCENE_CONFIG.houdini3D.shadowOpacity !== undefined ? SCENE_CONFIG.houdini3D.shadowOpacity : 0.85;
     houdiniShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3355,44 +3459,57 @@ function init() {
     houdiniShadowMesh.renderOrder = 3;
     sceneGroup.add(houdiniShadowMesh);
 
-    fbxLoader.load('geometry/rubbertoy.fbx', (fbx) => {
+    gltfLoader.load('geometry/rubbertoy.glb', (gltf) => {
+      const model = gltf.scene;
       rubberToyMeshes = [];
-      fbx.traverse((child) => {
+      model.traverse((child) => {
         if (child.isMesh) {
           child.renderOrder = 10;
           const mat = toyMaterial.clone();
           mat.morphTargets = true;
           mat.skinning = child.isSkinnedMesh === true;
           child.material = mat;
+          if (child.geometry && child.geometry.attributes && child.geometry.attributes.uv) {
+            const uv = child.geometry.attributes.uv;
+            for (let i = 0; i < uv.count; i++) {
+              uv.setY(i, 1.0 - uv.getY(i));
+            }
+            uv.needsUpdate = true;
+          }
           if (typeof child.updateMorphTargets === 'function') {
             child.updateMorphTargets();
+          }
+          if (child.morphTargetInfluences) {
+            for (let i = 0; i < child.morphTargetInfluences.length; i++) {
+              child.morphTargetInfluences[i] = 0;
+            }
           }
           rubberToyMeshes.push(child);
         }
       });
 
-      houdiniToyGroup = fbx;
+      houdiniToyGroup = model;
       houdiniToyGroup.renderOrder = 10;
 
       // Position, scale, and rotate based on initial screen context
       const pos = hCfg.position;
-      fbx.position.set(pos.x, pos.y, pos.z);
-      fbx.userData.baseX = pos.x;
-      fbx.userData.baseY = pos.y;
-      fbx.userData.baseZ = pos.z;
+      model.position.set(pos.x, pos.y, pos.z);
+      model.userData.baseX = pos.x;
+      model.userData.baseY = pos.y;
+      model.userData.baseZ = pos.z;
       const s = SCENE_CONFIG.houdini3D.scale;
-      fbx.scale.set(s, s, s);
+      model.scale.set(s, s, s);
 
       if (SCENE_CONFIG.houdini3D.rotation) {
         const rot = SCENE_CONFIG.houdini3D.rotation;
-        fbx.rotation.set(
+        model.rotation.set(
           (rot.x || 0) * Math.PI / 180,
           (rot.y || 0) * Math.PI / 180,
           (rot.z || 0) * Math.PI / 180
         );
       }
 
-      sceneGroup.add(fbx);
+      sceneGroup.add(model);
     }, undefined, (error) => {
     });
   }
@@ -3435,11 +3552,12 @@ function init() {
       emissive: new THREE.Color(sMatCfg.emissive !== undefined ? sMatCfg.emissive : 0x2267ff),
       emissiveIntensity: sMatCfg.emissiveIntensity !== undefined ? sMatCfg.emissiveIntensity : 1.2,
       roughness: sMatCfg.roughness !== undefined ? sMatCfg.roughness : 0.3,
-      metalness: sMatCfg.metalness !== undefined ? sMatCfg.metalness : 0.1
+      metalness: sMatCfg.metalness !== undefined ? sMatCfg.metalness : 0.1,
+      side: THREE.DoubleSide
     });
 
     // Contact shadow plane for the Web Globe
-    const shadowTexture = textureLoader.load('graphics/shadow.webp');
+    const shadowTexture = loadSharedTexture('graphics/shadow.webp');
     const wOpacity = wCfg.shadowOpacity !== undefined ? wCfg.shadowOpacity : 0.85;
     webShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3463,8 +3581,9 @@ function init() {
     webSignalMiddleMesh = null;
     webSignalOuterMesh = null;
 
-    fbxLoader.load('geometry/globe.fbx', (fbx) => {
-      fbx.traverse((child) => {
+    gltfLoader.load('geometry/globe.glb', (gltf) => {
+      const model = gltf.scene;
+      model.traverse((child) => {
         if (child.isMesh) {
           const cName = (child.name || "").toLowerCase();
           if (cName.includes('moon')) {
@@ -3490,26 +3609,25 @@ function init() {
         }
       });
 
-      webGlobeGroup = fbx;
+      webGlobeGroup = model;
       webGlobeGroup.renderOrder = 10;
-      fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
-      fbx.userData.baseX = initialPos.x;
-      fbx.userData.baseY = initialPos.y;
-      fbx.userData.baseZ = initialPos.z;
+      model.position.set(initialPos.x, initialPos.y, initialPos.z);
+      model.userData.baseX = initialPos.x;
+      model.userData.baseY = initialPos.y;
+      model.userData.baseZ = initialPos.z;
 
-      const s = wCfg.scale || 1.0;
-      fbx.scale.set(s, s, s);
+      const s = wCfg.scale || 0.62;
+      model.scale.set(s, s, s);
 
       if (wCfg.rotation) {
-        fbx.rotation.set(
+        model.rotation.set(
           (wCfg.rotation.x || 0) * Math.PI / 180,
           (wCfg.rotation.y || 0) * Math.PI / 180,
           (wCfg.rotation.z || 0) * Math.PI / 180
         );
       }
 
-
-      sceneGroup.add(fbx);
+      sceneGroup.add(model);
     }, undefined, (error) => {
     });
   }
@@ -3533,7 +3651,7 @@ function init() {
     });
 
     // Contact shadow plane for the Games Alien
-    const shadowTexture = textureLoader.load('graphics/shadow.webp');
+    const shadowTexture = loadSharedTexture('graphics/shadow.webp');
     const gOpacity = gCfg.shadowOpacity !== undefined ? gCfg.shadowOpacity : 0.66;
     gamesShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3553,13 +3671,14 @@ function init() {
     gamesShadowMesh.renderOrder = 3;
     sceneGroup.add(gamesShadowMesh);
 
-    fbxLoader.load('geometry/alien.fbx', (fbx) => {
+    gltfLoader.load('geometry/alien.glb', (gltf) => {
+      const model = gltf.scene;
       gamesAlienPose0Mesh = null;
       gamesAlienPose1Mesh = null;
       gamesAlienPop0Mesh = null;
       gamesAlienPop1Mesh = null;
 
-      fbx.traverse((child) => {
+      model.traverse((child) => {
         if (child.isMesh) {
           child.renderOrder = 10;
           const nameLower = (child.name || '').toLowerCase();
@@ -3585,27 +3704,27 @@ function init() {
         }
       });
 
-      gamesAlienGroup = fbx;
+      gamesAlienGroup = model;
       gamesAlienGroup.renderOrder = 10;
 
-      fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
-      fbx.userData.baseX = initialPos.x;
-      fbx.userData.baseY = initialPos.y;
-      fbx.userData.baseZ = initialPos.z;
-      fbx.userData.currentHoverY = 0;
+      model.position.set(initialPos.x, initialPos.y, initialPos.z);
+      model.userData.baseX = initialPos.x;
+      model.userData.baseY = initialPos.y;
+      model.userData.baseZ = initialPos.z;
+      model.userData.currentHoverY = 0;
 
-      const s = gCfg.scale !== undefined ? gCfg.scale : 0.005;
-      fbx.scale.set(s, s, s);
+      const s = gCfg.scale !== undefined ? gCfg.scale : 0.086;
+      model.scale.set(s, s, s);
 
       if (gCfg.rotation) {
-        fbx.rotation.set(
+        model.rotation.set(
           (gCfg.rotation.x || 0) * Math.PI / 180,
           (gCfg.rotation.y || 0) * Math.PI / 180,
           (gCfg.rotation.z || 0) * Math.PI / 180
         );
       }
 
-      sceneGroup.add(fbx);
+      sceneGroup.add(model);
     }, undefined, (error) => {
     });
   }
@@ -3644,7 +3763,7 @@ function init() {
     screenHoverEmissiveTexture = loadColorMap(
       textureLoader,
       (sMatCfg && sMatCfg.hoverEmissiveMap) || 'graphics/emojieyes.webp',
-      arScreenMaterial,
+      null,
       SCENE_CONFIG.ar3D.unloadedColor,
       'emissive'
     );
@@ -3654,7 +3773,7 @@ function init() {
     screenClickEmissiveTexture = loadColorMap(
       textureLoader,
       (sMatCfg && sMatCfg.clickEmissiveMap) || 'graphics/emojihuh.webp',
-      arScreenMaterial,
+      null,
       SCENE_CONFIG.ar3D.unloadedColor,
       'emissive'
     );
@@ -3692,7 +3811,7 @@ function init() {
     });
 
     // Contact shadow plane for the 3D AR Phone
-    const shadowTexture = textureLoader.load('graphics/shadow.webp');
+    const shadowTexture = loadSharedTexture('graphics/shadow.webp');
     const aOpacity = aCfg.shadowOpacity !== undefined ? aCfg.shadowOpacity : 0.66;
     arShadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTexture,
@@ -3725,8 +3844,9 @@ function init() {
     arBoundaryMesh.visible = (aCfg.showDebug === true);
     sceneGroup.add(arBoundaryMesh);
 
-    fbxLoader.load('geometry/phone.fbx', (fbx) => {
-      fbx.traverse((child) => {
+    gltfLoader.load('geometry/phone.glb', (gltf) => {
+      const model = gltf.scene;
+      model.traverse((child) => {
         if (child.isMesh) {
           child.renderOrder = 10;
           const matNames = Array.isArray(child.material)
@@ -3739,15 +3859,15 @@ function init() {
           ).toLowerCase();
 
           if (Array.isArray(child.material)) {
-            // Multi-material mesh (e.g. Phone mesh with Phone body and Screen materials)
+            // Multi-material mesh fallback
             child.material = child.material.map(m => {
               const mName = (m && m.name || "").toLowerCase();
               let mat = arPhoneMaterial;
               if (mName.includes('screen')) mat = arScreenMaterial;
               else if (mName.includes('camera') && !mName.includes('house')) mat = arCameraMaterial;
               else if (mName.includes('camerahouse') || mName.includes('house')) mat = arCameraHouseMaterial;
-              else if (mName.includes('shoe')) mat = arShoesMaterial;
               else if (mName.includes('sock')) mat = arSocksMaterial;
+              else if (mName.includes('shoe')) mat = arShoesMaterial;
               if (child.isSkinnedMesh && mat !== arScreenMaterial) {
                 mat = mat.clone();
                 mat.skinning = true;
@@ -3755,14 +3875,14 @@ function init() {
               return mat;
             });
             arPhoneBodyTargets.push({ mesh: child, isMulti: true, originalMaterials: [...child.material] });
-          } else if (fullName.includes('shoe')) {
-            child.material = child.isSkinnedMesh ? arShoesMaterial.clone() : arShoesMaterial;
-            if (child.isSkinnedMesh) child.material.skinning = true;
-            if (!arShoesMesh) arShoesMesh = child;
           } else if (fullName.includes('sock')) {
             child.material = child.isSkinnedMesh ? arSocksMaterial.clone() : arSocksMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
             if (!arSocksMesh) arSocksMesh = child;
+          } else if (fullName.includes('shoe')) {
+            child.material = child.isSkinnedMesh ? arShoesMaterial.clone() : arShoesMaterial;
+            if (child.isSkinnedMesh) child.material.skinning = true;
+            if (!arShoesMesh) arShoesMesh = child;
           } else if (fullName.includes('camera') && !fullName.includes('house')) {
             child.material = child.isSkinnedMesh ? arCameraMaterial.clone() : arCameraMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
@@ -3776,6 +3896,14 @@ function init() {
             child.material = arScreenMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
             arScreenMesh = child;
+            // Invert V UV coordinate so screen textures match Three.js texture loading orientation
+            if (child.geometry && child.geometry.attributes && child.geometry.attributes.uv) {
+              const uv = child.geometry.attributes.uv;
+              for (let i = 0; i < uv.count; i++) {
+                uv.setY(i, 1.0 - uv.getY(i));
+              }
+              uv.needsUpdate = true;
+            }
           } else if (fullName.includes('leg')) {
             child.material = child.isSkinnedMesh ? arPhoneMaterial.clone() : arPhoneMaterial;
             if (child.isSkinnedMesh) child.material.skinning = true;
@@ -3790,23 +3918,23 @@ function init() {
         }
       });
 
-      arPhoneGroup = fbx;
+      arPhoneGroup = model;
       arPhoneGroup.renderOrder = 10;
 
       const walkCenter = getArPhoneWalkCenter();
-      fbx.position.set(initialPos.x, initialPos.y, initialPos.z);
-      fbx.userData.baseX = walkCenter.x;
-      fbx.userData.baseY = initialPos.y;
-      fbx.userData.baseZ = walkCenter.z;
-      fbx.userData.currentHoverY = 0;
+      model.position.set(initialPos.x, initialPos.y, initialPos.z);
+      model.userData.baseX = walkCenter.x;
+      model.userData.baseY = initialPos.y;
+      model.userData.baseZ = walkCenter.z;
+      model.userData.currentHoverY = 0;
 
-      const s = aCfg.scale !== undefined ? aCfg.scale : 0.005;
-      fbx.scale.set(s, s, s);
+      const s = aCfg.scale !== undefined ? aCfg.scale : 0.44;
+      model.scale.set(s, s, s);
 
       if (aCfg.rotation) {
         const baseRadY = ((aCfg.rotation.y !== undefined) ? aCfg.rotation.y : 90) * Math.PI / 180;
         const initialFacingRotY = baseRadY + Math.PI;
-        fbx.rotation.set(
+        model.rotation.set(
           (aCfg.rotation.x || 0) * Math.PI / 180,
           initialFacingRotY,
           (aCfg.rotation.z || 0) * Math.PI / 180
@@ -3815,16 +3943,17 @@ function init() {
 
       // Collect skinned meshes for OutlinePass deformer
       arSkinnedMeshes = [];
-      fbx.traverse((child) => {
+      model.traverse((child) => {
         if (child.isSkinnedMesh) {
           arSkinnedMeshes.push(child);
         }
       });
 
       // Setup animation mixer for Walk & Neutral animations
-      if (fbx.animations && fbx.animations.length > 0) {
-        arMixer = new THREE.AnimationMixer(fbx);
-        const walkClip = fbx.animations.find(clip => clip.name.toLowerCase().includes('walk')) || fbx.animations[0];
+      const animations = gltf.animations || [];
+      if (animations && animations.length > 0) {
+        arMixer = new THREE.AnimationMixer(model);
+        const walkClip = animations.find(clip => clip.name.toLowerCase().includes('walk')) || animations[0];
         if (walkClip) {
           arWalkAction = arMixer.clipAction(walkClip);
           arWalkAction.setLoop(THREE.LoopRepeat, Infinity);
@@ -3833,7 +3962,7 @@ function init() {
           arWalkAction.play();
         }
 
-        const neutralClip = fbx.animations.find(clip => {
+        const neutralClip = animations.find(clip => {
           const name = clip.name.toLowerCase();
           return name.includes('stand') || name.includes('neutral') || name.includes('idle') || name.includes('pose') || name.includes('stance');
         });
@@ -3845,7 +3974,7 @@ function init() {
           arNeutralAction.play();
         }
 
-        const shakeClip = fbx.animations.find(clip => clip.name.toLowerCase().includes('shake'));
+        const shakeClip = animations.find(clip => clip.name.toLowerCase().includes('shake'));
         if (shakeClip) {
           arShakeAction = arMixer.clipAction(shakeClip);
           arShakeAction.setLoop(THREE.LoopRepeat, Infinity);
@@ -3855,8 +3984,9 @@ function init() {
         }
       }
 
-      sceneGroup.add(fbx);
+      sceneGroup.add(model);
     }, undefined, (error) => {
+      console.error('[GLTFLoader] Failed to load phone.glb', error);
     });
   }
 
@@ -4263,6 +4393,7 @@ function init() {
     canInteract = false;
     linkHoveredAR = false;
     lastArPhoneHoveredState = false;
+    if (playArHeaderVideo) playArHeaderVideo();
     [arLink, arLinkMobile].forEach(el => {
       if (el) {
         el._hoverActive = false;
@@ -4300,6 +4431,7 @@ function init() {
     arOverlayAnimating = true;
     arOverlayVisible = false;
     body.style.setProperty('cursor', 'default');
+    if (pauseArHeaderVideo) pauseArHeaderVideo();
 
     setPanelTransitionDirection(arPanel, false);
     setPanelDrawnState(arPanel, false);
@@ -4344,6 +4476,7 @@ function init() {
     gamesOverlayAnimating = true;
     canInteract = false;
     linkHoveredGames = false;
+    if (gamesOverlayData.playHeaderVideo) gamesOverlayData.playHeaderVideo();
     [gamesLink, gamesLinkMobile].forEach(el => {
       if (el) {
         el._hoverActive = false;
@@ -4381,6 +4514,7 @@ function init() {
     gamesOverlayAnimating = true;
     gamesOverlayVisible = false;
     body.style.setProperty('cursor', 'default');
+    if (gamesOverlayData.pauseHeaderVideo) gamesOverlayData.pauseHeaderVideo();
 
     setPanelTransitionDirection(gamesOverlayData.panel, false);
     setPanelDrawnState(gamesOverlayData.panel, false);
@@ -4418,6 +4552,7 @@ function init() {
     webOverlayAnimating = true;
     canInteract = false;
     linkHoveredWeb = false;
+    if (webOverlayData.playHeaderVideo) webOverlayData.playHeaderVideo();
     [webLink, webLinkMobile].forEach(el => {
       if (el) {
         el._hoverActive = false;
@@ -4455,6 +4590,7 @@ function init() {
     webOverlayAnimating = true;
     webOverlayVisible = false;
     body.style.setProperty('cursor', 'default');
+    if (webOverlayData.pauseHeaderVideo) webOverlayData.pauseHeaderVideo();
 
     setPanelTransitionDirection(webOverlayData.panel, false);
     setPanelDrawnState(webOverlayData.panel, false);
@@ -4492,6 +4628,7 @@ function init() {
     houdiniOverlayAnimating = true;
     canInteract = false;
     linkHoveredHoudini = false;
+    if (houdiniOverlayData.playHeaderVideo) houdiniOverlayData.playHeaderVideo();
     [houdiniLink, houdiniLinkMobile].forEach(el => {
       if (el) {
         el._hoverActive = false;
@@ -4529,6 +4666,7 @@ function init() {
     houdiniOverlayAnimating = true;
     houdiniOverlayVisible = false;
     body.style.setProperty('cursor', 'default');
+    if (houdiniOverlayData.pauseHeaderVideo) houdiniOverlayData.pauseHeaderVideo();
 
     setPanelTransitionDirection(houdiniOverlayData.panel, false);
     setPanelDrawnState(houdiniOverlayData.panel, false);
@@ -4845,14 +4983,29 @@ function init() {
 
   // Trigger loading screen fade out only when all 3D assets, textures, and fonts finish loading
   loadingManager.onLoad = () => {
+    const total3DTimeMs = Math.round(performance.now() - loadStartTime);
+    try {
+      console.group(`%c[Asset Loader] All 3D Assets Loaded in ${total3DTimeMs}ms`, 'color: #55ff55; font-weight: bold; font-size: 13px;');
+      const sortedReport = [...loadedAssetsReport].sort((a, b) => b.DurationMs - a.DurationMs);
+      console.table(sortedReport.map(({ Asset, Duration, Progress }) => ({ Asset, Duration, Progress })));
+      console.groupEnd();
+    } catch (e) {}
+
+    const fontStartTime = performance.now();
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(dismissLoadingScreen).catch(dismissLoadingScreen);
+      document.fonts.ready.then(() => {
+        const fontTimeMs = Math.round(performance.now() - fontStartTime);
+        const totalLoadMs = Math.round(performance.now() - loadStartTime);
+        console.log(`%c[Asset Loader] Fonts ready in ${fontTimeMs}ms. Total startup time: ${totalLoadMs}ms.`, 'color: #91bfff; font-weight: bold;');
+        dismissLoadingScreen();
+      }).catch(dismissLoadingScreen);
     } else {
       dismissLoadingScreen();
     }
   };
 
   loadingManager.onError = (url) => {
+    console.error(`%c[Asset Loader] Failed to load asset: ${url}`, 'color: #ff5555; font-weight: bold;');
   };
 
   // Safety fallback timeout (10 seconds) in case of network drops
@@ -5053,6 +5206,17 @@ function init() {
         plainTextLink.style.setProperty('animation', 'plaintextShrink 0.25s forwards');
         body.style.setProperty('cursor', 'default');
       }
+    };
+    plainTextLink.onclick = (e) => {
+      if (e) e.stopPropagation();
+      let target = 'about';
+      if (typeof webOverlayVisible !== 'undefined' && webOverlayVisible) target = 'web';
+      else if (typeof arOverlayVisible !== 'undefined' && arOverlayVisible) target = 'ar';
+      else if (typeof gamesOverlayVisible !== 'undefined' && gamesOverlayVisible) target = 'games';
+      else if (typeof houdiniOverlayVisible !== 'undefined' && houdiniOverlayVisible) target = 'houdini';
+      else if (typeof aboutOverlayVisible !== 'undefined' && aboutOverlayVisible) target = 'about';
+
+      window.location.href = `./${target}/index.html`;
     };
   }
 
@@ -5730,7 +5894,7 @@ function init() {
     const shadowGeo = new THREE.PlaneGeometry(size * 2.2 * shadowScale, length * 1.5 * shadowScale);
     shadowGeo.rotateX(-Math.PI / 2); // lie flat on XZ plane
 
-    const shadowMap = new THREE.TextureLoader(loadingManager).load('graphics/shadow.webp');
+    const shadowMap = loadSharedTexture('graphics/shadow.webp');
     const shadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowMap,
       transparent: true,
@@ -6743,19 +6907,24 @@ function init() {
     // Apply per-style material overrides for dish & gel
     updateDishAndGelMaterialOverrides(curModeName);
 
-    // Smoothly lerp plate position, rotation, scale, and visibility
-    if (plate) {
-      plate.visible = (SCENE_CONFIG.plate.enabled !== false) && !shouldHideDish;
-      if (plate.visible) {
+    // Smoothly lerp dishGroup (dish + gel) position, rotation, scale, and visibility
+    if (dishGroup) {
+      const isPlateVisible = (SCENE_CONFIG.plate.enabled !== false) && !shouldHideDish;
+      const isGelVisible = (SCENE_CONFIG.gel.enabled !== false) && !shouldHideGel;
+      dishGroup.visible = isPlateVisible || isGelVisible;
+
+      if (plate) plate.visible = isPlateVisible;
+      if (gel) gel.visible = isGelVisible;
+
+      if (dishGroup.visible) {
         const sVal = SCENE_CONFIG.plate.scale * targetScale;
         tmpObjectScale.set(sVal, sVal, sVal);
-        plate.scale.lerp(tmpObjectScale, 0.08);
-        plate.position.lerp(plateTargetPos, 0.08);
+        dishGroup.scale.lerp(tmpObjectScale, 0.08);
+        dishGroup.position.lerp(plateTargetPos, 0.08);
 
-        // Smoothly lerp rotation
-        plate.rotation.x += (plateTargetRot.x - plate.rotation.x) * 0.08;
-        plate.rotation.y += (plateTargetRot.y - plate.rotation.y) * 0.08;
-        plate.rotation.z += (plateTargetRot.z - plate.rotation.z) * 0.08;
+        dishGroup.rotation.x += (plateTargetRot.x - dishGroup.rotation.x) * 0.08;
+        dishGroup.rotation.y += (plateTargetRot.y - dishGroup.rotation.y) * 0.08;
+        dishGroup.rotation.z += (plateTargetRot.z - dishGroup.rotation.z) * 0.08;
       }
     }
 
@@ -6830,7 +6999,7 @@ function init() {
         fbxPlane.rotateZ(rz);
 
         // Dynamically scale the billboarded plane
-        const ps = SCENE_CONFIG.questionBox.planeScale !== undefined ? SCENE_CONFIG.questionBox.planeScale : 1.0;
+        const ps = SCENE_CONFIG.questionBox.planeScale !== undefined ? SCENE_CONFIG.questionBox.planeScale : 0.82;
         fbxPlane.scale.set(ps, ps, ps);
       }
     }
@@ -7481,7 +7650,7 @@ function init() {
 
       // Expand pop mesh scale during burst
       const popScaleFactor = 1.0 + linearProgress * 0.4;
-      const gamesBaseScale = gCfg.scale || 0.0009;
+      const gamesBaseScale = gCfg.scale || 0.086;
       const curPopScale = gamesBaseScale * popScaleFactor * targetScale;
       gamesAlienGroup.scale.set(curPopScale, curPopScale, curPopScale);
 
@@ -7551,7 +7720,7 @@ function init() {
           gamesShadowMaterial.opacity = idleShadowOpacity * easeOutCubic;
         }
 
-        const gamesBaseScale = SCENE_CONFIG.games3D.scale || 0.0009;
+        const gamesBaseScale = SCENE_CONFIG.games3D.scale || 0.086;
         const gamesTargetScale = gamesBaseScale * targetScale;
         const curScale = gamesTargetScale * easeOutCubic;
         gamesAlienGroup.scale.set(curScale, curScale, curScale);
@@ -7903,7 +8072,7 @@ function init() {
         const elapsed = performance.now() - webRespawnStartTime;
 
         if (elapsed < delay) {
-          const webBaseScale = wCfg.scale || 0.0055;
+          const webBaseScale = wCfg.scale || 0.62;
           const hoverScaleMult = wCfg.hoverScale !== undefined ? wCfg.hoverScale : 1.15;
           const startScale = webBaseScale * hoverScaleMult * targetScale;
           webGlobeGroup.scale.set(startScale, startScale, startScale);
@@ -7917,7 +8086,7 @@ function init() {
           const pct = Math.min(1.0, (elapsed - delay) / Math.max(1, duration));
           const easeOutCubic = 1.0 - Math.pow(1.0 - pct, 3.0);
 
-          const webBaseScale = wCfg.scale || 0.0055;
+          const webBaseScale = wCfg.scale || 0.62;
           const hoverScaleMult = wCfg.hoverScale !== undefined ? wCfg.hoverScale : 1.15;
           const startScale = webBaseScale * hoverScaleMult * targetScale;
           const endScale = webBaseScale * 1.0 * targetScale;
@@ -7939,7 +8108,7 @@ function init() {
         }
       } else if (isWebGlobeClickAnimating || webOverlayVisible || webOverlayAnimating) {
         // Lock scale at full hover scale AND lock position Y at elevated hover height + floatOffset during click animation or while overlay panel is open
-        const webBaseScale = wCfg.scale || 0.0055;
+        const webBaseScale = wCfg.scale || 0.62;
         const hoverScaleMult = wCfg.hoverScale !== undefined ? wCfg.hoverScale : 1.15;
         const webClickScale = webBaseScale * hoverScaleMult * targetScale;
         webGlobeGroup.scale.set(webClickScale, webClickScale, webClickScale);
@@ -7954,7 +8123,7 @@ function init() {
 
         webGlobeGroup.position.y = baseY + (hoverOffsetVal * nextHoverInf) + floatOffset;
 
-        const webBaseScale = wCfg.scale || 1.0;
+        const webBaseScale = wCfg.scale || 0.62;
         const webActiveScale = isWebGlobeHovered ? (wCfg.hoverScale !== undefined ? wCfg.hoverScale : 1.15) : 1.0;
         const webTargetScale = webBaseScale * webActiveScale * targetScale;
 
@@ -8043,7 +8212,7 @@ function init() {
           gamesAlienGroup.rotation.y += diffY * lerpSpeed;
         }
 
-        const gamesBaseScale = gCfg.scale !== undefined ? gCfg.scale : 0.005;
+        const gamesBaseScale = gCfg.scale !== undefined ? gCfg.scale : 0.086;
         const hoverScaleMult = isHovered ? (gCfg.hoverScale || 1.15) : 1.0;
         const gamesTargetScale = gamesBaseScale * hoverScaleMult * targetScale;
 
@@ -8085,7 +8254,7 @@ function init() {
         arPhoneReachedFullHoverScale = false;
       }
 
-      const baseScale = aCfg.scale !== undefined ? aCfg.scale : 0.005;
+      const baseScale = aCfg.scale !== undefined ? aCfg.scale : 0.44;
       const hoverScaleMult = aCfg.hoverScale !== undefined ? aCfg.hoverScale : 1.18;
       const hoverYOffsetVal = aCfg.hoverYOffset !== undefined ? aCfg.hoverYOffset : 0.09;
       const freq = aCfg.floatFrequency !== undefined ? aCfg.floatFrequency : 0.002;
@@ -9000,11 +9169,11 @@ function init() {
         }
 
         // 1. Inflated shape key index (or fallback Cloth)
-        let inflIdx = dict['Inflated'];
+        let inflIdx = dict['Inflate'] !== undefined ? dict['Inflate'] : dict['Inflated'];
         if (inflIdx === undefined) {
           const key = keys.find(k => {
             const kl = k.toLowerCase();
-            return kl.includes('inflated') || kl.includes('cloth');
+            return kl.includes('inflate') || kl.includes('cloth');
           });
           if (key) inflIdx = dict[key];
         }
@@ -9938,5 +10107,29 @@ function init() {
     mainCanvas.addEventListener('pointerup', handle3DPointerTap, { passive: true });
     mainCanvas.addEventListener('click', handle3DPointerTap, { passive: true });
   }
+
+  // Auto-open panel specified in URL search params (e.g. ?panel=web)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const panelParam = urlParams.get('panel');
+    if (panelParam) {
+      const panelKey = panelParam.toLowerCase();
+      const tryOpen = (attempts = 0) => {
+        const linkEl = document.getElementById(panelKey) || document.getElementById(panelKey + 'mobile');
+        if (linkEl && canInteract) {
+          linkEl.click();
+          try {
+            const cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+          } catch (err) {}
+        } else if (attempts < 100) {
+          setTimeout(() => tryOpen(attempts + 1), 100);
+        }
+      };
+      setTimeout(() => tryOpen(0), 100);
+    }
+  } catch (e) {}
 }
+
+
 
