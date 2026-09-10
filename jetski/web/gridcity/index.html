@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid City Shader Breakdown | Noah Gunther</title>
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CKT3fBuR.css">
+</head>
+<body>
+  <div class="subpage-container">
+    <div class="subpage-header">
+      <h1 class="subpage-title">Grid City Shader</h1>
+      <p class="subpage-subtitle">Breakdown and Process | Feb. 11, 2024</p>
+    </div>
+
+    <div class="subpage-content">
+      <video controls muted playsinline preload="auto" autoplay loop style="width: 100%;">
+        <source src="../../assets/gridCity3D_cycle-DuahhGr0.mp4#t=0.01" type="video/mp4" />
+      </video>
+
+      <p><a href="https://www.shadertoy.com/view/lXcyDl" target="_blank" rel="noopener noreferrer">Grid City</a>, a math and code based infinite 3D city, is an attempt at creating a fragment shader (graphics code informing the color of each pixel) that renders a cityscape in real time using a 3D rendering technique known as raymarching. I wrote this shader on <a href="https://shadertoy.com" target="_blank" rel="noopener noreferrer">Shadertoy.com</a>, a site for creating and sharing this kind of code.</p>
+      
+      <p>Creating a world like this using only a fragment shader often involves using signed distance functions, or SDFs, to define geometry, as opposed to the traditional polygonal meshes used in 3D graphics. In this shader, everything you see is defined by an SDF — 3D SDFs define the buildings, cars, trees, while 2D SDFs are used for the windows, street markings, and car lights, to name a few examples.</p>
+
+      <hr />
+
+      <h1>Grid City 2D</h1>
+      <p>When I started this project, I knew I wanted to create a 3D city inspired by New York, but as is often the case with building in 3D, it was easier to start with two dimensions. The below video is from <a href="https://www.shadertoy.com/view/43ccW2" target="_blank" rel="noopener noreferrer">Grid City 2D</a>, the shader I wrote as a preliminary sketch for the 3D version.</p>
+      
+      <video controls muted playsinline preload="auto" loop style="width: 100%;">
+        <source src="../../assets/gridCity2D-BUyw7Evq.mp4#t=0.01" type="video/mp4" />
+      </video>
+
+      <h2>Domain Repetition</h2>
+      <p>One amazing aspect of art created with graphics code is the infinite repeatability of space. If you play video games, you've probably noticed repeated textures tiled across surfaces. This is achieved by sampling the texture repeatedly, starting over each time we reach the end. We can use the same logic to repeat space in a shader like this, creating an infinite grid of 'cells' or 'tiles.' This technique is known as <a href="https://iquilezles.org/articles/sdfrepetition/" target="_blank" rel="noopener noreferrer">Domain Repetition</a>, and can be applied to any number of dimensions.</p>
+      
+      <p>In the linked article, Inigo Quilez says it best: it's a "mind blowing moment ... when one learns that with Domain Repetition a simple line of code can replicate an object infinite many times without requiring writing hundreds of lines of instancing infrastructure." What's particularly fascinating about Domain Repetition is not only that we can infinitely repeat a tile, we can also use the unique coordinates of each tile to change what appears in that tile.</p>
+      
+      <img src="../../assets/2D_02-BsTLvxMD.png" alt="2D Domain Repetition grid layout" />
+      
+      <p>Using 2D domain repetition to divide up the space and 2D SDFs (catalogued by Inigo Quilez) to draw shapes, Grid City 2D started to take shape. Each tile represents a block, with a variety of configurations of buildings, vehicles, and trees. Parks and lakes, which need to span multiple tiles, are shaped according to a function that checks the eight neighbors in a square around each tile, and creates geometry accordingly.</p>
+      
+      <img src="../../assets/2D_01-BGELpjj2.png" alt="2D Grid City blocks and parks" />
+      
+      <p>I also added elevated trains, which use domain repetition in only one dimension, and a helicopter (or UFO) that flies above the city once in a while. Everything else exists within the bounds of the 2D city grid.</p>
+      
+      <img src="../../assets/2D_03-BTKjnHFc.png" alt="Zoomed out view of 2D Grid City clusters" />
+
+      <hr />
+
+      <img src="../../assets/2D-B1H1MwVt.gif" alt="Wave animation in 2D Grid City" />
+      <h2>Wave Animation</h2>
+      <p>A particularly challenging feature was the above wave animation — fading in and moving toward shore, while the tide rolls in and out. Because the lake tiles are formed by combining multiple sphere and rounded box SDF shapes, the waves had to be carefully programmed to follow the shape of the shoreline and line up perfectly where the shapes are combined.</p>
+
+      <hr />
+
+      <img src="../../assets/aa-BN0BzE4t.png" alt="Anti-aliasing comparison in 2D Grid City" />
+      <h2>Anti-Aliasing</h2>
+      <p>Before moving on to the 3D Grid City shader, I want to touch on AA — anti-aliasing — in the 2D version. When I first published this shader, it was heavily aliased, because I was stepping from SDF to SDF without any smoothness, creating hard lines and jagged pixel edges. Based on advice in the comments of the shader, I updated all the SDFs to use the smoothstep function to transition gradually between definitions — in the above image, the original aliased version is represented on the left, and the updated anti-aliased version is on the right.</p>
+
+      <hr />
+
+      <h1>Grid City 3D</h1>
+      
+      <video controls muted playsinline preload="auto" loop style="width: 100%;">
+        <source src="../../assets/gridCity3D_cycle_topdown-DzrIIrMA.mp4#t=0.01" type="video/mp4" />
+      </video>
+      
+      <video controls muted playsinline preload="auto" loop style="width: 100%;">
+        <source src="../../assets/gridCity3D_sphere-B9dKePWK.mp4#t=0.01" type="video/mp4" />
+      </video>
+
+      <h2>3D SDFs</h2>
+      <p>Like the 2D version of Grid City, the 3D version uses SDFs to define geometry; this time, 3D signed distance functions. I used a plane for the ground, rounded boxes for the buildings and cars, round cones for the trees, and extruded 2D SDFs for sidewalks and parks.</p>
+      <p>2D SDFs play a big role here, too. In addition to being extruded for some 3D geometry, they also define the road markings, car lights and windows — the sides of the buildings are actually divided up using the same 2D domain repetition technique described above, to infinitely repeat the window rectangle on the building surfaces.</p>
+
+      <hr />
+
+      <img src="../../assets/3D_00-BcelAicZ.png" alt="First pass at 3D raymarched building height logic" />
+      <h2>3D Domain Repetition and Raymarching</h2>
+      <p>Domain repetition works in 3D largely the same way it works in 2D, just with a third dimension. In this case, we don't actually need that third dimension, since we're only repeating across a plane, and can clamp the Y axis to a single iteration.</p>
+      <p>Above is my first pass at bringing the logic that determines building height with a noise function into a 3D raymarched space. Inigo Quilez has a great page on raymarching — essentially, each pixel 'marches' a ray through space away from the camera until it gets close enough to call something a surface, or it reaches a maximum distance.</p>
+
+      <hr />
+
+      <img src="../../assets/3D_01-DO0KMzDH.png" alt="3D Grid City process pass" />
+      <h2>Optimizing Tile Logic</h2>
+      <p>The solution I found was to use a data buffer — on Shadertoy, this exists as a secondary pixel shader that can be accessed from the main image. Because Grid City is all based on a 2D grid, each block being one tile, we can write the data for each tile to one individual pixel of this data buffer. The result is this bitmap, accessed each time the main shader would previously calculate these values at a significantly reduced computational cost.</p>
+      
+      <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin: 20px 0;">
+        <img src="../../assets/3D_data_buffer-Brj8dgMk.gif" alt="3D Data buffer visualization" style="width: 200px; outline: 3px solid #000;" />
+        <p style="flex: 1; min-width: 240px; margin: 0;">The lower square contains the data for building height (in the red channel) as well as park locations (green) and park tile configuration (blue). The buffer moves at the same rate as the camera moves over the city.</p>
+      </div>
+
+      <hr />
+
+      <img src="../../assets/3D_03-DSxLVs4g.png" alt="Curved horizon warping" />
+      <h2>Warping Space</h2>
+      <p>On a walk one day, I noticed how buildings far away tend to appear lower down on the horizon and I wanted to replicate this effect in the shader. I warped the space down as the distance from the camera increases, creating the effect of a curved horizon seen above; in motion, the planet slowly rolls by under the camera.</p>
+      
+      <img src="../../assets/3D_04-Cqc89oAQ.png" alt="Spherical planet space warping" />
+
+      <hr />
+
+      <img src="../../assets/3D_05-BPU0v_zo.png" alt="Material assignment pass" />
+      <h2>Material Assignment</h2>
+      <p>Instead of calculating expensive material properties inside the raymarching loop, the geometry function assigns integer material IDs (for example, sidewalks have ID 1, trees have ID 2). Material properties are then assigned just once per pixel after surface distance is resolved.</p>
+      
+      <img src="../../assets/3D_09-B5ESMm86.png" alt="Material ID assignment visualization" />
+
+      <hr />
+
+      <img src="../../assets/3D_12-Dwi0CXil.png" alt="Building doors and windows pass" />
+      <h2>Doors and Windows</h2>
+      <p>Doors and windows were added using 2D domain repetition on building surfaces, modifying window size based on building sub-IDs.</p>
+      
+      <img src="../../assets/3D_14-DhWQK14Z.png" alt="Illuminated windows pass" />
+
+      <hr />
+
+      <h2>Color and Time</h2>
+      <p>As time cycled, I altered sky and light colors to emulate sunrise, sunset, and night cycles.</p>
+      
+      <video controls muted playsinline preload="auto" loop style="width: 100%;">
+        <source src="../../assets/gridCity3D_sunrise-m6dnDNrZ.mp4#t=0.01" type="video/mp4" />
+      </video>
+      <video controls muted playsinline preload="auto" loop style="width: 100%;">
+        <source src="../../assets/gridCity3D_sunset-CbclKdKy.mp4#t=0.01" type="video/mp4" />
+      </video>
+      <video controls muted playsinline preload="auto" loop style="width: 100%;">
+        <source src="../../assets/gridCity3D_moonrise-Drf7HnFW.mp4#t=0.01" type="video/mp4" />
+      </video>
+
+      <hr />
+
+      <img src="../../assets/mipmaps_combined-Bx0BtVDi.png" alt="Mipmaps anti-aliasing comparison" />
+      <h2>Anti-Aliasing in 3D</h2>
+      <p>Mipmaps are used for road marking textures, smoothstepping is applied for window SDFs, and FXAA (Fast Approximate Anti-Aliasing) filters geometry edges.</p>
+      
+      <img src="../../assets/fxaa_combined-D_WmZ91D.png" alt="FXAA anti-aliasing comparison" />
+
+      <hr />
+
+      <img src="../../assets/shadows_combined-u64gu4Cx.png" alt="Soft shadows comparison" />
+      <h2>Light and Shadow</h2>
+      <p>Soft shadows are calculated by stepping shadow rays towards the light source, gradually decreasing illumination based on ray-surface proximity.</p>
+      
+      <img src="../../assets/ao-ChEIU0AJ.png" alt="Ambient occlusion visualization" />
+
+      <hr />
+
+      <h2>Material Combine</h2>
+      <p>All distance, normal, lighting, AO, reflection, and specular passes combine to create the final rendered image.</p>
+      
+      <img src="../../assets/passes_combined-DJ848b22.png" alt="Combined rendering passes visualization" />
+      <img src="../../assets/complete-9q6fmEQF.png" alt="Final combined render" />
+
+      <hr />
+
+      <h2>Bonus: Path Tracing</h2>
+      <p>Path traced captures created by Shadertoy user FifthStateOfMatter based on this shader:</p>
+
+      <div class="side-by-side-grid">
+        <img src="../../assets/PT_00-smL8RmhZ.png" alt="Path tracing capture 1" />
+        <img src="../../assets/PT_01-Cf8tbIYx.png" alt="Path tracing capture 2" />
+        <img src="../../assets/PT_02-DzMjM7U7.png" alt="Path tracing capture 3" />
+        <img src="../../assets/PT_03-DjSdWpms.png" alt="Path tracing capture 4" />
+      </div>
+    </div>
+
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </div>
+</body>
+</html>
