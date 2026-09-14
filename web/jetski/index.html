@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Three.js Jetski | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <style>
+    .subpage-content video.jetski-portrait-video {
+      width: 60%;
+      max-width: 480px;
+      margin: 28px auto;
+      display: block;
+      border-radius: 6px;
+    }
+  </style>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
+
+  <main class="subpage-container">
+    <!-- Dynamic Return Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Web Projects">
+      <span aria-hidden="true">←</span> Back to Web Projects
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Three.js Jetski</h1>
+      <p class="subpage-subtitle">Feb. 28, 2023</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <p><a href="../../jetski/index.html">View the jetski portfolio site here.</a></p>
+      
+      <p>
+        In November of 2022, I began working on a portfolio collaboration with an amazing Product Designer / Art Director and friend Cody Drake. He created the design and did the modeling, rigging, and animation for the characters you see on the site, while I wrote the JavaScript (using <a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> for all of the WebGL components), GLSL, CSS, and HTML.
+      </p>
+
+      <!-- Main Home & Interactions Video -->
+      <video controls muted playsinline preload="auto" autoplay loop poster="../../assets/main-B6NSKTSa.webp" style="width: 100%;">
+        <source src="../../assets/main-BeiUrBrW.webm" type="video/webm" />
+      </video>
+
+      <p>
+        The video above shows the site home and the various interactions that can happen there. The water, wake, ripples, splashes, and skybox were all created with custom shaders written in GLSL and applied to geometry within the 3D scene. The screen-space effects, such as the ripple wipe transition when the site loads, the sword &ldquo;slash,&rdquo; the blood splatter, and the &ldquo;speed lines&rdquo; that appear when the jet ski speeds up are all shaders written in GLSL and displayed over the scene using <a href="https://github.com/patriciogonzalezvivo/glslCanvas" target="_blank" rel="noopener noreferrer">GLSLCanvas</a>.
+      </p>
+      <p>
+        In order to improve performance, I wrote a function to set dynamic resolution based on frame rate, and included MSAA to help prevent jagged edges on geometry when the resolution is lowered.
+      </p>
+
+      <hr />
+
+      <!-- Space & About Section -->
+      <h2>Space Transition & Dynamic Character Navigation</h2>
+      <video controls muted playsinline preload="auto" autoplay loop poster="../../assets/about-z9l4szls.webp" style="width: 100%;">
+        <source src="../../assets/about-lf-DYBen.webm" type="video/webm" />
+      </video>
+
+      <p>
+        Links to various parts of the site appear in the upper right of the page, but 3D objects in the scene (which are outlined in yellow when hovered over) can also be clicked on to navigate. Navigating to the about page triggers the character to jump up into space, followed by a camera and shader transition to change the color of the sky. Here, different parts of the body can be selected to view more about them.
+      </p>
+      <p>
+        While the panels displaying information are created with CSS, the selection orbs and animated lines are all created in 3D using a combination of keyframe animations and programmatic animation in Three.js. The character rig animates on a loop and slowly moves toward the mouse, so finding a way to keep the origin points for the lines consistent with the dynamic terminal points (placed at the center of each CSS panel) was key to making the effect work.
+      </p>
+
+      <hr />
+
+      <!-- AR Project Phone Display -->
+      <h2>3D AR Phone Screen Integration</h2>
+      <video controls muted playsinline preload="auto" autoplay loop poster="../../assets/ar-DfTGVCNH.webp" style="width: 100%;">
+        <source src="../../assets/ar-D53Mj_W-.webm" type="video/webm" />
+      </video>
+
+      <p>
+        For the AR content, we decided to give the phone where the AR work is displayed a little animated personality. The character is rendered in the 3D space, but the phone screen where the projects are displayed is a precisely placed HTML div. This way, the phone UI can be interacted with with more ease and the videos will display at full resolution.
+      </p>
+
+      <hr />
+
+      <!-- Mobile Layout & Fallbacks -->
+      <h2>Mobile Responsive Design & Layouts</h2>
+      <video class="jetski-portrait-video" controls muted playsinline preload="auto" autoplay loop poster="../../assets/mobile-DxEeohCk.webp">
+        <source src="../../assets/mobile-DOZLpk9x.webm" type="video/webm" />
+      </video>
+
+      <p>
+        We also designed a mobile version of the site, for which I created a separate CSS layout and additional functionality, such as a unique mobile navigation menu and information panel behavior for the AR work section.
+      </p>
+
+      <!-- Footer Copyright -->
+      <p style="text-align: center; margin-top: 48px; color: var(--text-muted); font-size: 14px;">
+        &copy; 2026 Noah Gunther
+      </p>
+    </div>
+  </main>
+
+</body>
+</html>

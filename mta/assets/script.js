@@ -135,7 +135,7 @@ function init() {
             const nameIds = idsNameSplit(response.subwayStationMaxRidershipWeeklyStation[i].toString());
             let idsImgString = '<br/>';
             for (let j=0; j<nameIds[0].length; j++) {
-                idsImgString += '<img src="./assets/subway' + nameIds[0][j] + '.png" alt="Subway ' + nameIds[0][j] + ' line logo"/>';
+                idsImgString += '<img src="./assets/subway' + nameIds[0][j] + '.webp" alt="Subway ' + nameIds[0][j] + ' line logo"/>';
             }
             let tableString = "<tr><th><text>" + (i+1) + "</text></th><th><text>" + nameIds[1] + "</text>" + idsImgString + "</th>";
             tableString += "<th><text>" + response.subwayStationMaxRidershipWeeklyBorough[i] + "</text></th>";
@@ -308,7 +308,7 @@ function init() {
         // Create html string
         let htmlString = '';
         for (let i=0; i<id.length; i++) {
-            htmlString += '<img class="logo" src = "./assets/subway' + id[i].toString() + '.png" alt="Subway ' + id[i].toString() + ' line logo"/>';
+            htmlString += '<img class="logo" src = "./assets/subway' + id[i].toString() + '.webp" alt="Subway ' + id[i].toString() + ' line logo"/>';
         }
         
         // Update html

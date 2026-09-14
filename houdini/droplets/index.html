@@ -1,90 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Droplets Tool | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Houdini Droplets Tool</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
-        </div>
+  <main class="subpage-container">
+    <!-- Back to Houdini Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Houdini Work">
+      <span aria-hidden="true">←</span> Back to Houdini Work
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Droplets Tool</h1>
+      <p class="subpage-subtitle">May 21, 2021</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <p>
+        This SOP-based droplet tool for Houdini, built with extensive control over behavior, appearance, and sourcing in mind, is the result of exploring alternatives to particle fluid simulation tools. While this method is not a physical fluid simulation, it is significantly faster and offers more direct artistic design input. The HDA works with arbitrary input geometry and dynamically creates a wetmap texture per frame that can be fed into render engine shader inputs (such as the roughness channel of the glass material in the Octane render below). The tool was built entirely in Houdini using VEX and Python states for interactive point placement.
+      </p>
+      <p>
+        <em>Note:</em> Because this tool does not physically simulate fluid dynamics, droplet behavior relies on geometric surface rules rather than mass momentum. While stop parameters are provided, a physical fluid simulation remains best suited for drops that roll off edges into free space.
+      </p>
+
+      <div class="video-embed">
+        <iframe src="https://player.vimeo.com/video/535867559?h=8f3ebea3d7" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Houdini Droplets Tool Demonstration"></iframe>
       </div>
-      <div id="mobilenavbackgroundblur"></div>
-    </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        Houdini Droplets Tool
+
+      <hr />
+
+      <h2>Sourcing and Point Generation</h2>
+      <p>
+        Droplets can be sourced either with a random procedural scatter of points across the surface, or by manually clicking on the geometry in the viewport using Houdini Python states. The frame when each drop begins moving can also be randomized within a specified range or manually keyframed.
+      </p>
+
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/qqA8Zh6zhhA" title="Droplets Tool - Procedural Scattering" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
+
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/CHoSRMHo_c0" title="Droplets Tool - Interactive Python States" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+
+      <hr />
+
+      <h2>Pathing, Friction Noise, and Wetmaps</h2>
+      <p>
+        The tool offers granular control over drop appearance (drop dimensions, radius randomization, trail length, and VDB meshing with static drops) as well as drop behavior (friction influence, gravity direction, and stopping conditions). Built-in visualizers assist in inspecting the underlying geometric attributes:
+      </p>
+
+      <figure>
+        <img src="../../assets/preview_paths-D8DLR2l0.webp" alt="Previewing droplet paths on geometry" />
+        <figcaption>Previewing droplet paths across the geometry surface.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/preview_noise-pdr3zyQ8.webp" alt="Procedural noise friction preview" />
+        <figcaption>Preview of procedural noise acting as surface friction to modulate path shape and velocity. Darker regions exert higher friction and slow droplets down, while lighter regions permit smooth flow. Noise frequency, amplitude, and influence are fully customizable.</figcaption>
+      </figure>
+
+      <p>
+        For the dynamic wetmap to bake properly, the input geometry requires UV coordinates. The wetness attribute is transferred into a COP2 network that evaluates UV space per frame. When configuring render materials, pointing the texture sampler to the internal wetmap COP network and setting texture evaluation to refresh each frame produces realistic dynamic trails:
+      </p>
+
+      <figure>
+        <img src="../../assets/preview_wetmap-D27o6bZN.webp" alt="Dynamic wetmap texture preview" />
+        <figcaption>Dynamic wetmap texture generated wherever droplets travel over time.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/headerbackground-QNXE2y8o.webp" alt="Octane render of glass with wetmap" />
+        <figcaption>Wetmap in action: driving the roughness channel of a frosted glass shader in Octane Render so trailing streaks become transparent.</figcaption>
+      </figure>
+
+      <hr />
+
+      <p>
+        Special thanks to the Toadstorm Nerdblog for their post on <a href="https://www.toadstorm.com/blog/?p=465" target="_blank" rel="noopener noreferrer">xyzdist() and primuv()</a>, two indispensable VEX functions that powered this tool. Additional thanks to Peter Quint for his video tutorial on <a href="https://vimeo.com/285813013" target="_blank" rel="noopener noreferrer">creating deforming wetmaps in Houdini</a>.
+      </p>
     </div>
-    <div id="content">
-      <p><i>Updated May 21, 2021</i></p><br/><br/>
-      <p>This SOP-based droplet tool for Houdini, built with a lot of control over behavior, appearance, and sourcing in mind, is the result of failing to get the kind of droplet behavior I was looking for with particle fluid sim tools. While this method is not a fluid simulation, it is generally faster and offers more design input. The HDA should work with any input geometry, and it dynamically creates a wetmap texture per frame that can be fed into different values in a render engine (like the roughness value of the glass material in the Octane render below). This tool was built entirely in Houdini using mostly VEX and some python for interactively placing points.<br/><br/>Disclaimer: because this tool doesn't truly simulate anything, droplet behavior won't always be believable or look nice. This is especially true when you might expect a droplet to fall off of something - there are a couple stop parameters in this tool, but a fluid sim would work better for drops that roll down a surface and slide off into space.</p>
-      <br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/535867559?h=8f3ebea3d7" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script><br/><br/>
-      <p><b>Download the OpenHDA for Houdini here: <a href="https://gunthern.gumroad.com/l/LaGaPi">Pay what you want on Gumroad</a></b><br/><br/>Droplets can be sourced with either a random scatter of points, or by manually clicking on the geometry where you want to add points using python states (both methods in the following two videos). The frame when the drop starts moving can also be either randomized in a range or manually specified.</p><br/><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/qqA8Zh6zhhA" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/CHoSRMHo_c0" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
-      <br/><br/><p>This tool also offers a lot of control over drop appearance (size of drops, randomness of size, drop trail length, VDB meshing with static drops) and drop behavior (how much different conditions effect movement, when to stop). I won't go over all of these options here, but some of the preview modes for different information about drop pathing, “friction” noise, and wetmap are displayed below.</p>
-      <img src="./graphics/preview_paths.png">
-      <div class="caption"><p1>Previewing the droplet paths</p1></div><br/><br/>
-      <img src="./graphics/preview_noise.png">
-      <div class="caption"><p1>Preview of the procedural noise that acts as friction to determine drop path shape and speed. Darker areas are rougher and will repel the drops and make them move slowly. Lighter areas allow the drops to move freely. Noise size, intensity, and influence on drop behavior can all be customized.</p1></div><br/><br/>
-      <p>For the wetmap to work, the input geometry must have UVs (the wetmap preview will work either way, but the final result is passed into a COP2 net that transfers the wetness attribute to the UV space of the input geometry). Just point to the “wetmap” network within the HDA when setting up a render node and be sure to update textures every frame.</p>
-      <img src="./graphics/preview_wetmap.png">
-      <div class="caption"><p1>Previewing the dynamic wetmap texture created wherever the drops pass by</p1></div><br/><br/>
-      <img src="./graphics/headerbackground.png">
-      <div class="caption"><p1>Wetmap in action - used to determine roughness of the glass material, so streaks become see-through</p1></div><br/><br/>
-      <p>Special thanks to the Toadstorm Nerdblog for <a href="https://www.toadstorm.com/blog/?p=465">this post about xyzdist() and primuv()</a>, two of the VEX functions I used most heavily with this project. I highly recommend checking out this blog. Also thanks to Peter Quint for <a href="https://vimeo.com/285813013">this video about creating deforming wetmaps</a>.</p>
-      <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
-    </div>
-  </body>
+
+    <!-- Page Footer -->
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+</body>
 </html>

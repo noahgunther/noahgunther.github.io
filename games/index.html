@@ -1,84 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Work | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="stylesheet" crossorigin href="../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Games Work</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
+  <main class="subpage-container">
+    <!-- Centered Header Page Title -->
+    <header class="subpage-header" style="text-align: center;">
+      <h1 class="subpage-title" style="text-align: center;">Game Work</h1>
+    </header>
+
+    <!-- Short Intro Section -->
+    <section class="about-me-section" style="margin-bottom: 36px;">
+      <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+        <img src="data:image/webp;base64,UklGRgwEAABXRUJQVlA4WAoAAAAQAAAA/wAA/wAAQUxQSEgDAAABDzD/ERGCbrPteavnFVio01mAgNZgx5XMBUyfBcSV2L1rCHgXiDoWhO7C/v6SN0kb0f8JkP+Pq2+dX6/e1JmOnUaeXCi7P3zeYWA01J3GqHNc/Gxwhs97ntoYjeFOndpQfvbyBktH0OXsIT1kfQh4ZOkZ1dJh6bBexZn24bAUtUQtUQnOYGmTH3ePatRy9nKmqCWmw0YVZ7C0RXkFee8lKsGZGrXIup09rEdYD0u3N1jaYl+ixL6cvUTFm2Zpk/UVVlkf8lbFGYKW2BdJp2zxjeCNpU3WxymS5JTDhjs1ajllEw3rFtMRtHmDpS327yCnvEIvUfGmWTpCkpgkPWQ9bLiDpe2UTdYo29lL1OZNjVokvYKcfYm9xIE3WDrC+jh7kIf0EtWdGrVIX2Q9k8R02Li8wdIW0+OUKNsph3W8qVGLrBJ7SK/QS1R3sLTF/h2SrA9ZDxtVnGmWNlnllNiX2EtUgjNYep79O/QgD1kPG5c3NWoR2U45k8ReouINlraYXiFJX2Q9bLhToxZZ5ZSYHmcvcVzeYGmLvUiSVWIvEbypUcuZXtatl7OXmG9vsHRYOixFLVHLCd60X5n59oZfuKCKN79qSvAs3+BO2/Nzjst0z88JO9e/DT+9cwHe1MlFvsF4t3x7AwOjzoE2BoA3DUD5nG/j8gbGBVie+Tbe3TGwfAMD8m1axRtoUKdCnbwHZxpJ5gBQGA11B7JMrh2j8V7FmTqzRH44vgSCM+xZptapjAYtjMubKiLS+TyWOPCG8MHy1Dop56jiTl+k8/4lfIdBcKYFeYXeGDstjK+Yb28gy1SAvMUB4M6eZVKnwndQbFzeNLJEAOMrDgBvYJWZbwOtJ9dOFWfq5KMCDFCCM0Db8w07jdHAncYA2s7nncsboE4gT61zAHhTp8JowID8nFrFGaDBEgmjATsEZxoD5C9bRdlp+AM0tLHOAfnetYozdeab9TkxGtQJwRkY/NjGxSjiTIO2c+15jjppe356w89eDKB6U+dojAY7mLbdHz6bkm/yzfjypjEag/e2Uyfu8J7vHaPOcaGLO5Zvo04YvGdx54dKfs7RWN1pjMa4eDcwcYfPlqdCvoM7cpi2PT+nMi5jEX/+wwNWUDggngAAAPAQAJ0BKgABAAE+kUihTSWkIyIgKACwEglpbuF2sRtACewD32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2ThQAD+/7dMAAAAAAAAAAAA" alt="Game Work Icon" style="width: 120px; height: auto; border-radius: 6px; flex-shrink: 0;" />
+        <div style="flex: 1; min-width: 260px;">
+          <p class="about-me-text" style="font-family: 'Inter Tight', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.65; color: var(--text-secondary); margin: 0; text-align: left;">
+            Interactive gameplay experiences, real-time shaders, and custom game mechanics built for VR, desktop, web, and mobile environments.
+          </p>
         </div>
       </div>
-      <div id="mobilenavbackgroundblur"></div>
+    </section>
+
+    <hr style="border: none; height: 1px; background: var(--panel-border); margin: 36px 0 44px 0;" />
+
+    <!-- Wide Box Project Banners -->
+    <div class="project-banners-list">
+      
+      <a href="./drone/index.html?from=games" class="project-banner" style="background-image: url('../assets/drone-BNsUdUvA.webp');">
+        <h2 class="project-banner__title">Drone Delivery</h2>
+        <p class="project-banner__desc">Breakdown of a slice of a delivery drone flying game.</p>
+      </a>
+
+      <a href="./horizon/index.html?from=games" class="project-banner" style="background-image: url('../assets/meta-DNInKDk7.webp');">
+        <h2 class="project-banner__title">Meta Reality Labs | Horizon</h2>
+        <p class="project-banner__desc">My work on graphics, gameplay, avatars, and more at Meta RL.</p>
+      </a>
+
+      <a href="../ar/games/index.html?from=games" class="project-banner" style="background-image: url('../assets/ar-DVIGkEBK.webp');">
+        <h2 class="project-banner__title">AR Games</h2>
+        <p class="project-banner__desc">Multiplayer networked AR games built for mobile.</p>
+      </a>
+
+      <a href="./tokimon/index.html?from=games" class="project-banner" style="background-image: url('../assets/tokimon-4JKyYNaG.webp');">
+        <h2 class="project-banner__title">Tokimon</h2>
+        <p class="project-banner__desc">A card game where players generate and battle cards by describing them using AI.</p>
+      </a>
+
+      <a href="../horsecorpse/index.html" class="project-banner" style="background-image: url('../assets/horsecorpse-CqcN2Id1.webp');">
+        <h2 class="project-banner__title">Horse Corpse Adventure Game</h2>
+        <p class="project-banner__desc">One of my first game projects, a text based adventure game for web.</p>
+      </a>
+
     </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        Games Work
-      </div>
-    </div>
-    <div id="content">
-      <a id="dropletslink" href="./drone/index.html"><div class="project" style="background-image: url('./drone/graphics/headerbackground.png');">
-        <div class="projecttitle">Drone Delivery</div>
-        <div class="projecttext">Breakdown of a slice of a delivery drone flying game.</div>
-      </div></a><br/><br/>
-      <a id="vineslink" href="./horizon/index.html"><div class="project" style="background-image: url('./horizon/graphics/headerbackground.png');">
-        <div class="projecttitle">Meta RL | Horizon</div>
-        <div class="projecttext">My work on graphics, gameplay, avatars, and more at Meta Reality Labs.</div>
-      </div></a><br/><br/>
-      <a  id="arlink" href="../ar/index.html"><div class="project" style="background-image: url('../ar/graphics/headerbackground.png');">
-        <div class="projecttitle">AR Games</div>
-        <div class="projecttext">Multiplayer (networked) AR games built for mobile.</div>
-      </div></a><br/><br/>
-      <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
-    </div>
-  </body>
+
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+  <script src="../subpage.js"></script>
+</body>
 </html>

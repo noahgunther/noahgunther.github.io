@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipe Dream Houdini | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
+
+  <main class="subpage-container">
+    <!-- Back to Houdini Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Houdini Work">
+      <span aria-hidden="true">←</span> Back to Houdini Work
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Pipe Dream Houdini</h1>
+      <p class="subpage-subtitle">Feb. 24, 2020</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/bzZl8qOmiIk" title="Houdini Pipe Dream Redux" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+
+      <figure>
+        <img src="../../assets/snow-DCMrRF5R.webp" alt="Snow falling across procedural pipes" />
+        <figcaption>Snow particles settling on procedural pipe geometry.</figcaption>
+      </figure>
+
+      <p>
+        For this project, I set out to recreate the classic Microsoft Windows 3D Pipes screensaver that captivated so many of us in the 1990s. Studying footage of the original screensaver, I mapped out the foundational rules governing pipe generation:
+      </p>
+
+      <ol>
+        <li>Pipes initialize from a single spherical joint and a starter segment. Each frame, a pipe extends by exactly one segment.</li>
+        <li>Starting positions, hues, directional paths, and camera tumble are randomized.</li>
+        <li>Pipes must never collide or intersect with themselves or other existing pipes.</li>
+        <li>Pipes are confined within a visible three-dimensional boundary volume.</li>
+      </ol>
+
+      <p>
+        My first attempt utilized an L-system with turtle commands: each iteration stepped forward with equal probability of continuing straight or banking along cardinal axes. However, this came with two critical roadblocks: the grammar had no spatial memory to detect impending self-intersections, and constraining growth strictly within a volumetric bounding box proved difficult.
+      </p>
+
+      <figure>
+        <img src="../../assets/01-BdxWb7uD.webp" alt="First L-system pipe attempt with intersections" />
+        <figcaption>Early test utilizing a Lindenmayer System. Notice the overlapping lines and intersections near the bottom right.</figcaption>
+      </figure>
+
+      <hr />
+
+      <h2>The VEX Point Array System</h2>
+      <p>
+        I rearchitected the generator using a VEX point-array system, leveraging Python to handle scene seeds and high-level attributes. In this setup, each pipe claims an unoccupied grid node and queries adjacent coordinate neighbors before choosing its next step:
+      </p>
+
+      <figure>
+        <img src="../../assets/02-rBcu_1Nz.webp" alt="Point grid interconnection test" />
+        <figcaption>Early test when points connected to all adjacent lattice neighbors rather than a single trajectory.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/03-0ZVgwgPy.webp" alt="First pipe without self-intersections" />
+        <figcaption>First successful single pipe generation without any self-intersections.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/04-BpFYAFDB.webp" alt="Multi-pipe collision conflict test" />
+        <figcaption>Initial two-pipe test encountering point-occupancy conflicts when claiming adjacent space.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/05-DkWqXPC3.webp" alt="Multi-pipe coordination without collisions" />
+        <figcaption>Successful spatial arbitration across multiple concurrent pipes.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="../../assets/pipe_00_curves-G_X8Zndr.webp" style="width: 100%;">
+          <source src="../../assets/pipe_00_curves-_XMhkJbZ.webm" type="video/webm" />
+        </video>
+        <figcaption>Curve generation workflow: points connect, smooth, and sweep into geometry via the PolyWire SOP while elbow spheres are dynamically placed at 90-degree turns.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="data:image/webp;base64,UklGRh4BAABXRUJQVlA4IBIBAACQHgCdASrgAQ4BPpFIoU0lpCMiICgAsBIJaW7hd2EbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkN4AP7/3P0AAAAAAAAAAAAAAAAAAAAA" style="width: 100%;">
+          <source src="../../assets/headerbackground-DZeGXDx1.webm" type="video/webm" />
+        </video>
+        <figcaption>Procedural animation cycle with six concurrent pipes weaving through space.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/06-B8XqHKcZ.webp" alt="Pipes with joint spheres on corners" />
+        <figcaption>Six pipes with joint spheres assigned to random corners, recreating the iconic screensaver look.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/07-CeZXpO2l.webp" alt="Rendered pipes in boundary volume" />
+        <figcaption>Final look development render. Pipe count, frame thresholds, boundary dimensions, radius, joint spheres, materials, and custom collision guides are exposed as HDA parameters.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="data:image/webp;base64,UklGRh4BAABXRUJQVlA4IBIBAACQHgCdASrgAQ4BPpFIoU0lpCMiICgAsBIJaW7hd2EbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkN4AP7/3P0AAAAAAAAAAAAAAAAAAAAA" style="width: 100%;">
+          <source src="../../assets/pipes_07_animation-DEfhcqPV.webm" type="video/webm" />
+        </video>
+        <figcaption>Pipes rendered with a tinted glass material, routing randomized point colors directly into the shader transmission channel.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="data:image/webp;base64,UklGRrgOAABXRUJQVlA4IKwOAABQugGdASqABzgEPpFIoU0lpCMiIAgAsBIJaW7hd2EbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ3gAP7/3P0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" style="width: 100%;">
+          <source src="../../assets/pipes_08_animation-C4XwLnlj.webm" type="video/webm" />
+        </video>
+        <figcaption>Clear glass shader constrained to a single 2D plane with reduced resample count to produce squiggly trajectories.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="media-grid-2">
+          <img src="../../assets/08-BMg5PFl5.webp" alt="Testing HDA resample count parameters" />
+          <img src="../../assets/09-BEYz_aCd.webp" alt="Testing HDA boundary volume parameters" />
+        </div>
+        <figcaption>Exploring procedural variations: tuning curve subdivision density and adjusting volumetric bounding boxes.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="data:image/webp;base64,UklGRh4BAABXRUJQVlA4IBIBAACQHgCdASrgAQ4BPpFIoU0lpCMiICgAsBIJaW7hd2EbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkN4AP7/3P0AAAAAAAAAAAAAAAAAAAAA" style="width: 100%;">
+          <source src="../../assets/pipes_06_animation-BKG2kE1Z.webm" type="video/webm" />
+        </video>
+        <figcaption>Pipes growing with the curve resample count set to 1.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="data:image/webp;base64,UklGRh4BAABXRUJQVlA4IBIBAACQHgCdASrgAQ4BPpFIoU0lpCMiICgAsBIJaW7hd2EbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkN4AP7/3P0AAAAAAAAAAAAAAAAAAAAA" style="width: 100%;">
+          <source src="../../assets/pipes_10_animation-DwwvIndp.webm" type="video/webm" />
+        </video>
+        <figcaption>Sampling image texture maps to project color across the pipe network while dynamically modulating segment radii.</figcaption>
+      </figure>
+
+      <hr />
+
+      <h2>Scaling to Arbitrary Pipe Counts</h2>
+      <p>
+        In my original prototype, I used a Foreach loop iterating over six distinct VEX scripts per frame. This approach was computationally heavy and fundamentally hardcoded to a maximum of six pipes. Decreasing pipe counts simply deleted pipes post-simulation rather than dynamically redistributing spatial paths.
+      </p>
+      <p>
+        Researching solver optimization led me to <a href="https://entagma.com/vex-space-filling-curves-aka-that-windows-95-screensaver/" target="_blank" rel="noopener noreferrer">Entagma's excellent post on VEX space-filling curves</a>. Inspired by their workflow, I transitioned from duplicating static 3D point grids to dynamically sourcing seed points from VDB volumes, then running the simulation inside a native Solver SOP.
+      </p>
+
+      <figure>
+        <img src="../../assets/10-CpHsKgHF.webp" alt="Unlimited pipes architecture render" />
+        <figcaption>Refactored solver architecture capable of simulating dozens of concurrent pipes seamlessly.</figcaption>
+      </figure>
+
+      <p>
+        Within the solver, each pipe receives an integer identifier (<code>@pipe_n</code>) and calculates unique pseudo-random seed colors. To prevent race conditions where two pipes claim the exact same open coordinate on the same frame, an inner Foreach loop evaluates each pipe sequentially per sub-step. Points are flagged as occupied immediately as a segment is committed, guaranteeing that two pipes can never intersect—even when running dozens of concurrent paths.
+      </p>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="data:image/webp;base64,UklGRh4BAABXRUJQVlA4IBIBAACQHgCdASrgAQ4BPpFIoU0lpCMiICgAsBIJaW7hd2EbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkN4AP7/3P0AAAAAAAAAAAAAAAAAAAAA" style="width: 100%;">
+          <source src="../../assets/pipes_tommy_animation-Dq2pmU1B.webm" type="video/webm" />
+        </video>
+        <figcaption>Pipes procedurally populating and conforming to the internal volume of the Houdini "Tommy" test asset.</figcaption>
+      </figure>
+    </div>
+
+    <!-- Page Footer -->
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tokimon | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
+
+  <main class="subpage-container">
+    <!-- Back to Game Work Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Game Work">
+      <span aria-hidden="true">←</span> Back to Game Work
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Tokimon</h1>
+      <p class="subpage-subtitle">Sept. 14, 2026</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <p>
+        Tokimon is a card battling game where players describe a card - giving it a name, freeform description, and personality - to an LLM, which then generates the card, giving it art, a more thorough description, moves, and more. Players can then battle their cards against each other, with the LLM interpreting the battle outcome, creating a narrative and illustration of the result.
+      </p>
+
+      <p>
+        For example, this card was generated from the description &ldquo;Aero, the Whispering Zephyr: A sentient breeze that carries secrets across kingdoms and slips through the tightest defenses.&rdquo;
+      </p>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="../../assets/battle0-card0-CO1ZA4EV.webp" style="width: 100%; max-width: 600px; border-radius: 8px; margin: 12px auto; display: block;">
+          <source src="../../assets/battle0-card0-Mm1W1K31.webm" type="video/webm" />
+          <img src="../../assets/battle0-card0-CO1ZA4EV.webp" alt="Aero, the Whispering Zephyr" style="width: 100%; max-width: 600px; border-radius: 8px;" />
+        </video>
+        <figcaption>Interactive 3D card tilt and holographic foil shading for Aero, the Whispering Zephyr.</figcaption>
+      </figure>
+
+      <p>
+        Then, an adversary is generated with the description: &ldquo;Zeppelin, the Cloud Fortress: A massive, hydrogen-filled warship that rains down explosive damage from above, safe from melee attacks.&rdquo;
+      </p>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="../../assets/battle0-card1-BME_5RX7.webp" style="width: 100%; max-width: 760px; border-radius: 8px; margin: 12px auto; display: block;">
+          <source src="../../assets/battle0-card1-DLZBrwPk.webm" type="video/webm" />
+          <img src="../../assets/battle0-card1-BME_5RX7.webp" alt="Aero vs Zeppelin matchup setup" style="width: 100%; max-width: 760px; border-radius: 8px;" />
+        </video>
+        <figcaption>Side-by-side card clash staging: Aero vs. Zeppelin.</figcaption>
+      </figure>
+
+      <p>
+        These cards are battled, with Aero winning - the battle is illustrated in the LLM output below.
+      </p>
+
+      <figure>
+        <img src="../../assets/battle0-CurVRTBt.webp" alt="Battle Outcome: Aero, the Whispering Zephyr Wins" style="width: 100%; max-width: 760px; border-radius: 8px; margin: 12px auto; display: block;" />
+        <figcaption>LLM battle resolution narrative and dynamically generated illustration depicting Aero disabling Zeppelin's pressure regulators.</figcaption>
+      </figure>
+
+      <p>
+        Players can continue battling the same cards or new ones, racking up points from their victories.
+      </p>
+
+      <p>
+        Unfortunately, the game isn't live at the moment, due to the cost of the LLM tokens required to play it. Reach out to me if you're interested in a demo.
+      </p>
+
+      <hr />
+
+      <!-- Section: Generated Cards Carousel -->
+      <h2>Generated Cards</h2>
+      <p>
+        Here's a random assortment of generated cards, paired with their descriptions:
+      </p>
+
+      <section class="ar-showcase ar-showcase--tokimon" id="cardsShowcase" aria-label="Generated Cards Carousel">
+        <!-- Left Prev Button -->
+        <button id="cardsPrevBtn" class="ar-nav-btn ar-nav-btn--prev" aria-label="Previous card">
+          <span class="ar-nav-arrow ar-nav-arrow--left" aria-hidden="true"></span>
+        </button>
+
+        <!-- Center Body (Image + Content) -->
+        <div class="ar-showcase__body">
+          <!-- Image Column -->
+          <div class="ar-showcase__media">
+            <img id="cardsImg" class="tokimon-card-img" src="../../assets/ignis-eTdEz3Qo.webp" alt="Ignis, the Living Hearth" />
+          </div>
+
+          <!-- Description Column -->
+          <div class="ar-showcase__content">
+            <h2 class="ar-title" id="cardsTitle">Ignis, the Living Hearth</h2>
+            <p class="ar-description" id="cardsDesc">
+              A crackling, warm flame that embodies both the comfort of a home fire and the threat of a wildfire.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Next Button -->
+        <button id="cardsNextBtn" class="ar-nav-btn ar-nav-btn--next" aria-label="Next card">
+          <span class="ar-nav-arrow ar-nav-arrow--right" aria-hidden="true"></span>
+        </button>
+
+        <!-- Bottom Dots Indicator -->
+        <div class="ar-dots-container" id="cardsDots" role="tablist" aria-label="Card pagination"></div>
+      </section>
+
+      <hr />
+
+      <!-- Section: Battle Results Carousel -->
+      <h2>Battle Results</h2>
+      <p>
+        An assortment of battle results from the cards generated above.
+      </p>
+
+      <section class="ar-showcase ar-showcase--tokimon" id="battlesShowcase" aria-label="Battle Results Carousel">
+        <!-- Left Prev Button -->
+        <button id="battlesPrevBtn" class="ar-nav-btn ar-nav-btn--prev" aria-label="Previous battle">
+          <span class="ar-nav-arrow ar-nav-arrow--left" aria-hidden="true"></span>
+        </button>
+
+        <!-- Center Body (Image + Content) -->
+        <div class="ar-showcase__body">
+          <!-- Image Column -->
+          <div class="ar-showcase__media">
+            <img id="battlesImg" class="tokimon-card-img" src="../../assets/gaea_vs_chiron-BHun_hJX.webp" alt="Gaea vs Chiron" />
+          </div>
+
+          <!-- Description Column -->
+          <div class="ar-showcase__content">
+            <h2 class="ar-title" id="battlesTitle">Gaea vs Chiron</h2>
+          </div>
+        </div>
+
+        <!-- Right Next Button -->
+        <button id="battlesNextBtn" class="ar-nav-btn ar-nav-btn--next" aria-label="Next battle">
+          <span class="ar-nav-arrow ar-nav-arrow--right" aria-hidden="true"></span>
+        </button>
+
+        <!-- Bottom Dots Indicator -->
+        <div class="ar-dots-container" id="battlesDots" role="tablist" aria-label="Battle pagination"></div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="subpage-footer">
+      <p>&copy; 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      // 1. CARDS CAROUSEL DATA
+      const cardsData = [
+        {
+          title: "Ignis, the Living Hearth",
+          desc: "A crackling, warm flame that embodies both the comfort of a home fire and the threat of a wildfire.",
+          img: "../../graphics/tokimon/ignis.webp"
+        },
+        {
+          title: "Gaea, the Deep Root",
+          desc: "An ancient, moss-covered earth spirit that provides unyielding defense but moves with glacial slowness.",
+          img: "../../graphics/tokimon/gaea.webp"
+        },
+        {
+          title: "Talon, the Lightning Falcon",
+          desc: "A bird of pure electrical energy that strikes instantly, leaving paralyzed foes in its wake.",
+          img: "../../graphics/tokimon/talon.webp"
+        },
+        {
+          title: "Pencil, the Mechanical Pencil",
+          desc: "Just a regular mechanical pencil, laying on some notebook paper, lightly used.",
+          img: "../../graphics/tokimon/pencil.webp"
+        },
+        {
+          title: "Nereid, the Abyssal Siren",
+          desc: "A beautiful but haunting aquatic creature whose songs control the ocean tides and drag ships to the deep.",
+          img: "../../graphics/tokimon/nereid.webp"
+        },
+        {
+          title: "Sylph, the Orchid Mantis",
+          desc: "A deadly insectoid assassin that camouflages perfectly with forest flora to ambush prey.",
+          img: "../../graphics/tokimon/sylph.webp"
+        },
+        {
+          title: "Chiron, the Sun Centaur",
+          desc: "A noble archer who fires arrows of solid light, piercing through magical armor and healing allies.",
+          img: "../../graphics/tokimon/chiron.webp"
+        },
+        {
+          title: "Singularity, the Void Devourer",
+          desc: "An unstable black hole that continuously pulls adjacent cards into its gravity well, destroying them.",
+          img: "../../graphics/tokimon/singularity.webp"
+        },
+        {
+          title: "Boreas, the Glacial Eclipse",
+          desc: "A rare alignment that freezes the area of play, rendering combat impossible.",
+          img: "../../graphics/tokimon/boreas.webp"
+        },
+        {
+          title: "Orion, the Clockwork Vanguard",
+          desc: "A brass-plated automaton driven by clockwork gears, gaining power with every passing turn.",
+          img: "../../graphics/tokimon/orion.webp"
+        },
+        {
+          title: "Zeppelin, the Cloud Fortress",
+          desc: "A massive, hydrogen-filled warship that rains down explosive damage from above, safe from melee attacks.",
+          img: "../../graphics/tokimon/zeppelin.webp"
+        },
+        {
+          title: "The Reply-All Email",
+          desc: "A devastating curse that multiplies exponentially, clogging everyone's hand with useless notifications.",
+          img: "../../graphics/tokimon/replyall.webp"
+        },
+        {
+          title: "The Unopenable Jar",
+          desc: "A legendary glass defensive unit protected by an airtight vacuum seal that defeats even the strongest warriors.",
+          img: "../../graphics/tokimon/jar.webp"
+        }
+      ];
+
+      // 2. BATTLES CAROUSEL DATA
+      const battlesData = [
+        {
+          title: "Gaea vs Chiron",
+          img: "../../graphics/tokimon/gaea_vs_chiron.webp"
+        },
+        {
+          title: "Ignis vs Boreas",
+          img: "../../graphics/tokimon/ignis_vs_boreas.webp"
+        },
+        {
+          title: "Orion vs Nereid",
+          img: "../../graphics/tokimon/orion_vs_nereid.webp"
+        },
+        {
+          title: "Pencil vs Singularity",
+          img: "../../graphics/tokimon/pencil_vs_singularity.webp"
+        },
+        {
+          title: "Reply All vs Talon",
+          img: "../../graphics/tokimon/replyall_vs_talon.webp"
+        },
+        {
+          title: "Sylph vs Jar",
+          img: "../../graphics/tokimon/sylph_vs_jar.webp"
+        }
+      ];
+
+      // Helper function to initialize a showcase carousel (matching AR showcase style)
+      function initCarousel(config) {
+        let currentIndex = 0;
+        const total = config.data.length;
+        const showcaseEl = document.getElementById(config.showcaseId);
+        const imgEl = document.getElementById(config.imgId);
+        const titleEl = document.getElementById(config.titleId);
+        const descEl = config.descId ? document.getElementById(config.descId) : null;
+        const prevBtn = document.getElementById(config.prevBtnId);
+        const nextBtn = document.getElementById(config.nextBtnId);
+        const dotsContainer = document.getElementById(config.dotsId);
+
+        // Preload images for instant transitions
+        config.data.forEach((item) => {
+          const preImg = new Image();
+          preImg.src = item.img;
+        });
+
+        // Build dot buttons
+        dotsContainer.innerHTML = '';
+        config.data.forEach((item, idx) => {
+          const dot = document.createElement('button');
+          dot.className = 'ar-dot' + (idx === 0 ? ' is-active' : '');
+          dot.setAttribute('aria-label', 'Go to ' + item.title);
+          dot.addEventListener('click', () => goToIndex(idx));
+          dotsContainer.appendChild(dot);
+        });
+
+        const dots = dotsContainer.querySelectorAll('.ar-dot');
+        let currentSwitchId = 0;
+
+        function updateUI(animate = true) {
+          const item = config.data[currentIndex];
+          const switchId = ++currentSwitchId;
+
+          dots.forEach((dot, idx) => {
+            dot.classList.toggle('is-active', idx === currentIndex);
+          });
+
+          if (animate) {
+            imgEl.style.opacity = '0';
+            titleEl.style.opacity = '0';
+            if (descEl) descEl.style.opacity = '0';
+
+            const nextImg = new Image();
+            nextImg.src = item.img;
+            const decodePromise = nextImg.decode ? nextImg.decode().catch(() => {}) : Promise.resolve();
+            const delayPromise = new Promise((resolve) => setTimeout(resolve, 140));
+
+            Promise.all([decodePromise, delayPromise]).then(() => {
+              if (switchId !== currentSwitchId) return;
+
+              imgEl.src = item.img;
+              imgEl.alt = item.title;
+              titleEl.textContent = item.title;
+              if (descEl) {
+                descEl.textContent = item.desc || '';
+              }
+
+              void imgEl.offsetWidth;
+              imgEl.style.opacity = '1';
+              titleEl.style.opacity = '1';
+              if (descEl) descEl.style.opacity = '1';
+            });
+          } else {
+            imgEl.src = item.img;
+            imgEl.alt = item.title;
+            titleEl.textContent = item.title;
+            if (descEl) {
+              descEl.textContent = item.desc || '';
+            }
+            imgEl.style.opacity = '1';
+            titleEl.style.opacity = '1';
+            if (descEl) descEl.style.opacity = '1';
+          }
+        }
+
+        function goToIndex(idx) {
+          currentIndex = (idx + total) % total;
+          updateUI(true);
+        }
+
+        function prev() {
+          goToIndex(currentIndex - 1);
+        }
+
+        function next() {
+          goToIndex(currentIndex + 1);
+        }
+
+        prevBtn.addEventListener('click', prev);
+        nextBtn.addEventListener('click', next);
+
+        // Touch swipe support
+        let touchStartX = 0;
+        showcaseEl.addEventListener('touchstart', (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        showcaseEl.addEventListener('touchend', (e) => {
+          const diff = touchStartX - e.changedTouches[0].screenX;
+          if (Math.abs(diff) > 40) {
+            if (diff > 0) next();
+            else prev();
+          }
+        }, { passive: true });
+
+        updateUI(false);
+      }
+
+      // Initialize both carousels
+      initCarousel({
+        showcaseId: 'cardsShowcase',
+        imgId: 'cardsImg',
+        titleId: 'cardsTitle',
+        descId: 'cardsDesc',
+        prevBtnId: 'cardsPrevBtn',
+        nextBtnId: 'cardsNextBtn',
+        dotsId: 'cardsDots',
+        data: cardsData
+      });
+
+      initCarousel({
+        showcaseId: 'battlesShowcase',
+        imgId: 'battlesImg',
+        titleId: 'battlesTitle',
+        prevBtnId: 'battlesPrevBtn',
+        nextBtnId: 'battlesNextBtn',
+        dotsId: 'battlesDots',
+        data: battlesData
+      });
+    })();
+  </script>
+</body>
+</html>

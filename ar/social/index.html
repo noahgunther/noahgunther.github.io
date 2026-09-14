@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social AR | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
+
+  <main class="subpage-container">
+    <!-- Back to AR Work link -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to AR Work">
+      <span aria-hidden="true">←</span> Back to AR Work
+    </a>
+
+    <!-- Centered Header Page Title -->
+    <header class="subpage-header" style="text-align: center;">
+      <h1 class="subpage-title" style="text-align: center;">Social AR</h1>
+    </header>
+
+    <!-- Short Intro Section -->
+    <section class="about-me-section" style="margin-bottom: 36px;">
+      <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+        <img src="../../assets/social_ar_icon-CIS-ak01.webp" alt="Social AR Icon" style="width: 120px; height: auto; border-radius: 12px; flex-shrink: 0;" />
+        <div style="flex: 1; min-width: 260px;">
+          <p class="about-me-text" style="font-family: 'Inter Tight', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.65; color: var(--text-secondary); margin: 0; text-align: left;">
+            Social AR experiences are group video calling AR effects that create shared environments for everyone on the call. Unlike games, there isn't a specific goal to achieve — instead, callers can interact with each other and experience virtual spaces together, composing participants into the same screen space. Use the carousel below to explore each experience.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hr style="border: none; height: 1px; background: var(--panel-border); margin: 36px 0 44px 0;" />
+
+    <!-- Interactive AR Showcase Carousel -->
+    <section class="ar-showcase" id="arShowcase">
+      <!-- Left Prev Button -->
+      <button id="prevBtn" class="ar-nav-btn ar-nav-btn--prev" aria-label="Previous experience">
+        <span class="ar-nav-arrow ar-nav-arrow--left" aria-hidden="true"></span>
+      </button>
+
+      <!-- Center Body (Video + Content) -->
+      <div class="ar-showcase__body">
+        <!-- Video Column -->
+        <div class="ar-showcase__media">
+          <img id="showcasePoster" class="ar-showcase__poster" src="../../assets/FriendsSpacewalk-D7e2UeNt.webp" alt="Multihead Alien poster" />
+          <video id="showcaseVideo" class="ar-showcase__video" autoplay loop muted playsinline controls preload="auto" poster="../../assets/FriendsSpacewalk-D7e2UeNt.webp" src="../../assets/FriendsSpacewalk-D6zfax8w.webm">
+            <source id="videoSource" src="../../assets/FriendsSpacewalk-D6zfax8w.webm" type="video/webm">
+          </video>
+          <div id="showcaseSpinner" class="ar-showcase__spinner" aria-label="Loading video"><div class="ar-spinner-circle"></div></div>
+        </div>
+
+        <!-- Description Column -->
+        <div class="ar-showcase__content">
+          <img id="experienceIcon" class="ar-icon" src="../../assets/friendsspacewalk-H5NLK7E8.webp" alt="Multihead Alien icon" />
+          <h2 class="ar-title" id="experienceTitle">Multihead Alien</h2>
+          <p class="ar-description" id="experienceDesc">
+            Composing the faces of all the present callers into the heads of a many-headed alien enjoying a stroll on its tiny planet, this AR experience takes over the whole phone screen and is consistent for each caller, using networking technology to allow callers to see others moving their heads around in space.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Next Button -->
+      <button id="nextBtn" class="ar-nav-btn ar-nav-btn--next" aria-label="Next experience">
+        <span class="ar-nav-arrow ar-nav-arrow--right" aria-hidden="true"></span>
+      </button>
+
+      <!-- Bottom Dots Indicator -->
+      <div class="ar-dots-container" id="carouselDots" role="tablist" aria-label="Experience selector"></div>
+    </section>
+
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+  <script src="../../subpage.js"></script>
+
+  <script>
+    (function () {
+      const experiences = [
+        {
+          id: "multiheadalien",
+          title: "Multihead Alien",
+          thumb: "../../graphics/arthumbs/friendsspacewalk.webp",
+          video: "../../meta_ar_captures/FriendsSpacewalk.webm",
+          poster: "../../meta_ar_captures/FriendsSpacewalk.webp",
+          desc: "Composing the faces of all the present callers into the heads of a many-headed alien enjoying a stroll on its tiny planet, this AR experience takes over the whole phone screen and is consistent for each caller, using networking technology to allow callers to see others moving their heads around in space."
+        },
+        {
+          id: "groupselfie",
+          title: "Group Selfie",
+          thumb: "../../graphics/arthumbs/groupselfie.webp",
+          video: "../../meta_ar_captures/GroupSelfie.webm",
+          poster: "../../meta_ar_captures/GroupSelfie.webp",
+          desc: "This AR experience is simple, but one of my favorites — callers are layered together using background segmentation into the same screen space, as if they were all in the same room. Ideal for taking virtual selfies together, callers can move to the front of the stack by shaking their phone. The possibilities for making funny scenes together are endless."
+        },
+        {
+          id: "costumeselector",
+          title: "Costume Selector",
+          thumb: "../../graphics/arthumbs/costumeselector.webp",
+          video: "../../meta_ar_captures/costumeSelector.webm",
+          poster: "../../meta_ar_captures/costumeSelector.webp",
+          desc: "All callers remain in the standard video calling grid format, taking turns choosing between two ridiculous costume options. Whichever they pick, that costume element will be applied to all callers. If the callers choose all four options in a matching set (pirate, rockstar, cyborg, or princess), a special secret costume element is revealed."
+        },
+        {
+          id: "reshapeface",
+          title: "Reshape Face",
+          thumb: "../../graphics/arthumbs/reshape.webp",
+          video: "../../meta_ar_captures/Reshape.webm",
+          poster: "../../meta_ar_captures/Reshape.webp",
+          desc: "No one is safe from having their face morphed into various shapes in this experience, in which callers can select shapes to morph the faces of everyone on the call."
+        },
+        {
+          id: "wintercoaster",
+          title: "Winter Coaster",
+          thumb: "../../graphics/arthumbs/wintercoaster.webp",
+          video: "../../meta_ar_captures/WinterCoaster.webm",
+          poster: "../../meta_ar_captures/WinterCoaster.webp",
+          desc: "All callers faces are composed into a winter wonderland riding a sleigh-themed roller coaster. The experience uses the full phone screen, and sends the extracted faces of the other callers over the video call using a custom shader packing and unpacking system, and the rotation of the heads is possible using networking technology to send a rotational vector between callers."
+        },
+        {
+          id: "abstractlove",
+          title: "Abstract Love",
+          thumb: "../../graphics/arthumbs/abstractlove.webp",
+          video: "../../meta_ar_captures/AbstractLove.webm",
+          poster: "../../meta_ar_captures/AbstractLove.webp",
+          desc: "Callers are composed into a lovely scene full of hearts and pastel pinks. Want to capture a moment of love from far away, or create a valentines day AR photo? This is the experience for you!"
+        },
+        {
+          id: "angelsanddemons",
+          title: "Angels and Demons",
+          thumb: "../../graphics/arthumbs/angelsanddemons.webp",
+          video: "../../meta_ar_captures/AngelsAndDemons.webm",
+          poster: "../../meta_ar_captures/AngelsAndDemons.webp",
+          desc: "The Devil on one shoulder and the Angel on the other in this AR experience will be randomly selected from the other participants in the call — be careful who you listen to! This effect uses a variety of custom screen space shader effects to give each character their unique glow."
+        },
+        {
+          id: "poolfloaty",
+          title: "Pool Floaty",
+          thumb: "../../graphics/arthumbs/poolfloaty.webp",
+          video: "../../meta_ar_captures/PoolFloaty.webm",
+          poster: "../../meta_ar_captures/PoolFloaty.webp",
+          desc: "Enjoy a relaxing trip to the pool on a hot summer day with this AR experience, which composes all callers into a scene complete with floaties, headwear, and a custom water shader. Each caller is given a unique set of accessories, synchronized over the network so everyone has a consistent experience."
+        },
+        {
+          id: "candycottage",
+          title: "Candy Cottage",
+          thumb: "../../graphics/arthumbs/candycottage.webp",
+          video: "../../meta_ar_captures/CandyCottage.webm",
+          poster: "../../meta_ar_captures/CandyCottage.webp",
+          desc: "Each caller is placed in a window of a lovely gingerbread home in this holiday themed AR experience. Tilt your phone around to see more of the scene and watch out for the gingerbread homeowner peeking out of the door."
+        }
+      ];
+
+      let currentIndex = 0;
+      const total = experiences.length;
+
+      const video = document.getElementById("showcaseVideo");
+      const poster = document.getElementById("showcasePoster");
+      const spinner = document.getElementById("showcaseSpinner");
+      const icon = document.getElementById("experienceIcon");
+      const title = document.getElementById("experienceTitle");
+      const desc = document.getElementById("experienceDesc");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const dotsContainer = document.getElementById("carouselDots");
+
+      // Preload posters and thumb icons for instant transitions
+      experiences.forEach((exp) => {
+        const pImg = new Image();
+        pImg.src = exp.poster;
+        const tImg = new Image();
+        tImg.src = exp.thumb;
+      });
+
+      // Show/hide spinner and fade video in when ready
+      video.addEventListener("playing", () => {
+        spinner.classList.remove("is-active");
+        video.style.opacity = "1";
+      });
+
+      video.addEventListener("waiting", () => {
+        if (video.style.opacity === "1") {
+          spinner.classList.add("is-active");
+        }
+      });
+
+      // Build dot buttons
+      experiences.forEach((exp, idx) => {
+        const dot = document.createElement("button");
+        dot.className = "ar-dot" + (idx === 0 ? " is-active" : "");
+        dot.setAttribute("aria-label", "Go to " + exp.title);
+        dot.addEventListener("click", () => goToIndex(idx));
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = dotsContainer.querySelectorAll(".ar-dot");
+
+      let currentSwitchId = 0;
+
+      function updateUI(animate = true) {
+        const item = experiences[currentIndex];
+        const switchId = ++currentSwitchId;
+
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle("is-active", idx === currentIndex);
+        });
+
+        // Animate text, icon, and media transition together
+        if (animate) {
+          icon.style.opacity = "0";
+          title.style.opacity = "0";
+          desc.style.opacity = "0";
+          poster.style.opacity = "0";
+          video.style.opacity = "0";
+          spinner.classList.remove("is-active");
+
+          video.pause();
+
+          // Pre-decode next poster and icon during the fade-out
+          const nextPoster = new Image();
+          nextPoster.src = item.poster;
+          const nextThumb = new Image();
+          nextThumb.src = item.thumb;
+
+          const decodePromises = [
+            nextPoster.decode ? nextPoster.decode().catch(() => {}) : Promise.resolve(),
+            nextThumb.decode ? nextThumb.decode().catch(() => {}) : Promise.resolve(),
+            new Promise((resolve) => setTimeout(resolve, 180))
+          ];
+
+          Promise.all(decodePromises).then(() => {
+            if (switchId !== currentSwitchId) return;
+
+            // Switch text, icon, and poster at the exact same moment
+            icon.src = item.thumb;
+            icon.alt = item.title + " icon";
+            title.textContent = item.title;
+            desc.textContent = item.desc;
+            poster.src = item.poster;
+            poster.alt = item.title + " poster";
+
+            // Trigger reflow to ensure DOM has updated sources
+            void icon.offsetWidth;
+            void poster.offsetWidth;
+
+            icon.style.opacity = "1";
+            title.style.opacity = "1";
+            desc.style.opacity = "1";
+            poster.style.opacity = "1";
+
+            // Show buffering wheel while new video buffers
+            spinner.classList.add("is-active");
+
+            video.poster = item.poster;
+            video.src = item.video;
+            video.load();
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                spinner.classList.remove("is-active");
+                video.style.opacity = "1";
+              });
+            }
+          });
+        } else {
+          icon.src = item.thumb;
+          icon.alt = item.title + " icon";
+          title.textContent = item.title;
+          desc.textContent = item.desc;
+          poster.src = item.poster;
+          poster.alt = item.title + " poster";
+
+          icon.style.opacity = "1";
+          title.style.opacity = "1";
+          desc.style.opacity = "1";
+          poster.style.opacity = "1";
+          video.style.opacity = "0";
+          spinner.classList.add("is-active");
+
+          video.pause();
+          video.poster = item.poster;
+          video.src = item.video;
+          video.load();
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              spinner.classList.remove("is-active");
+              video.style.opacity = "1";
+            });
+          }
+        }
+      }
+
+      function goToIndex(idx) {
+        currentIndex = (idx + total) % total;
+        updateUI(true);
+      }
+
+      function prev() {
+        goToIndex(currentIndex - 1);
+      }
+
+      function next() {
+        goToIndex(currentIndex + 1);
+      }
+
+      prevBtn.addEventListener("click", prev);
+      nextBtn.addEventListener("click", next);
+
+      // Keyboard arrow navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") {
+          prev();
+        } else if (e.key === "ArrowRight") {
+          next();
+        }
+      });
+
+      // Swipe support for touch devices
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const showcase = document.getElementById("arShowcase");
+
+      showcase.addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      showcase.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 45) {
+          if (diff > 0) next();
+          else prev();
+        }
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

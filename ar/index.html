@@ -1,178 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Work | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="stylesheet" crossorigin href="../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR Work</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
+  <main class="subpage-container">
+    <!-- Centered Header Page Title -->
+    <header class="subpage-header" style="text-align: center;">
+      <h1 class="subpage-title" style="text-align: center;">AR Work</h1>
+    </header>
+
+    <!-- Short Intro Section -->
+    <section class="about-me-section" style="margin-bottom: 36px;">
+      <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+        <img src="data:image/webp;base64,UklGRgoEAABXRUJQVlA4WAoAAAAQAAAA/wAA/wAAQUxQSEYDAAABDzD/ERGCbmvtWXTrQQRkcxpAchvO3NLQwAy3gaElZ27DkhsYMgeIHYB9fr735hH9nwDZ/5zTMqflt/yn+E/xFsS9pM2F002/kTYXXkd6W0BT/Znm+PP82fB/5j3/vEpTf4bx50VgJ+GmPoXTsdlQcWmZ05L1m2mZ0zKbEHH687laUKEP1yUsiLiuGaauZEHtex4QHj1YEHFTxwdgMabi1K775T13VAtiVwIKlA4s8GfHAfgD8KZU3HT3PMBNuUJ4NKoFEafbuMN7lhKwNLCgthKwjVLcgdGQiJsuuUJaJOl5AHfVgoqTpLUAXte1AGm4YEG8+wDlTrlCeFySBf68xB3es5r+hG2UxHv+eZEiKQGL2nGH9yypvvXz9JqlXCENHXoe4CYpLhZcD3BB3TNw+W+0YS3gpr5cIahtAFD0m0B42OJ+I1cIMqQAaehZC8YAhEfPh+tgDNvYinsBgkzZ4T23ErCbooMNwN/NQPjAYMdKeMzAdLMWwH8JsoQhV+DX5QMUPQ9TCoP8Ce9Z8ids4/SFwRAYFHegKFcIL2klyBitBVwqFdIgfW0pF81AOKB4SSsMhnCTK7dukvQ8gsyRzsui64oppfEBwme8fGH4H6GhA9Kg60qQRRm8br+m6Oio6H6FwY6VDlrPI8ik2loJD0NKB60vQYbQEvi71agMuv/CYEjpqK2VIEPooPU8bFLHCoMhpZXB330JMoSWQPerNb/ucscXBkMK23hXW88jyBCg3NGIO5boADddBP4mAYMNcR+lGUiDpAy6zsAk1W00gCLlCiySdLcWIEj+pZ/nTyfJn7CNUr47gSIJxp8XuegDOCnXS91hM6PePQ9gUgavnCC8JKlaEHGTJOUKDBm0OiANFyyoON2GE7YR4nKAm2RGbEXgfUAC3rNuqwW1pecBBSqw6B4LIm66WwvN1EoWVJyaud65SU0siD3y5+V9yJTaFffLos5qQezS84D0qwcLKm7q0IwL6k0WRJx6sz/UjQUVN/Uojl25WhDBv466zHfNXPeStoIFFdgIJ78hrs6ESPM38g0m+LMx9c1ANSLSVH9m5/qeDdhL2lx4zVOfEiW8jrro5+kx+2f2n6Lf9I/Zf4p/WGA+VlA4IJ4AAADwEACdASoAAQABPpFIoU0lpCMiICgAsBIJaW7hdrEbQAnsA99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk4UAA/v+3TAAAAAAAAAAAAA==" alt="AR Work Icon" style="width: 120px; height: auto; border-radius: 6px; flex-shrink: 0;" />
+        <div style="flex: 1; min-width: 260px;">
+          <p class="about-me-text" style="font-family: 'Inter Tight', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.65; color: var(--text-secondary); margin: 0; text-align: left;">
+            From June 2021 to November 2022 I worked as Lead Technical Artist on Social AR and AR Games for video calling at Meta. I led technical development for these experiences, writing interaction code, shaders, and developing render pipelines.
+          </p>
         </div>
       </div>
-      <div id="mobilenavbackgroundblur"></div>
+    </section>
+
+    <hr style="border: none; height: 1px; background: var(--panel-border); margin: 36px 0 44px 0;" />
+
+    <!-- Two-Column Portrait Project Banners -->
+    <div class="project-banners-list--columns">
+      
+      <a href="./games/index.html?from=ar" class="project-banner project-banner--portrait" style="background-image: url('../assets/AlienAttackPreview-Bt9pTz7G.webp');">
+        <video class="project-banner__video" src="../assets/AlienAttackPreview-CFzXG1Ez.webm" autoplay loop muted playsinline poster="../assets/AlienAttackPreview-Bt9pTz7G.webp">
+          <source src="../assets/AlienAttackPreview-CFzXG1Ez.webm" type="video/webm">
+        </video>
+        <h2 class="project-banner__title">AR Games</h2>
+        <p class="project-banner__desc">Networked AR minigames, uniquely designed and developed for group video calls.</p>
+      </a>
+
+      <a href="./social/index.html?from=ar" class="project-banner project-banner--portrait" style="background-image: url('../assets/FriendsSpacewalkPreview-D_8lZS39.webp');">
+        <video class="project-banner__video" src="../assets/FriendsSpacewalkPreview-BWfwKkKK.webm" autoplay loop muted playsinline poster="../assets/FriendsSpacewalkPreview-D_8lZS39.webp">
+          <source src="../assets/FriendsSpacewalkPreview-BWfwKkKK.webm" type="video/webm">
+        </video>
+        <h2 class="project-banner__title">Social AR</h2>
+        <p class="project-banner__desc">Real-time social experiences built to enhance and experiment with the group video calling format.</p>
+      </a>
+
     </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        AR Work
-      </div>
-    </div>
-    <div id="content">
-      <p><i>Updated Jan 30, 2023</i></p><br/><br/>
-      <p>From June 2021 to November 2022 I worked as Lead Technical Artist on Social AR and AR Games for video calling at Meta. These experiences use networking capabilities to enable participants in a video call to share a moment in AR together, whether it's something as simple as taking a selfie together in a virtual space or as complex as a battle royale style bumper car game. See the project details and video captures below for more info.</p>
-      <br/><hr/><br/>
-      <h>AR Games</h>
-      <p>AR Games for video calling are multiplayer experiences that cover a wide variety of genres. Some are competitive, such as the battle royale bumper car game, and some are collaborative, such as the "Desert of Doom" game where callers need to guide each other through a dangerous sandstorm. See the videos below for examples of these games and specific descriptions.</p>
-      <div class="videocontainer">
-        <div id="lastbuttongames" class="lastbutton">
-          <img src="./graphics/lastbutton.png" style="width: 100%;">
-        </div>
-        <div id="nextbuttongames" class="nextbutton">
-          <img src="./graphics/nextbutton.png" style="width: 100%;">
-        </div>
-        <video id="alienattack" controls muted playsinline preload="auto">
-          <source type='video/mp4' src="../assets/AlienAttack.925aba46.mp4#t=0.01">
-        </video>
-        <video id="bumperroyale" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/BumperRoyale.89b8d8ac.mp4#t=0.01">
-        </video>
-        <video id="charades" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/Charades.084df31b.mp4#t=0.01">
-        </video>
-        <video id="desertofdoom" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/DesertOfDoom.3759cf78.mp4#t=0.01">
-        </video>
-        <video id="dontfall" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/DontFall.78838cb6.mp4#t=0.01">
-        </video>
-        <video id="haveyouever" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/HaveYouEver.242e2d84.mp4#t=0.01">
-        </video>
-        <video id="hotpotato" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/HotPotato.2e3427a8.mp4#t=0.01">
-        </video>
-        <video id="jumpwave" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/JumpWave.c7bb222f.mp4#t=0.01">
-        </video>
-        <video id="kawaiisushi" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/KawaiiSushi.026390df.mp4#t=0.01">
-        </video>
-        <video id="mazeofmystery" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/MazeOfMystery.26f59bd1.mp4#t=0.01">
-        </video>
-        <video id="pestcontrol" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/PestControl.5ccbcb36.mp4#t=0.01">
-        </video>
-        <video id="sk8erz" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/Sk8erz.6998b750.mp4#t=0.01">
-        </video>
-        <video id="snackup" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/SnackUp.84e7c351.mp4#t=0.01">
-        </video>
-        <video id="snapnsnack" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/SnapNSnack.64ff9dcb.mp4#t=0.01">
-        </video>
-        <video id="speedrush" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/SpeedRush.fcfaed93.mp4#t=0.01">
-        </video>
-        <video id="trivia" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/Trivia.cd32f783.mp4#t=0.01">
-        </video>
-      </div>
-      <div class="caption" style="clear: left;"><p1 id="argamescaption"></p1></div><br/><br/>
-      <hr/><br/>
-      <h>Social AR</h>
-      <p>Social AR experiences are group video calling AR effects that create an environment that everyone can participate in. Unlike games, there isn't a specific goal to achieve - instead, callers can enjoy interacting with each other and simply existing in these different environments. Like the AR Games, many of these compose callers into the same screen space; my favorite example is the "Group Selfie" experience, which layers the video feeds of participants and makes it look like they're all in the same space.</p>
-      <div class="videocontainer">
-        <div id="lastbuttonsocial" class="lastbutton">
-          <img src="./graphics/lastbutton.png" style="width: 100%;">
-        </div>
-        <div id="nextbuttonsocial" class="nextbutton">
-          <img src="./graphics/nextbutton.png" style="width: 100%;">
-        </div>
-        <video id="friendsspacewalk" controls muted playsinline preload="auto">
-          <source type='video/mp4' src="../assets/FriendsSpacewalk.fd90508f.mp4#t=0.01">
-        </video>
-        <video id="groupselfie" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/GroupSelfie.c76bc59c.mp4#t=0.01">
-        </video>
-        <video id="costumeselector" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/CostumeSelector.5ab8ed59.mp4#t=0.01">
-        </video>
-        <video id="reshape" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/Reshape.2565d6d2.mp4#t=0.01">
-        </video>
-        <video id="wintercoaster" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/WinterCoaster.8b8e5331.mp4#t=0.01">
-        </video>
-        <video id="abstractlove" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/AbstractLove.21b178bd.mp4#t=0.01">
-        </video>
-        <video id="angelsanddemons" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/AngelsAndDemons.8097bc96.mp4#t=0.01">
-        </video>
-        <video id="poolfloaty" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/PoolFloaty.75940c0b.mp4#t=0.01">
-        </video>
-        <video id="candycottage" controls muted playsinline preload="none" style="visibility: hidden;">
-          <source type='video/mp4' src="../assets/CandyCottage.9c990fbd.mp4#t=0.01">
-        </video>
-      </div>
-      <div class="caption" style="clear: left;"><p1 id="socialarcaption"></p1></div><br/><br/>
-      <br/><br/><p style="text-align: center; clear: left;">© 2026 Noah Gunther</p>
-    </div>
-    <a href="https://noahgunther.com/?context=ar">
-      <div id="togglepagemode">
-        <img src="./graphics/3dicon.png">
-      </div>
-    </a>
-  </body>
+
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+  <script src="../subpage.js"></script>
+</body>
 </html>

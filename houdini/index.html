@@ -1,106 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Houdini Work | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="stylesheet" crossorigin href="../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Houdini Work</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
+  <main class="subpage-container">
+    <!-- Centered Header Page Title -->
+    <header class="subpage-header" style="text-align: center;">
+      <h1 class="subpage-title" style="text-align: center;">Houdini Work</h1>
+    </header>
+
+    <!-- Short Intro Section -->
+    <section class="about-me-section" style="margin-bottom: 36px;">
+      <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+        <img src="data:image/webp;base64,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" alt="Houdini Work Icon" style="width: 120px; height: auto; border-radius: 6px; flex-shrink: 0;" />
+        <div style="flex: 1; min-width: 260px;">
+          <p class="about-me-text" style="font-family: 'Inter Tight', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.65; color: var(--text-secondary); margin: 0; text-align: left;">
+            Procedural geometry generation, particle dynamics, and simulation pipelines created with SideFX Houdini. Building procedural assets, custom digital assets (HDAs), and automated graphics pipelines for real-time graphics and offline rendered sequences.
+          </p>
         </div>
       </div>
-      <div id="mobilenavbackgroundblur"></div>
+    </section>
+
+    <hr style="border: none; height: 1px; background: var(--panel-border); margin: 36px 0 44px 0;" />
+
+    <!-- Wide Box Project Banners -->
+    <div class="project-banners-list">
+      
+      <a href="./droplets/index.html" class="project-banner" style="background-image: url('../assets/droplets-BEOieYub.webp');">
+        <h2 class="project-banner__title">Droplets Tool</h2>
+        <p class="project-banner__desc">SOP-based tool without fluid simulation that dynamically creates droplet geometry and a wetmap texture on any geometry surface.</p>
+      </a>
+
+      <a href="./vines/index.html" class="project-banner" style="background-image: url('../assets/vines-BGjn7Geo.webp');">
+        <h2 class="project-banner__title">Vines Tool</h2>
+        <p class="project-banner__desc">An HDA for procedurally growing vines on any input geometry, that grow based on parameters such as light orientation and surface attraction.</p>
+      </a>
+
+      <a href="./robot/index.html" class="project-banner" style="background-image: url('../assets/robot-BMZ8-8lU.webp');">
+        <h2 class="project-banner__title">Robot Artist</h2>
+        <p class="project-banner__desc">A virtual robot that procedurally draws 2D images of 3D meshes, and sometimes gets abstract.</p>
+      </a>
+
+      <a href="./pipes/index.html" class="project-banner" style="background-image: url('../assets/pipes-Dh2Uck7t.webp');">
+        <video class="project-banner__video" src="../assets/pipes-CmxdpukO.webm" autoplay loop muted playsinline poster="../assets/pipes-Dh2Uck7t.webp"></video>
+        <h2 class="project-banner__title">Pipe Dream Houdini</h2>
+        <p class="project-banner__desc">A procedural animation project recreating the classic Microsoft "Pipe Dream" screensaver using VEX and Python.</p>
+      </a>
+
+      <a href="./volcano/index.html" class="project-banner" style="background-image: url('../assets/volcano-BLI-k7w6.webp');">
+        <h2 class="project-banner__title">Volcanic Eruption</h2>
+        <p class="project-banner__desc">A volcanic eruption animation using pyro and fluid simulation, and a custom lightning tool created with VEX.</p>
+      </a>
+
+      <a href="./stainedglass/index.html" class="project-banner" style="background-image: url('../assets/stainedglass-Cdx03yqW.webp');">
+        <h2 class="project-banner__title">Stained Glass Tool</h2>
+        <p class="project-banner__desc">An HDA that created stained glass geometry from image inputs.</p>
+      </a>
+
+      <a href="./fireworks/index.html" class="project-banner" style="background-image: url('../assets/houdinifireworks-D6R6WO1a.webp');">
+        <video class="project-banner__video" src="../assets/houdinifireworks-JXV--QxK.webm" autoplay loop muted playsinline poster="../assets/houdinifireworks-D6R6WO1a.webp"></video>
+        <h2 class="project-banner__title">Interactive Fireworks</h2>
+        <p class="project-banner__desc">A Python/VEX based tool to interactively create animated fireworks.</p>
+      </a>
+
+      <a href="https://noahgunther.wordpress.com" target="_blank" rel="noopener noreferrer" class="project-banner" style="background-image: url('../assets/wordpress-U6RP2Z9_.webp');">
+        <h2 class="project-banner__title">Wordpress Gallery</h2>
+        <p class="project-banner__desc">A gallery of smaller projects and older work largely created with Houdini.</p>
+      </a>
+
     </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        Houdini Work
-      </div>
-    </div>
-    <div id="content">
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/514449215?h=2937e1af7c" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script><br/><br/>
-      <hr/><br/><br/>
-      <a id="dropletslink" href="./droplets/index.html"><div class="project" style="background-image: url('./droplets/graphics/headerbackground.png');">
-        <div class="projecttitle">Droplets Tool</div>
-        <div class="projecttext">SOP-based (no fluid sim) tool for Houdini that dynamically creates droplet geometry and wetmaps on any surface.</div>
-      </div></a><br/><br/>
-      <a id="vineslink" href="./vines/index.html"><div class="project" style="background-image: url('./vines/graphics/headerbackground.png');">
-        <div class="projecttitle">Vines Tool</div>
-        <div class="projecttext">A Houdini tool for procedurally growing vines on any input geometry that creep their way toward the light.</div>
-      </div></a><br/><br/>
-      <a  id="robotlink" href="./robotartist/index.html"><div class="project" style="background-image: url('./robotartist/graphics/headerbackground.png');">
-        <div class="projecttitle">Robot Artist</div>
-        <div class="projecttext">A virtual robot created in Houdini that procedurally draws 2D images of 3D meshes - and sometimes gets abstract.</div>
-      </div></a><br/><br/>
-      <a  id="pipeslink" href="./pipedream/index.html"><div class="project" style="background-image: url('./pipedream/graphics/headerbackground.gif');">
-        <div class="projecttitle">Pipe Dream Redux</div>
-        <div class="projecttext">A procedural animation and randomization project to recreate the classic Microsoft Windows "Pipe Dream" screensaver using VEX and Python.</div>
-      </div></a><br/><br/>
-      <a  id="volcanolink" href="./volcano/index.html"><div class="project" style="background-image: url('./volcano/graphics/headerbackground.png');">
-        <div class="projecttitle">Volcanic Eruption</div>
-        <div class="projecttext">A Volcanic Eruption in Houdini using pyro and fluid simulation, and a custom lightning tool created with VEX.</div>
-      </div></a><br/><br/>
-      <a  id="stainedglasslink" href="./stainedglass/index.html"><div class="project" style="background-image: url('./stainedglass/graphics/headerbackground.png');">
-        <div class="projecttitle">Stained Glass Tool</div>
-        <div class="projecttext">Tool for Houdini that creates stained glass mosaic geometry from input images.</div>
-      </div></a><br/><br/>
-      <a id="fireworkslink" href="./fireworks/index.html"><div class="project" style="background-image: url('./fireworks/graphics/headerbackground.gif');">
-        <div class="projecttitle">Interactive Fireworks</div>
-        <div class="projecttext">A Python state and VEX based Houdini tool for interactively creating animated fireworks in the viewport.</div>
-      </div></a><br/><br/>
-      <a href="https://noahgunther.wordpress.com"><div class="project" style="background-image: url('./graphics/wordpress.png');">
-        <div class="projecttitle">Wordpress Gallery</div>
-        <div class="projecttext">A gallery of smaller projects and older work.</div>
-      </div></a><br/><br/>
-      <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
-    </div>
-  </body>
+
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+  <script src="../subpage.js"></script>
+</body>
 </html>

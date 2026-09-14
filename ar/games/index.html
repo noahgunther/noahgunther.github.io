@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Games | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
+
+  <main class="subpage-container">
+    <!-- Back to AR Work link -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to AR Work">
+      <span aria-hidden="true">←</span> Back to AR Work
+    </a>
+
+    <!-- Centered Header Page Title -->
+    <header class="subpage-header" style="text-align: center;">
+      <h1 class="subpage-title" style="text-align: center;">AR Games</h1>
+    </header>
+
+    <!-- Short Intro Section -->
+    <section class="about-me-section" style="margin-bottom: 36px;">
+      <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+        <img src="../../assets/ar_games_icon-CBAX6Je2.webp" alt="AR Games Icon" style="width: 120px; height: auto; border-radius: 12px; flex-shrink: 0;" />
+        <div style="flex: 1; min-width: 260px;">
+          <p class="about-me-text" style="font-family: 'Inter Tight', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.65; color: var(--text-secondary); margin: 0; text-align: left;">
+            AR Games for video calling are multiplayer experiences that cover a wide variety of genres. Some are competitive, such as the "Bumper Royale" game, and some are collaborative, such as the "Desert of Doom" game where callers need to guide each other through a dangerous sandstorm. Use the carousel below to explore each game and its gameplay mechanics.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hr style="border: none; height: 1px; background: var(--panel-border); margin: 36px 0 44px 0;" />
+
+    <!-- Interactive AR Showcase Carousel -->
+    <section class="ar-showcase" id="arShowcase">
+      <!-- Left Prev Button -->
+      <button id="prevBtn" class="ar-nav-btn ar-nav-btn--prev" aria-label="Previous experience">
+        <span class="ar-nav-arrow ar-nav-arrow--left" aria-hidden="true"></span>
+      </button>
+
+      <!-- Center Body (Video + Content) -->
+      <div class="ar-showcase__body">
+        <!-- Video Column -->
+        <div class="ar-showcase__media">
+          <img id="showcasePoster" class="ar-showcase__poster" src="../../assets/AlienAttack-DDXWAUHi.webp" alt="Alien Attack poster" />
+          <video id="showcaseVideo" class="ar-showcase__video" autoplay loop muted playsinline controls preload="auto" poster="../../assets/AlienAttack-DDXWAUHi.webp" src="../../assets/AlienAttack-XozYXTjS.webm">
+            <source id="videoSource" src="../../assets/AlienAttack-XozYXTjS.webm" type="video/webm">
+          </video>
+          <div id="showcaseSpinner" class="ar-showcase__spinner" aria-label="Loading video"><div class="ar-spinner-circle"></div></div>
+        </div>
+
+        <!-- Description Column -->
+        <div class="ar-showcase__content">
+          <img id="experienceIcon" class="ar-icon" src="../../assets/alienattack-CZ-gAeQa.webp" alt="Alien Attack icon" />
+          <h2 class="ar-title" id="experienceTitle">Alien Attack</h2>
+          <p class="ar-description" id="experienceDesc">
+            In this AR Game, callers work together to defend their fort from aliens by firing laser beams at them. As time goes on, stronger aliens arrive, making it harder and harder to keep them at bay. Callers are composed into the area at the bottom of the screen and each given a laser cannon, controlled by tapping on the screen.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Next Button -->
+      <button id="nextBtn" class="ar-nav-btn ar-nav-btn--next" aria-label="Next experience">
+        <span class="ar-nav-arrow ar-nav-arrow--right" aria-hidden="true"></span>
+      </button>
+
+      <!-- Bottom Dots Indicator -->
+      <div class="ar-dots-container" id="carouselDots" role="tablist" aria-label="Experience selector"></div>
+    </section>
+
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+  <script src="../../subpage.js"></script>
+
+  <script>
+    (function () {
+      const experiences = [
+        {
+          id: "alienattack",
+          title: "Alien Attack",
+          thumb: "../../graphics/arthumbs/alienattack.webp",
+          video: "../../meta_ar_captures/AlienAttack.webm",
+          poster: "../../meta_ar_captures/AlienAttack.webp",
+          desc: "In this AR Game, callers work together to defend their fort from aliens by firing laser beams at them. As time goes on, stronger aliens arrive, making it harder and harder to keep them at bay. Callers are composed into the area at the bottom of the screen and each given a laser cannon, controlled by tapping on the screen."
+        },
+        {
+          id: "bumperroyale",
+          title: "Bumper Royale",
+          thumb: "../../graphics/arthumbs/bumperroyale.webp",
+          video: "../../meta_ar_captures/BumperRoyale.webm",
+          poster: "../../meta_ar_captures/BumperRoyale.webp",
+          desc: "A thrilling battle royale, this time with bumper cars! Using Cannon.js for physics, callers are each given a car to drive by tapping on the screen to build momentum. As time goes on, the stage shrinks, giving players less and less room to maneuver. All car positions and events are synchronized over the network."
+        },
+        {
+          id: "charades",
+          title: "Charades",
+          thumb: "../../graphics/arthumbs/charades.webp",
+          video: "../../meta_ar_captures/Charades.webm",
+          poster: "../../meta_ar_captures/Charades.webp",
+          desc: "Classic charades, with prompts only visible to the player taking their turn. Score points by guessing what the active player is acting out, and laugh as everyone tries to figure out how to act things out while holding their phone."
+        },
+        {
+          id: "desertofdoom",
+          title: "Desert of Doom",
+          thumb: "../../graphics/arthumbs/desertofdoom.webp",
+          video: "../../meta_ar_captures/DesertOfDoom.webm",
+          poster: "../../meta_ar_captures/DesertOfDoom.webp",
+          desc: "A turn-based cooperative game, where one player tries to navigate a field of dangerous cacti during a sandstorm that prevents them from seeing in front of them. The other participants in the call CAN see the cacti, however, and yell at the player to go left or right based on what's ahead."
+        },
+        {
+          id: "dontfall",
+          title: "Don't Fall",
+          thumb: "../../graphics/arthumbs/dontfall.webp",
+          video: "../../meta_ar_captures/DontFall.webm",
+          poster: "../../meta_ar_captures/DontFall.webp",
+          desc: "Players navigate a tightrope way up high, where fans suspended by balloons create gusty winds that threaten to blow players away if they don't lean in just right. The last player left walking the tightrope wins!"
+        },
+        {
+          id: "haveyouever",
+          title: "Have You Ever",
+          thumb: "../../graphics/arthumbs/haveyouever.webp",
+          video: "../../meta_ar_captures/HaveYouEver.webm",
+          poster: "../../meta_ar_captures/HaveYouEver.webp",
+          desc: "Participants are asked a series of yes or no questions, such as \"Have you ever seen a ghost?\" If they answer yes, they get a badge corresponding to that answer. Build up a halo of badges to impress your friends with all your experiences!"
+        },
+        {
+          id: "hotpotato",
+          title: "Hot Potato",
+          thumb: "../../graphics/arthumbs/hotpotato.webp",
+          video: "../../meta_ar_captures/HotPotato.webm",
+          poster: "../../meta_ar_captures/HotPotato.webp",
+          desc: "Hot potato! But this time it's alive, and clinging to your face! Shake it off to send it to someone else, and be ever wary of the heat - it might just pop into a delicious potato-based treat at any second."
+        },
+        {
+          id: "jumpwave",
+          title: "Jump Wave",
+          thumb: "../../graphics/arthumbs/jumpwave.webp",
+          video: "../../meta_ar_captures/JumpWave.webm",
+          poster: "../../meta_ar_captures/JumpWave.webp",
+          desc: "Jump up and up and up, as high as you can go, in this endless platform jumping game. Watch your friends above or below you with off-screen indicators showing their position - if you fall, you can spectate the current leader until everyone has fallen and the players are ranked."
+        },
+        {
+          id: "kawaiisushi",
+          title: "Kawaii Sushi",
+          thumb: "../../graphics/arthumbs/kawaiisushi.webp",
+          video: "../../meta_ar_captures/KawaiiSushi.webm",
+          poster: "../../meta_ar_captures/KawaiiSushi.webp",
+          desc: "Catch as much sushi as you can in the limited amount of time available, competing with the other players in the call. Whoever catches the most sushi wins - just be careful that you don't swallow the wasabi, which will subtract a point!"
+        },
+        {
+          id: "mazeofmystery",
+          title: "Maze of Mystery",
+          thumb: "../../graphics/arthumbs/mazeofmystery.webp",
+          video: "../../meta_ar_captures/MazeOfMystery.webm",
+          poster: "../../meta_ar_captures/MazeOfMystery.webp",
+          desc: "This AR game procedurally generates a random haunted house maze each time it's played. Avoid ghosts, dead ends, and arguments with your friends as you take turns steering the characters to try and find the hidden magic goal in this mysterious maze."
+        },
+        {
+          id: "pestcontrol",
+          title: "Pest Control",
+          thumb: "../../graphics/arthumbs/pestcontrol.webp",
+          video: "../../meta_ar_captures/PestControl.webm",
+          poster: "../../meta_ar_captures/PestControl.webp",
+          desc: "Just like whack-a-mole, but with a sly twist - in this game, players take turns trying to hit as many moles as they can with their mallets. However, they need to be careful that they don't accidentally whack one of their friends by mistake; you never know whose head is going to pop up next."
+        },
+        {
+          id: "sk8erz",
+          title: "Sk8erz",
+          thumb: "../../graphics/arthumbs/sk8erz.webp",
+          video: "../../meta_ar_captures/Sk8erz.webm",
+          poster: "../../meta_ar_captures/Sk8erz.webp",
+          desc: "Skate forever down this city street, if you can, but be careful of the many hazards that you'll encounter, including manholes, garbage cans, street signs and even pizza delivery drones. Kickflip and duck your way past more obstacles than your friends to win this game."
+        },
+        {
+          id: "snackup",
+          title: "Snack Up",
+          thumb: "../../graphics/arthumbs/snackup.webp",
+          video: "../../meta_ar_captures/SnackUp.webm",
+          poster: "../../meta_ar_captures/SnackUp.webp",
+          desc: "Match the snack on your face with one floating down through the air in this object matching game, but be careful of nabbing the wrong one, especially as things move faster and faster. Get the most matches without being knocked out to score a victory and also be the fullest."
+        },
+        {
+          id: "snapnsnack",
+          title: "Snap 'N Snack",
+          thumb: "../../graphics/arthumbs/snapnsnack.webp",
+          video: "../../meta_ar_captures/SnapNSnack.webm",
+          poster: "../../meta_ar_captures/SnapNSnack.webp",
+          desc: "Guide your hungry pet turtle to catch leaves, fruit, or, even better, falling stars that triple the points you receive from catching any of these. The most satisfied turtle when time runs out wins, and you and your turtle both get a leaf crown to celebrate."
+        },
+        {
+          id: "speedrush",
+          title: "Speed Rush",
+          thumb: "../../graphics/arthumbs/speedrush.webp",
+          video: "../../meta_ar_captures/SpeedRush.webm",
+          poster: "../../meta_ar_captures/SpeedRush.webp",
+          desc: "A good old classic racing game, compete with your friends to be the first to the finish. Steer your car by tilting your phone, and be careful that you don't crash, slowing you down and giving your competition a chance to pull ahead."
+        },
+        {
+          id: "trivia",
+          title: "Trivia",
+          thumb: "../../graphics/arthumbs/trivia.webp",
+          video: "../../meta_ar_captures/Trivia.webm",
+          poster: "../../meta_ar_captures/Trivia.webp",
+          desc: "Who knows more stuff? A classic question for a group of people on a video call, answered by playing a round of AR trivia! That's trivia in AR, not about AR. Try and answer as many of these obscure questions correctly to win and be officially recognized as the smartest person on the video call."
+        }
+      ];
+
+      let currentIndex = 0;
+      const total = experiences.length;
+
+      const video = document.getElementById("showcaseVideo");
+      const poster = document.getElementById("showcasePoster");
+      const spinner = document.getElementById("showcaseSpinner");
+      const icon = document.getElementById("experienceIcon");
+      const title = document.getElementById("experienceTitle");
+      const desc = document.getElementById("experienceDesc");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const dotsContainer = document.getElementById("carouselDots");
+
+      // Preload posters and thumb icons for instant transitions
+      experiences.forEach((exp) => {
+        const pImg = new Image();
+        pImg.src = exp.poster;
+        const tImg = new Image();
+        tImg.src = exp.thumb;
+      });
+
+      // Show/hide spinner and fade video in when ready
+      video.addEventListener("playing", () => {
+        spinner.classList.remove("is-active");
+        video.style.opacity = "1";
+      });
+
+      video.addEventListener("waiting", () => {
+        if (video.style.opacity === "1") {
+          spinner.classList.add("is-active");
+        }
+      });
+
+      // Build dot buttons
+      experiences.forEach((exp, idx) => {
+        const dot = document.createElement("button");
+        dot.className = "ar-dot" + (idx === 0 ? " is-active" : "");
+        dot.setAttribute("aria-label", "Go to " + exp.title);
+        dot.addEventListener("click", () => goToIndex(idx));
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = dotsContainer.querySelectorAll(".ar-dot");
+
+      let currentSwitchId = 0;
+
+      function updateUI(animate = true) {
+        const item = experiences[currentIndex];
+        const switchId = ++currentSwitchId;
+
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle("is-active", idx === currentIndex);
+        });
+
+        // Animate text, icon, and media transition together
+        if (animate) {
+          icon.style.opacity = "0";
+          title.style.opacity = "0";
+          desc.style.opacity = "0";
+          poster.style.opacity = "0";
+          video.style.opacity = "0";
+          spinner.classList.remove("is-active");
+
+          video.pause();
+
+          // Pre-decode next poster and icon during the fade-out
+          const nextPoster = new Image();
+          nextPoster.src = item.poster;
+          const nextThumb = new Image();
+          nextThumb.src = item.thumb;
+
+          const decodePromises = [
+            nextPoster.decode ? nextPoster.decode().catch(() => {}) : Promise.resolve(),
+            nextThumb.decode ? nextThumb.decode().catch(() => {}) : Promise.resolve(),
+            new Promise((resolve) => setTimeout(resolve, 180))
+          ];
+
+          Promise.all(decodePromises).then(() => {
+            if (switchId !== currentSwitchId) return;
+
+            // Switch text, icon, and poster at the exact same moment
+            icon.src = item.thumb;
+            icon.alt = item.title + " icon";
+            title.textContent = item.title;
+            desc.textContent = item.desc;
+            poster.src = item.poster;
+            poster.alt = item.title + " poster";
+
+            // Trigger reflow to ensure DOM has updated sources
+            void icon.offsetWidth;
+            void poster.offsetWidth;
+
+            icon.style.opacity = "1";
+            title.style.opacity = "1";
+            desc.style.opacity = "1";
+            poster.style.opacity = "1";
+
+            // Show buffering wheel while new video buffers
+            spinner.classList.add("is-active");
+
+            video.poster = item.poster;
+            video.src = item.video;
+            video.load();
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                spinner.classList.remove("is-active");
+                video.style.opacity = "1";
+              });
+            }
+          });
+        } else {
+          icon.src = item.thumb;
+          icon.alt = item.title + " icon";
+          title.textContent = item.title;
+          desc.textContent = item.desc;
+          poster.src = item.poster;
+          poster.alt = item.title + " poster";
+
+          icon.style.opacity = "1";
+          title.style.opacity = "1";
+          desc.style.opacity = "1";
+          poster.style.opacity = "1";
+          video.style.opacity = "0";
+          spinner.classList.add("is-active");
+
+          video.pause();
+          video.poster = item.poster;
+          video.src = item.video;
+          video.load();
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              spinner.classList.remove("is-active");
+              video.style.opacity = "1";
+            });
+          }
+        }
+      }
+
+      function goToIndex(idx) {
+        currentIndex = (idx + total) % total;
+        updateUI(true);
+      }
+
+      function prev() {
+        goToIndex(currentIndex - 1);
+      }
+
+      function next() {
+        goToIndex(currentIndex + 1);
+      }
+
+      prevBtn.addEventListener("click", prev);
+      nextBtn.addEventListener("click", next);
+
+      // Keyboard arrow navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") {
+          prev();
+        } else if (e.key === "ArrowRight") {
+          next();
+        }
+      });
+
+      // Swipe support for touch devices
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const showcase = document.getElementById("arShowcase");
+
+      showcase.addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      showcase.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 45) {
+          if (diff > 0) next();
+          else prev();
+        }
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

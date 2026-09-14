@@ -1,81 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Fireworks | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Houdini Interactive Fireworks</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
-        </div>
+  <main class="subpage-container">
+    <!-- Back to Houdini Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Houdini Work">
+      <span aria-hidden="true">←</span> Back to Houdini Work
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Interactive Fireworks</h1>
+      <p class="subpage-subtitle">Jan. 1, 2021</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/9RtO6c4lI08" title="Interactive Fireworks Tool in Houdini" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
-      <div id="mobilenavbackgroundblur"></div>
-    </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        Houdini Interactive Fireworks
+
+      <p>
+        For this tool, I wanted to create an experience centered around direct viewport interaction—moving beyond parameter sliders so the artist can click directly on viewport geometry and immediately trigger responsive procedural animations. I built the interactive layer using Houdini Python states, SideFX's framework for crafting custom interactive viewport tools.
+      </p>
+
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/FmCE0s50Jto" title="Python States Viewport Interaction Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
+
+      <hr />
+
+      <h2>Viewport Python States & VEX Solvers</h2>
+      <p>
+        Leveraging Houdini's built-in Python state templates, I adapted the point-placement handler to support custom surface collision meshes. When the user clicks in the viewport, a point is instantiated with an attribute recording the current timeline frame. This birth-frame stamp enables each firework rocket to compute its trajectory, ascent velocity, and burst timing independently with consistent procedural playback.
+      </p>
+
+      <figure>
+        <img src="../../assets/screenshot-Cyr8KXOT.webp" alt="Interactive point placement in Houdini viewport" />
+        <figcaption>Interactive Python states in the Houdini viewport: clicking surfaces to generate burst coordinates and timeline triggers.</figcaption>
+      </figure>
+
+      <figure>
+        <video autoplay loop muted playsinline preload="auto" poster="../../assets/headerbackground-D-PF6lG2.webp" style="width: 100%;">
+          <source src="../../assets/headerbackground-D2LZMWOX.webm" type="video/webm" />
+        </video>
+        <figcaption>Procedural particle dynamics and explosive spark cascades simulated across the night sky.</figcaption>
+      </figure>
+
+      <p>
+        The remainder of the simulation runs in VEX, where ballistic launch arcs, particle detonation physics, drag, gravity dissipation, and color emission curves are evaluated. High-level controls such as arc curvature, launch speed, burst radius, spark density, and color palettes are exposed as user-friendly parameters on the HDA.
+      </p>
     </div>
-    <div id="content">
-      <p><i>Updated Jan. 1, 2021</i></p><br/><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/9RtO6c4lI08" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
-      <p>For this tool, I wanted to create something more interactive than my last few - rather than moving sliders back and forth and toggling boxes on and off, I wanted a user to be able to click on the viewport and watch something nice happen. I used python states, Houdini's flexible system for creating custom tools with viewport interactivity.</p><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/FmCE0s50Jto" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
-      <p><b>Download the OpenHDA for Houdini here: <a href="./fireworks_pythonstates.zip">Direct Download</a></b><br/><br/>
-      Houdini has a great library of preset python functionality, so all it took to get the basic setup working were some slight modifications to the add points python state script. The first thing I did was allow for custom geometry input to place the points where the fireworks would explode, then I added a parameter that would track the frame that the point was placed, which was important for animating the fireworks (procedurally) with consistent timing.</p><br/>
-      <img src="./graphics/screenshot.jpg">
-      <div class="caption"><p1>Creating the path for the fireworks to follow.</p1></div><br/><br/>
-      <p>Most of the rest of the work happened in VEX, where the trajectories for the fireworks and their explosions, color and emissive attributes, and procedural animations were created. As a final step, I exposed parameters like how large the arcs of the trajectories would be, how fast the fireworks would go, the size of their explosions, and more in the HDA. Feel free to download it and experiment with it as you'd like!</p><br/>
-      <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
-    </div>
-  </body>
+
+    <!-- Page Footer -->
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+</body>
 </html>

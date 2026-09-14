@@ -1,84 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volcanic Eruption | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Houdini Volcanic Eruption</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
+  <main class="subpage-container">
+    <!-- Back to Houdini Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Houdini Work">
+      <span aria-hidden="true">←</span> Back to Houdini Work
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Volcanic Eruption</h1>
+      <p class="subpage-subtitle">Sept. 28, 2020</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <p>
+        Procedural volcanic eruption sequence simulated and rendered in Houdini. Lava flows were solved using FLIP fluid dynamics with localized divergence attributes and emissive color-mapped shaders. Atmospheric plume and ash effects were achieved with sparse Pyro dynamics modulated by custom VEX controllers driving combustion and temperature dissipation. Volcanic lightning arcs were synthesized with a custom procedural branching tool built in VEX.
+      </p>
+
+      <div class="video-embed">
+        <iframe src="https://player.vimeo.com/video/462444950?h=cb227bdb0c" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Houdini Volcanic Eruption Main Sequence"></iframe>
+      </div>
+
+      <div class="video-embed">
+        <iframe src="https://player.vimeo.com/video/462751543?h=5753890b82" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Houdini Volcanic Eruption Close-Up Sequence"></iframe>
+      </div>
+
+      <hr />
+
+      <h2>Production Renders</h2>
+
+      <figure>
+        <img src="../../assets/cam_1_00-CNWfX631.webp" alt="Volcano wide shot with lightning discharge" />
+        <figcaption>Wide shot capturing initial caldera detonation and atmospheric lightning discharge.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/headerbackground-Czc1_VwG.webp" alt="Volcano eruption plume detail" />
+        <figcaption>Volumetric ash column and particulate illumination.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="media-grid-2">
+          <img src="../../assets/cam_2_00-3-CM6P3hoo.webp" alt="Caldera brim close-up" />
+          <img src="../../assets/cam_1_01-DE4J9z-j.webp" alt="Pyroclastic smoke detail" />
         </div>
-      </div>
-      <div id="mobilenavbackgroundblur"></div>
+        <figcaption>Caldera rim detail showing FLIP lava divergence and dense turbulent smoke rolling down the mountain slopes.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/cam_3_01-1-CHwViljI.webp" alt="Lava crusting and temperature render" />
+        <figcaption>Lava surface showing procedural crusting as surface temperature cools away from the core vents.</figcaption>
+      </figure>
+
+      <figure>
+        <div class="media-grid-2">
+          <img src="../../assets/cam_1_02-DBudleO4.webp" alt="Full eruption dusk shot" />
+          <img src="../../assets/cam_2_01-DimjQr1N.webp" alt="Crater night lighting render" />
+        </div>
+        <figcaption>Atmospheric color passes capturing sunset illumination and nocturnal emissive glow.</figcaption>
+      </figure>
     </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        Houdini Volcanic Eruption
-      </div>
-    </div>
-    <div id="content">
-      <p><i>Updated Sept. 28, 2020</i></p><br/><br/>
-      <p>Volcanic Eruption created and rendered in Houdini. Lava created using FLIP fluid with divergence attribute and emission / color mapped shader. Smoke effects done with Pyro dynamics and some VEX controllers for the flame emission. Lightning geometry generated with custom lightning tool.</p>
-      <br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/462444950?h=cb227bdb0c" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script><br/><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/462751543?h=5753890b82" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script><br/><br/>
-      <img src="./graphics/cam_1_00.png">
-      <img src="./graphics/headerbackground.png">
-      <img src="./graphics/cam_2_00-3.png">
-      <img src="./graphics/cam_1_01.png">
-      <img src="./graphics/cam_3_01-1.png">
-      <img src="./graphics/cam_1_02.png">
-      <img src="./graphics/cam_2_01.png">
-      <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
-    </div>
-  </body>
+
+    <!-- Page Footer -->
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+</body>
 </html>

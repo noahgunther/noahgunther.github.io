@@ -1,106 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NKRE9H80JX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vines Tool | Noah Gunther</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"/>
+  
+  <link rel="icon" type="image/webp" href="../../assets/thumbnail_ng_logo-Br44iSJY.webp" />
+  <script src="../../subpage.js" defer></script>
+  <link rel="stylesheet" crossorigin href="../../assets/subpage-CtTxI51y.css">
+</head>
+<body>
 
-      gtag('config', 'G-NKRE9H80JX');
-    </script>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:500,600"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400"/>
-    <link rel="icon" type="image/svg+xml" href="../../icon.png" />
-    <link rel="stylesheet" href="./style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Houdini Vines Tool</title>
-  </head>
-  <body id="body">
-    <!--Main script-->
-    <script id="main" type="module" src="./main.js"></script>
-    <!--Main navigation links and mobile nav links-->
-    <div id="home" class="logolink">
-      <img id="logolink" style="height: 100%; width: 100%;" src="../../icon.png">
-    </div>
-    <div id="mainnavlinks">
-      <div id="houdini" class="link">Houdini</div>
-      <div id="web" class="link">Web</div>
-      <div id="games" class="link">Games</div>
-      <div id="ar" class="link">AR</div>
-      <div id="about" class="link">About</div>
-    </div>
-    <div id="mobilenavlinksbutton">
-      <div id="mobilenavlinksbuttontop"></div>
-      <div id="mobilenavlinksbuttonmiddle"></div>
-      <div id="mobilenavlinksbuttonbottom"></div>
-    </div>
-    <div id="mobilenavmenu" style="visibility: hidden;">
-      <div id="mobilenavlinks">
-        <div class="mobilemenuwrapper">
-          <div class="mobilelinkwrapper">
-            <div id="aboutmobile" class="mobilelink">About</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="armobile" class="mobilelink">AR</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="gamesmobile" class="mobilelink">Games</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="webmobile" class="mobilelink">Web</div>
-          </div>
-          <div class="mobilelinkwrapper">
-            <div id="houdinimobile" class="mobilelink">Houdini</div>
-          </div>
+  <main class="subpage-container">
+    <!-- Back to Houdini Navigation -->
+    <a href="../index.html" class="subpage-back-link" aria-label="Back to Houdini Work">
+      <span aria-hidden="true">←</span> Back to Houdini Work
+    </a>
+
+    <!-- Page Header -->
+    <header class="subpage-header">
+      <h1 class="subpage-title">Vines Tool</h1>
+      <p class="subpage-subtitle">Jan. 19, 2021</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="subpage-content">
+      <div class="video-embed">
+        <iframe src="https://player.vimeo.com/video/502262184?h=90161feea7" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Houdini Vines Tool Showcase"></iframe>
+      </div>
+
+      <figure>
+        <div class="media-grid-2">
+          <video autoplay loop muted playsinline preload="auto" poster="../../assets/spiral-Bs7exl5C.webp" style="width: 100%;">
+            <source src="../../assets/spiral-CVYgr35k.webm" type="video/webm" />
+          </video>
+          <video autoplay loop muted playsinline preload="auto" poster="../../assets/spiral_closeup-B5aNneb1.webp" style="width: 100%;">
+            <source src="../../assets/spiral_closeup-C7-tuXES.webm" type="video/webm" />
+          </video>
+          <video autoplay loop muted playsinline preload="auto" poster="../../assets/comp-2-BLNsPfla.webp" style="width: 100%;">
+            <source src="../../assets/comp-2-BSfQ_x2G.webm" type="video/webm" />
+          </video>
+          <video autoplay loop muted playsinline preload="auto" poster="../../assets/floating_hang-CuU5PJUe.webp" style="width: 100%;">
+            <source src="../../assets/floating_hang-Bw0mMb2t.webm" type="video/webm" />
+          </video>
         </div>
+        <figcaption>Results using various parameters and target "light" configurations. Growth shape, color, and direction can all be customized.</figcaption>
+      </figure>
+
+      <hr />
+
+      <h2>Boids-Inspired Growth Logic</h2>
+      <p>
+        After working on several projects involving <a href="https://www.red3d.com/cwr/boids/" target="_blank" rel="noopener noreferrer">Boids using Craig Reynolds' three rules of interaction</a>, I had an idea to simulate vine growth using similar principles. A primary challenge was ensuring the vines would continuously "cling" to surfaces rather than navigating freely through open space like flocking boids; they needed to actively seek out and adhere to structural anchors.
+      </p>
+
+      <figure>
+        <div class="media-grid-2">
+          <img src="../../assets/vines_tool.octane_rop1-e-scl0sP.webp" alt="Vines initial test render 1" />
+          <img src="../../assets/vines_tool.octane_rop2-_UAMzC2k.webp" alt="Vines initial test render 2" />
+          <img src="../../assets/vines_tool.octane_rop3-ByaJG7zH.webp" alt="Vines initial test render 3" />
+          <img src="../../assets/vines_tool.octane_rop4-D38Q3txv.webp" alt="Vines initial test render 4" />
+        </div>
+        <figcaption>Early test results with user controls for source and target geometry. Initially, the vines grew arbitrarily outward like branching trees, before surface-adhesion constraints were refined.</figcaption>
+      </figure>
+
+      <p>
+        The solver is implemented in Houdini using VEX. On each simulation step, the vine tips evaluate a composite directional vector informed by several weighted factors: orientation toward the goal (light source), proximity thresholds to surrounding surfaces, repulsion from neighboring vines to prevent clumping, and procedural curl noise. Once the heading is computed, points step forward along the surface until reaching designated stop conditions.
+      </p>
+
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/FyZsNWv0KDE" title="Houdini Vines Growth Simulation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
-      <div id="mobilenavbackgroundblur"></div>
+
+      <figure>
+        <img src="../../assets/settings0-DdgF_Lzk.webp" alt="HDA Growth Settings Parameter UI" />
+        <figcaption>Growth parameter controls inside the HDA interface. Different balancing of attraction, surface cling, and noise generates vastly different botanical behaviors.</figcaption>
+      </figure>
+
+      <hr />
+
+      <h2>Foliage, Age Tracking & Flowers</h2>
+      <p>
+        To make the growth feel organic, leaves needed to sprout selectively—only when the vine segment rested at an appropriate surface angle rather than hanging vertically or clipping inside tight crevices. This is evaluated by measuring the surface normal of the closest geometry and filtering vine points whose alignment falls within a valid angular threshold.
+      </p>
+
+      <figure>
+        <img src="../../assets/humanvines-CmcOsk08.webp" alt="Leaf growth test on character mesh" />
+        <figcaption>Testing surface-filtered leaf sprouting across an organic mannequin geometry.</figcaption>
+      </figure>
+
+      <p>
+        Finally, leaves dynamically emerge as small buds and scale up as the host vine matures, while the primary stems thicken with age. A point attribute counter tracks the age of each segment across the simulation frames, allowing procedural ramps to drive thickness, leaf scale, and pigmentation. Flowers are instantiated using an extension of this age-gated system.
+      </p>
+
+      <figure>
+        <img src="../../assets/settings1-D-IduRJq.webp" alt="Appearance and Foliage Parameter UI" />
+        <figcaption>Customization controls for vine thickness, taper, leaf density, and flower coloration.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../../assets/lattice_vines_2k-Cu1Bqf1B.webp" alt="Final render of vines climbing wooden lattice" />
+        <figcaption>Final Octane Render of procedural vines scaling a wooden garden lattice.</figcaption>
+      </figure>
     </div>
-    <!--Page Content-->
-    <div id="header">
-      <div id="headertext">
-        Houdini Vines Tool
-      </div>
-    </div>
-    <div id="content">
-      <p><i>Updated Jan. 19, 2021</i></p><br/><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/502262184?h=90161feea7" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script><br/><br/>
-      <p><b>Download the OpenHDA for Houdini here: <a href="https://gunthern.gumroad.com/l/yXqsa">Pay what you want on Gumroad</a></b></p><br/><br/>
-      <div class="row">
-        <img src="./graphics/spiral.gif">
-        <img src="./graphics/spiral_closeup.gif">
-      </div>
-      <div class="row">
-        <img src="./graphics/comp-2.gif">
-        <img src="./graphics/floating_hang.gif">
-      </div>
-      <div class="caption"><p1>Results using various parameters and target "light" configurations. Growth shape, color, and direction can all be customized.</p1></div><br/><br/>
-      <p>After working on several projects involving <a href="https://www.red3d.com/cwr/boids/">Boids using Craig Reynolds three rules of interaction</a>, I had an idea to simulate vine growth using similar principles. A big challenge here was the idea that the vines would need to “cling” to surfaces, and should not be able to fly around like boids; rather, they would need to find something to attach themselves to.</p>
-      <div class="row">
-        <img src="./graphics/vines_tool.octane_rop1.png">
-        <img src="./graphics/vines_tool.octane_rop2.png">
-      </div>
-      <div class="row">
-        <img src="./graphics/vines_tool.octane_rop3.png">
-        <img src="./graphics/vines_tool.octane_rop4.png">
-      </div>
-      <div class="caption"><p1>First results, with user controls for source and target geometry, as well as things like growth randomness. However, the vines could grow in any direction arbitrarily, like trees, instead of clinging to nearby surfaces in order to climb.</p1></div><br/><br/><br/>
-      <p>Like in previous projects, I used Houdini and VEX to simulate the behavior of the vines. On each frame, they choose a direction based a number of conditions, such as where their goal (the light) is, whether they are close enough, or too close, to a piece of geometry or each other, and a little sprinkling of randomness. The user has control over how strongly each of these conditions factor in. As their final step, they move forward based on the calculated direction and their movement speed (unless they have reached a stop condition).</p><br/>
-      <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/FyZsNWv0KDE" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><br/><br/>
-      <img src="./graphics/settings0.png">
-      <div class="caption"><p1>Control over how the vines grow. Different growth settings will result in differently behaving vines!</p1></div><br/><br/>
-      <p>Another thing I wanted to do was add leaves that would sprout from the vines, but only when the vine was at an appropriate angle (not growing flat on the ground or hanging from something at too steep an angle). This required measuring the normal vector to the surface nearest the vine, and ruling out all the points on the vine that didn't measure up.</p><br/>
-      <img src="./graphics/humanvines.png">
-      <div class="caption"><p1>Testing the leaf growth.</p1></div><br/><br/>
-      <p>Finally, I also wanted the leaves to start as tiny sprouts and grow along with the vine, which also needed thicken as it grew older. To achieve these effects, I introduced a counter on the vine points that would track how old they were, allowing for dynamic scaling and coloring based on age. Of course, this is all up to the user as well. I also decided to add flowers using the same system.</p><br/>
-      <img src="./graphics/settings1.png">
-      <div class="caption"><p1>Control over vine and leaf / flower appearance.</p1></div><br/><br/>
-      <img src="./graphics/lattice_vines_2k.png">
-      <div class="caption"><p1>Vines climbing up a lattice.</p1></div><br/><br/>
-      <br/><br/><p style="text-align: center;">© 2026 Noah Gunther</p>
-    </div>
-  </body>
+
+    <!-- Page Footer -->
+    <footer class="subpage-footer">
+      <p>© 2026 Noah Gunther</p>
+    </footer>
+  </main>
+
+</body>
 </html>
