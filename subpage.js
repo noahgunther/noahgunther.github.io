@@ -207,28 +207,59 @@
   function setupMobileMenu() {
     const btn = document.getElementById('mobilenavlinksbutton');
     const menu = document.getElementById('mobilenavmenu');
+    const btnTop = document.getElementById('mobilenavlinksbuttontop');
+    const btnMiddle = document.getElementById('mobilenavlinksbuttonmiddle');
+    const btnBottom = document.getElementById('mobilenavlinksbuttonbottom');
     if (!btn || !menu) return;
 
     let isOpen = false;
 
+    function openMenu() {
+      isOpen = true;
+      btn.classList.add('is-active');
+      menu.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+      if (btnTop) btnTop.style.setProperty('animation', 'mobileNavButtonTopIn 0.3s forwards');
+      if (btnMiddle) btnMiddle.style.setProperty('animation', 'mobileNavButtonMiddleIn 0.3s forwards');
+      if (btnBottom) btnBottom.style.setProperty('animation', 'mobileNavButtonBottomIn 0.3s forwards');
+    }
+
+    function closeMenu() {
+      isOpen = false;
+      btn.classList.remove('is-active');
+      menu.classList.remove('is-active');
+      document.body.style.overflow = '';
+      if (btnTop) btnTop.style.setProperty('animation', 'mobileNavButtonTopOut 0.2s forwards');
+      if (btnMiddle) btnMiddle.style.setProperty('animation', 'mobileNavButtonMiddleOut 0.2s forwards');
+      if (btnBottom) btnBottom.style.setProperty('animation', 'mobileNavButtonBottomOut 0.2s forwards');
+    }
+
     function toggleMenu() {
-      isOpen = !isOpen;
       if (isOpen) {
-        menu.classList.add('is-active');
-        document.body.style.overflow = 'hidden';
+        closeMenu();
       } else {
-        menu.classList.remove('is-active');
-        document.body.style.overflow = '';
+        openMenu();
       }
     }
 
     btn.addEventListener('click', toggleMenu);
 
+    const backdrop = document.getElementById('mobilenavbackgroundblur');
+    if (backdrop) {
+      backdrop.addEventListener('click', closeMenu);
+    }
+
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && isOpen) {
-        toggleMenu();
+        closeMenu();
       }
     });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 768 && isOpen) {
+        closeMenu();
+      }
+    }, { passive: true });
   }
 
   // ==========================================
