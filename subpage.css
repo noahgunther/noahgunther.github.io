@@ -172,6 +172,13 @@ a:hover {
   text-decoration: none;
 }
 
+/* Hide 3D button in portrait layout */
+@media (orientation: portrait) {
+  #plaintext-toggle-link {
+    display: none !important;
+  }
+}
+
 /* Desktop LinkedIn Link */
 #linkedin-desktop-wrapper {
   position: fixed;
@@ -1091,11 +1098,7 @@ a:hover {
   }
 
   #plaintext-toggle-link {
-    left: clamp(16px, 3.5vw, 24px);
-    bottom: clamp(20px, 3.5vh, 32px);
-    width: clamp(36px, 9vw, 48px);
-    font-size: clamp(8px, 2.2vw, 10px);
-    padding: 3px;
+    display: none !important;
   }
 
   .project-banners-list--columns {
