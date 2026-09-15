@@ -1333,11 +1333,26 @@ a:hover {
   max-width: 360px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: portrait) {
   .ar-showcase--tokimon .ar-showcase__media {
     width: 100%;
     max-width: 280px;
     aspect-ratio: 1331 / 1768 !important;
+  }
+
+  .ar-showcase--tokimon .ar-showcase__content {
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    text-align: center;
+  }
+
+  .ar-showcase--tokimon .ar-title {
+    text-align: center;
+  }
+
+  .ar-showcase--tokimon .ar-description {
+    text-align: center;
   }
 }
 
