@@ -1047,8 +1047,8 @@ a:hover {
 
   .subpage-container {
     padding-top: clamp(88px, 12vh, 110px);
-    padding-left: clamp(68px, 15vw, 92px);
-    padding-right: clamp(68px, 15vw, 92px);
+    padding-left: clamp(16px, 4vw, 24px);
+    padding-right: clamp(16px, 4vw, 24px);
     padding-bottom: 80px;
     width: 100%;
     box-sizing: border-box;
